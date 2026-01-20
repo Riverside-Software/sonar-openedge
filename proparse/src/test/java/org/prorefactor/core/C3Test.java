@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -35,11 +35,7 @@ import org.prorefactor.treeparser.TreeParserBlocks;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.google.common.io.ByteSource;
-import com.google.common.io.ByteStreams;
 import com.progress.xref.EmptyCrossReference;
-
-import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 
 /**
  * Test two variants of the parser, one with a local context semantic predicate, and one without.
@@ -49,7 +45,7 @@ public class C3Test {
   private RefactorSession session;
 
   @BeforeTest
-  public void setUp() throws IOException, InvalidRCodeException {
+  public void setUp() throws IOException {
     session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
   }
 
@@ -75,7 +71,7 @@ public class C3Test {
 
   private void genericTest(String filename, boolean c3) throws IOException {
     try (InputStream input = Files.newInputStream(Paths.get(filename))) {
-      ABLLexer lexer = new ABLLexer(session, StandardCharsets.UTF_8, ByteSource.wrap(ByteStreams.toByteArray(input)), filename, false);
+      ABLLexer lexer = new ABLLexer(session, StandardCharsets.UTF_8, input.readAllBytes(), filename, false);
       CommonTokenStream tokStream = new CommonTokenStream(lexer);
       Proparse parser = new Proparse(tokStream);
       if (c3)

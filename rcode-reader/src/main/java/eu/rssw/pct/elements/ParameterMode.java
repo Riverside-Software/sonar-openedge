@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -38,6 +38,14 @@ public enum ParameterMode {
 
   public String getName() {
     return name().replace('_', '-');
+  }
+
+  public static ParameterMode getParameterMode(String mode) {
+    for (var m : ParameterMode.values()) {
+      if (m.getName().equalsIgnoreCase(mode.replace('_', '-')))
+        return m;
+    }
+    return INPUT;
   }
 
   public static ParameterMode getParameterMode(int mode) {

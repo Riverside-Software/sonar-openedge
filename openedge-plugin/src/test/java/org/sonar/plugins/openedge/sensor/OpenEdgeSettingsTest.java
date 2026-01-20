@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -409,6 +409,27 @@ public class OpenEdgeSettingsTest {
     List<ITypeInfo> catalog = cache.getCatalogCache(new File(TestProjectSensorContext.BASEDIR, "catalog.json").getAbsolutePath());
     assertNotNull(catalog);
     assertEquals(catalog.size(), 4797);
+  }
+
+  @Test
+  public void testDependencies01() {
+    MapSettings settings = new MapSettings();
+    settings.setProperty(Constants.DEPENDENCIES_SOURCE, "openedge-project.json");
+    SonarRuntime runtime = OpenEdgePluginTest.SONARQUBE_RUNTIME;
+
+    SensorContextTester context = SensorContextTester.create(new File(TestProjectSensorContext.BASEDIR));
+    context.setSettings(settings);
+    context.setRuntime(runtime);
+
+    SettingsCache cache = new SettingsCache();
+    OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), context.runtime(),
+        cache);
+    oeSettings.init();
+
+    assertTrue(oeSettings.getPropath().stream().anyMatch(it -> it.getName().endsWith("net-12.8.9.pl")));
+    assertTrue(oeSettings.getPropath().stream().anyMatch(it -> it.getName().endsWith("core-12.8.9.apl")));
+    assertTrue(oeSettings.getPropath().stream().anyMatch(it -> it.getName().endsWith("adecomm.pl")));
+    assertTrue(oeSettings.getPropath().stream().anyMatch(it -> it.getName().endsWith("4feb5d83e9b6559144d87a558145a720d4abc4cf")));
   }
 
 }

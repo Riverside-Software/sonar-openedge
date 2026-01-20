@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -17,7 +17,6 @@ package org.prorefactor.proparse;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,7 +47,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import com.google.common.io.ByteSource;
 
 /**
  * Voodoo implementation of the ABL lexer (i.e. include file management, preprocessor variables, and lexer) in this
@@ -131,7 +129,7 @@ public class Lexer implements IPreprocessor {
   private Map<String, String> globalDefdNames = new HashMap<>();
   private int sequence = 0;
 
-  public Lexer(ABLLexer prepro, ByteSource src, String fileName) {
+  public Lexer(ABLLexer prepro, byte[] src, String fileName) {
     this.prepro = prepro;
     this.factory = new ProTokenFactory();
     try {
@@ -1852,13 +1850,7 @@ public class Lexer implements IPreprocessor {
     }
 
     if (includeCache2.get(idx) != null) {
-      try {
-        currentInput = new InputSource(++sourceCounter, fName,
-            ByteSource.wrap(includeCache2.get(idx).getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8, idx,
-            prepro.getProparseSettings().getSkipXCode());
-      } catch (IOException caught) {
-        throw new UncheckedIOException(caught);
-      }
+      currentInput = new InputSource(++sourceCounter, includeCache2.get(idx), idx);
     } else {
       try {
         currentInput = new InputSource(++sourceCounter, incFile, prepro.getCharset(), idx,
@@ -1887,6 +1879,7 @@ public class Lexer implements IPreprocessor {
     currentInput = null;
     includeCache.clear();
     includeCache2.clear();
+    includeVector.clear();
   }
 
   /**

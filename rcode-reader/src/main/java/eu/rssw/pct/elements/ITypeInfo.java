@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -28,9 +28,13 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
+
 import org.prorefactor.core.Pair;
 import org.prorefactor.core.Triplet;
 
+import com.google.gson.annotations.JsonAdapter;
+
+@JsonAdapter(TypeInfoAdapter.class)
 public interface ITypeInfo {
   String getTypeName();
   String getParentTypeName();

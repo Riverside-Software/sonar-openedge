@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -95,6 +95,12 @@ public class TestDumpFile {
     assertFalse(idx2.isInAlternateBufferPool());
     Index idx3 = db.getTable("BillTo").getIndex("custnumbillto");
     assertTrue(idx3.isUnique());
+
+    var employeeTbl = db.getTable("Employee");
+    assertNotNull(employeeTbl);
+    var dtzFld = employeeTbl.getField("BirthdatetimeTZ");
+    assertNotNull(dtzFld);
+    assertEquals(dtzFld.getInitial(), "now");
   }
 
   @Test

@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -33,7 +33,11 @@ import eu.rssw.pct.elements.IPropertyElement;
 import eu.rssw.pct.elements.ITableElement;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.IVariableElement;
+import eu.rssw.pct.elements.TypeInfoAdapter;
 
+import com.google.gson.annotations.JsonAdapter;
+
+@JsonAdapter(TypeInfoAdapter.class)
 public class TypeInfo implements ITypeInfo {
   private static final int IS_FINAL = 1;
   private static final int IS_INTERFACE = 2;
@@ -56,6 +60,7 @@ public class TypeInfo implements ITypeInfo {
   private final Collection<IPropertyElement> properties = new ArrayList<>();
   private final Collection<IVariableElement> variables = new ArrayList<>();
   private final Collection<IEventElement> events = new ArrayList<>();
+  private final Collection<IDatasetElement> datasets = new ArrayList<>();
   private final Collection<ITableElement> tables = new ArrayList<>();
   private final Collection<IBufferElement> buffers = new ArrayList<>();
 
@@ -102,6 +107,12 @@ public class TypeInfo implements ITypeInfo {
       this.flags = this.flags | HAS_STATICS;
     var buf = new BufferElement(element.getName());
     buffers.add(buf);
+  }
+
+  public void addDataset(IDatasetElement element) {
+    datasets.add(element);
+    if (element.isStatic())
+      this.flags = this.flags | HAS_STATICS;
   }
 
   @Override
@@ -169,6 +180,16 @@ public class TypeInfo implements ITypeInfo {
   }
 
   @Override
+  public IDatasetElement getDataset(String name) {
+    for (var ds : datasets) {
+      if (ds.getName().equalsIgnoreCase(name)) {
+        return ds;
+      }
+    }
+    return null;
+  }
+
+  @Override
   public Collection<IMethodElement> getMethods() {
     return methods;
   }
@@ -200,12 +221,7 @@ public class TypeInfo implements ITypeInfo {
 
   @Override
   public Collection<IDatasetElement> getDatasets() {
-    return Collections.emptyList();
-  }
-
-  @Override
-  public IDatasetElement getDataset(String dataset) {
-    return null;
+    return datasets;
   }
 
   @Override

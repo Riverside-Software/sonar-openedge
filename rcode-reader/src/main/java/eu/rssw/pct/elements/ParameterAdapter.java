@@ -1,0 +1,52 @@
+/*
+ * OpenEdge plugin for SonarQube
+ * Copyright (c) 2015-2026 Riverside Software
+ * contact AT riverside DASH software DOT fr
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
+ */
+package eu.rssw.pct.elements;
+
+import java.io.IOException;
+
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+
+public class ParameterAdapter extends TypeAdapter<IParameter> {
+  private final DataTypeAdapter dataTypeAdapter = new DataTypeAdapter();
+
+  @Override
+  public void write(JsonWriter out, IParameter value) throws IOException {
+    if (value == null) {
+      out.nullValue();
+      return;
+    }
+    out.beginObject();
+    out.name("num").value(value.getNum());
+    out.name("name").value(value.getName());
+    out.name("extent").value(value.getExtent());
+    out.name("mode").value(value.getMode().name());
+    out.name("parameterType").value(value.getParameterType().name());
+    out.name("dataType");
+    dataTypeAdapter.write(out, value.getDataType());
+    out.endObject();
+  }
+
+  @Override
+  public IParameter read(JsonReader in) throws IOException {
+    throw new UnsupportedOperationException();
+  }
+}

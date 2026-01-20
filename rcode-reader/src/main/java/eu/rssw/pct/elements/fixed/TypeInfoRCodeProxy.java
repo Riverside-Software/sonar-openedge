@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -23,11 +23,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import com.google.gson.annotations.JsonAdapter;
+
 import eu.rssw.pct.PLReader.InvalidLibraryException;
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 import eu.rssw.pct.elements.BuiltinClasses;
+import eu.rssw.pct.elements.TypeInfoAdapter;
 
+@JsonAdapter(TypeInfoAdapter.class)
 public class TypeInfoRCodeProxy extends TypeInfoProxy {
   private final Path rcode;
 

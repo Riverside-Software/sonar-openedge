@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -28,6 +28,7 @@ import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.PrimitiveDataType;
 
 /**
@@ -170,6 +171,17 @@ public class Routine extends Symbol {
     return routineScope;
   }
 
+  public IMethodElement getMethodElement() {
+    if (progressType == ABLNodeType.METHOD) {
+      for (var method : routineScope.getRootScope().getTypeInfo().getMethods()) {
+        if (hasSameSignature(this, method)) {
+          return method;
+        }
+      }
+    }
+    return null;
+  }
+
   public Routine getForwardDeclaration() {
     return fwdDeclaration;
   }
@@ -273,6 +285,34 @@ public class Routine extends Symbol {
 
       graph.addEdge(ifNode.asJPNode(), ifNode.getElseBlockOrNode().asJPNode());
     }
+  }
+
+  /**
+   * 
+   */
+  private static boolean hasSameSignature(Routine routine, IMethodElement method) {
+    // Different name, no match...
+    if (!method.getName().equalsIgnoreCase(routine.getName()))
+      return false;
+    // Different number of parameters, no match...
+    if (method.getParameters().length != routine.getParameters().size())
+      return false;
+    // Compare parameter data type one by one
+    int zz = 0;
+    for (var prm : method.getParameters()) {
+      var prm2 = routine.getParameters().get(zz).getSymbol();
+      if (prm2 instanceof Variable var2) {
+        if (prm.isClassDataType()) {
+          if (!prm.getDataType().getClassName().equalsIgnoreCase(var2.getDataType().getClassName()))
+            return false;
+        } else if (!prm.getDataType().equals(var2.getDataType()))
+          return false;
+      } else {
+        return false;
+      }
+      zz++;
+    }
+    return true;
   }
 
   @Override

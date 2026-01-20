@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -50,6 +50,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
+import org.eclipse.aether.RepositoryException;
 import org.prorefactor.core.schema.IDatabase;
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.proparse.classdoc.ClassDocumentation;
@@ -77,10 +78,14 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.io.Files;
 import com.google.common.primitives.Ints;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 
 import eu.rssw.antlr.database.DumpFileUtils;
 import eu.rssw.antlr.database.objects.DatabaseDescription;
+import eu.rssw.openedge.ls.IDependencyResolver.LocalDependency;
+import eu.rssw.openedge.ls.OpenEdgeDependencyResolver;
+import eu.rssw.openedge.ls.mapping.ProjectConfigFile;
 import eu.rssw.pct.FileEntry;
 import eu.rssw.pct.PLReader;
 import eu.rssw.pct.RCodeInfo;
@@ -120,6 +125,8 @@ public class OpenEdgeSettings {
   private boolean rtbCompatibility;
   private Kryo kryo;
 
+  private OpenEdgeDependencyResolver resolver;
+
   public OpenEdgeSettings(Configuration config, FileSystem fileSystem, SonarRuntime runtime) {
     this(config, fileSystem, runtime, null);
   }
@@ -142,6 +149,7 @@ public class OpenEdgeSettings {
     initializeDirectories();
     initializePropathDlc();
     initializeDefaultPropath();
+    initializeDependencies();
     initializeCPD();
     initializeIncludeExtensions();
     rtbCompatibility = config.getBoolean(Constants.RTB_COMPATIBILITY).orElse(false);
@@ -224,6 +232,71 @@ public class OpenEdgeSettings {
     return retVal;
   }
 
+  private final void initializeDependencies() {
+    // Dependencies are injected by language server in the propath
+    if (runtime.getProduct() == SonarProduct.SONARLINT)
+      return;
+    if (config.get(Constants.DEPENDENCIES_SOURCE).isEmpty()) {
+      LOG.info("No dependencies specified");
+      return;
+    }
+    var projectName = config.get("sonar.projectName").orElse("No name");
+    var srcFileName = config.get(Constants.DEPENDENCIES_SOURCE).orElse("openedge-project.json");
+
+    List<LocalDependency> resolvedDependencies = new ArrayList<>();
+    resolver = new OpenEdgeDependencyResolver();
+    LOG.info("Reading dependencies in {}", srcFileName);
+
+    try (var reader = java.nio.file.Files.newBufferedReader(fileSystem.baseDir().toPath().resolve(srcFileName))) {
+      var cfg = new GsonBuilder().create().fromJson(reader, ProjectConfigFile.class);
+      if ((cfg != null) && (cfg.dependencies != null)) {
+        for (var dep : cfg.dependencies) {
+          if (dep == null)
+            continue;
+          var dlFile = resolver.downloadArtifact(dep.groupId, dep.artifactId, dep.version, dep.classifier,
+              dep.extension);
+          resolvedDependencies.add(
+              new LocalDependency(dep.groupId, dep.artifactId, dep.version, dep.classifier, dep.extension, dlFile));
+          LOG.debug("Dependency: {}", dlFile.getPath());
+        }
+      }
+    } catch (IOException | RepositoryException e) {
+      LOG.error("Error handling dependencies in {}", srcFileName, e);
+    }
+
+    try {
+      var list = processArtifacts(resolvedDependencies, projectName);
+      propath.addAll(list.stream().map(Path::toFile).toList());
+      propathFull.addAll(list.stream().map(Path::toFile).toList());
+    } catch (IOException caught) {
+      LOG.error("Error while processing dependencies", caught);
+    }
+  }
+
+  private List<Path> processArtifacts(List<LocalDependency> resolvedDependencies, String projectName)
+      throws IOException {
+    var dotDir = fileSystem.baseDir().toPath().resolve(".dependencies");
+    java.nio.file.Files.createDirectories(dotDir);
+    List<Path> list = new ArrayList<>();
+    for (var dep : resolvedDependencies) {
+      var extractPath = resolver.processArtifact(dep, dotDir, projectName);
+      if (dep.classifier() == null) {
+        if ("zip".equals(dep.extension()) && (extractPath != null)) {
+          try (var files = java.nio.file.Files.list(extractPath)) {
+            list.addAll(files.filter(
+                it -> it.getFileName().toString().endsWith(".pl") || it.getFileName().toString().endsWith(".apl")) //
+              .toList());
+          }
+          list.add(extractPath);
+        } else if ("pl".equals(dep.extension()) || "apl".equals(dep.extension())) {
+          list.add(dep.localFile().toPath());
+        }
+      }
+    }
+
+    return list;
+  }
+
   private final void initializeCPD() {
     // CPD annotations
     for (String str : config.get(Constants.CPD_ANNOTATIONS).orElse("").split(",")) {
@@ -245,7 +318,7 @@ public class OpenEdgeSettings {
   private final void initializeIncludeExtensions() {
     includeExtensions.addAll(Splitter.on(',').trimResults().omitEmptyStrings().splitToList(
         config.get(Constants.INCLUDE_SUFFIXES).orElse(OpenEdge.DEFAULT_INCLUDE_FILE_SUFFIXES)).stream().map(
-            String::toLowerCase).collect(Collectors.toList()));
+            String::toLowerCase).toList());
   }
 
   private final void initializeBuildBinaryCache() {
@@ -994,8 +1067,8 @@ public class OpenEdgeSettings {
       int version = input.readInt();
       if ((magic == 0x57535352) && (version == 2)) {
         Object obj = kryo.readClassAndObject(input);
-        if (obj instanceof Schema)
-          return (Schema) obj;
+        if (obj instanceof Schema schema)
+          return schema;
       }
       LOG.info("Invalid schema read from serialized file");
     } catch (KryoException | IOException caught) {

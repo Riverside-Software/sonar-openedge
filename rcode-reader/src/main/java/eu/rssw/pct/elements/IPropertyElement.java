@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -21,6 +21,9 @@ package eu.rssw.pct.elements;
 
 import javax.annotation.Nullable;
 
+import com.google.gson.annotations.JsonAdapter;
+
+@JsonAdapter(PropertyElementAdapter.class)
 public interface IPropertyElement extends IAccessibleElement {
   @Nullable
   IVariableElement getVariable();

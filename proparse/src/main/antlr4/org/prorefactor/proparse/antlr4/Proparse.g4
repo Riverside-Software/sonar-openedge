@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -4024,8 +4024,13 @@ recordFunction:
   | ROWID
   | ROWSTATE
   )
-  ( LEFTPAREN record RIGHTPAREN | record )
+  ( LEFTPAREN recFuncRecord RIGHTPAREN | recFuncRecord )
 ;
+
+// Only in order to identify 'record' in code completion
+recFuncRecord:
+  record
+  ;
 
 optionalArgFunction:
   (

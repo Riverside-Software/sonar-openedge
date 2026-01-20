@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -21,6 +21,9 @@ package eu.rssw.pct.elements;
 
 import java.util.function.Function;
 
+import com.google.gson.annotations.JsonAdapter;
+
+@JsonAdapter(DataTypeAdapter.class)
 public class DataType {
   public static final DataType VOID = new DataType(PrimitiveDataType.VOID);
   public static final DataType CHARACTER = new DataType(PrimitiveDataType.CHARACTER);
@@ -76,8 +79,14 @@ public class DataType {
   }
 
   public DataType(String className) {
-    this.primDataType = PrimitiveDataType.CLASS;
-    this.className = className;
+    if (className == null) {
+      this.primDataType = PrimitiveDataType.UNKNOWN;
+      this.className = null;
+    } else {
+      this.primDataType = PrimitiveDataType.CLASS;
+      var idx = className.indexOf('<');
+      this.className = idx == -1 ? className : className.substring(0, idx);
+    }
   }
 
   public PrimitiveDataType getPrimitive() {

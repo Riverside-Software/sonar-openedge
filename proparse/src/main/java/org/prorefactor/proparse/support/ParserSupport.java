@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.Token;
@@ -53,7 +54,7 @@ public class ParserSupport {
   private List<SymbolScope> innerScopes = new ArrayList<>();
   private Map<RuleContext, SymbolScope> innerScopesMap = new HashMap<>();
   private Map<String, SymbolScope> funcScopeMap = new HashMap<>();
-
+  private Map<String, String> resolvedClassNames = new HashMap<>();
   private boolean schemaTablePriority = false;
   private boolean unitIsAbstract = true;
   private boolean unitIsInterface = false;
@@ -334,7 +335,20 @@ public class ParserSupport {
 
   // TODO Speed issue in this function, multiplied JPNode tree generation time by a factor 10
   public String lookupClassName(String text) {
-    return classFinder.lookup(text);
+    var rslt = classFinder.lookup(text);
+    if ((rslt != null) && !rslt.isBlank())
+        resolvedClassNames.computeIfAbsent(text.toLowerCase(), it -> rslt);
+    return rslt;
+  }
+
+  /**
+   * @return List of all classes that have been resolved in USING statements by the parser
+   */
+  public List<String> getAllResolvedClasses() {
+    return resolvedClassNames.entrySet().stream() //
+      .filter(entry -> entry.getKey().length() < entry.getValue().length()) //
+      .map(Entry::getValue) //
+      .toList();
   }
 
 }

@@ -5,7 +5,7 @@
   <parent>
     <groupId>eu.rssw</groupId>
     <artifactId>sonar-openedge</artifactId>
-    <version>3.5.3</version>
+    <version>3.6.0</version>
   </parent>
   <groupId>eu.rssw.sonar.openedge</groupId>
   <artifactId>sonar-openedge-plugin</artifactId>
@@ -30,17 +30,17 @@
     <dependency>
       <groupId>eu.rssw.openedge.checks</groupId>
       <artifactId>openedge-checks</artifactId>
-      <version>3.5.3</version>
+      <version>3.6.0</version>
     </dependency>
     <dependency>
       <groupId>eu.rssw.openedge.parsers</groupId>
       <artifactId>listing-parser</artifactId>
-      <version>3.5.3</version>
+      <version>3.6.0</version>
     </dependency>
     <dependency>
       <groupId>eu.rssw.openedge.parsers</groupId>
       <artifactId>profiler-parser</artifactId>
-      <version>3.5.3</version>
+      <version>3.6.0</version>
     </dependency>
     <dependency>
       <groupId>org.sonarsource.sonarqube</groupId>
@@ -51,6 +51,11 @@
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
       <version>20231013</version>
+    </dependency>
+    <dependency>
+      <groupId>eu.rssw.proparse</groupId>
+      <artifactId>mvn-resolver</artifactId>
+      <version>1.24.0</version>
     </dependency>
     <dependency>
       <groupId>org.sonarsource.sonarqube</groupId>
@@ -129,6 +134,16 @@
               </resources>
             </transformer>
           </transformers>
+          <filters>
+            <filter>
+              <artifact>*:*</artifact>
+              <excludes>
+                <exclude>META-INF/*.SF</exclude>
+                <exclude>META-INF/*.DSA</exclude>
+                <exclude>META-INF/*.RSA</exclude>
+              </excludes>
+            </filter>
+          </filters>
         </configuration>
         <executions>
           <execution>

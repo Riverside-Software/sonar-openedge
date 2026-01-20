@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -46,9 +46,15 @@ import org.testng.annotations.Test;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 import eu.rssw.pct.elements.BuiltinClasses;
+import eu.rssw.pct.mapping.OpenEdgeVersion;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IDatasetElement;
 import eu.rssw.pct.elements.IEventElement;
@@ -59,6 +65,8 @@ import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.ParameterMode;
 import eu.rssw.pct.elements.ParameterType;
 import eu.rssw.pct.elements.PrimitiveDataType;
+import eu.rssw.pct.elements.fixed.DataRelationElement;
+import eu.rssw.pct.elements.fixed.DatasetElement;
 import eu.rssw.pct.elements.fixed.EnumGetValueMethodElement;
 import eu.rssw.pct.elements.fixed.EventElement;
 import eu.rssw.pct.elements.fixed.IndexComponentElement;
@@ -502,25 +510,26 @@ public class RCodeInfoTest {
 
   @Test
   public void testElementsV11() throws IOException {
-    testElements("src/test/resources/rcode/TestClassElementsV11.r", 7362, "FD68B3A75111510B3DD219BAD820CB0C");
-    testElements2("src/test/resources/rcode/TestClassElementsChV11.r", 32156, "7945FD8804C9E910211A5E37708143D5");
+    testElements("src/test/resources/rcode/TestClassElementsV11.r", 1100, 12057, "D6B0D4BF8EF51E40FA3FE0B7EFFE4AD0");
+    testElements2("src/test/resources/rcode/TestClassElementsChV11.r", 1100, 32156, "74D5730BF9B92DA058FFA9FB5EAAE4C2");
     testElements3(Paths.get("src/test/resources/rcode/TestClassElementsV11.r"));
     testElements3(Paths.get("src/test/resources/rcode/TestClassElementsChV11.r"));
   }
 
   @Test
   public void testElementsV12() throws IOException {
-    testElements("src/test/resources/rcode/TestClassElementsV12.r", 61154,
-        "HQ6EkpNyOcWsMwdls8AwASGA8ubkdv6rLXwp4tkVHYE=");
-    testElements2("src/test/resources/rcode/TestClassElementsChV12.r", 32156,
-        "JIg2azB7KXRZrAfnG2zFYlMiYuqdOCd+LO1MHgr9egg=");
+    testElements("src/test/resources/rcode/TestClassElementsV12.r", 1200, 12057,
+        "E8YKo77pR0wcdlnwUJMMTCpAteoVQuVFY+uML89KHpI=");
+    testElements2("src/test/resources/rcode/TestClassElementsChV12.r", 1200, 32156,
+        "Y1sP1+/gQj0wtDH6r6jbGwjO5aKUhPmYgXWSQCz7w7k=");
     testElements3(Paths.get("src/test/resources/rcode/TestClassElementsV12.r"));
     testElements3(Paths.get("src/test/resources/rcode/TestClassElementsChV12.r"));
   }
 
-  public void testElements(String fileName, long crc, String digest) throws IOException {
+  public void testElements(String fileName, int version, long crc, String digest) throws IOException {
     try (InputStream input = Files.newInputStream(Paths.get(fileName))) {
       RCodeInfo rci = new RCodeInfo(input);
+      assertEquals(rci.getVersion(), version);
       assertTrue(rci.isClass());
       assertEquals(rci.getCrc(), crc);
       assertEquals(rci.getDigest(), digest);
@@ -564,7 +573,9 @@ public class RCodeInfoTest {
       assertEquals(ds1.getBufferNames().length, 2);
       assertEquals(ds1.getBufferNames()[0], "tt1");
       assertEquals(ds1.getBufferNames()[1], "tt2");
-      assertEquals(ds1.hashCode(), 1623550553);
+      assertEquals(ds1.hashCode(), 500422603);
+      assertNotNull(ds1.getDataRelations());
+      assertEquals(ds1.getDataRelations().length, 1);
       assertNull(rci.getTypeInfo().getDataset("ds2"));
 
       assertNotNull(rci.getTypeInfo().getEvents());
@@ -674,9 +685,10 @@ public class RCodeInfoTest {
     }
   }
 
-  public void testElements2(String fileName, long crc, String digest) throws IOException {
+  public void testElements2(String fileName, int version, long crc, String digest) throws IOException {
     try (InputStream input = Files.newInputStream(Paths.get(fileName))) {
       RCodeInfo rci = new RCodeInfo(input);
+      assertEquals(rci.getVersion(), version);
       assertTrue(rci.isClass());
       assertEquals(rci.getCrc(), crc);
       assertEquals(rci.getDigest(), digest);
@@ -729,54 +741,58 @@ public class RCodeInfoTest {
 
   @Test
   public void testKryoBuiltinClasses() throws IOException {
-    Kryo kryo = getKryo();
-    try (OutputStream output = Files.newOutputStream(Paths.get("target/kryo/builtin.bin"));
-        Output data = new Output(output)) {
-      for (ITypeInfo info : BuiltinClasses.getBuiltinClasses()) {
-        kryo.writeClassAndObject(data, info);
+    for (OpenEdgeVersion version : OpenEdgeVersion.values()) {
+      Kryo kryo = getKryo();
+      try (OutputStream output = Files.newOutputStream(Paths.get("target/kryo/builtin.bin"));
+          Output data = new Output(output)) {
+        for (ITypeInfo info : BuiltinClasses.getBuiltinClasses(version)) {
+          kryo.writeClassAndObject(data, info);
+        }
       }
-    }
-    ITypeInfo info = BuiltinClasses.getBuiltinClasses().stream() //
-      .filter(it -> "Progress.ApplicationServer.AdapterTypes".equals(it.getTypeName())) //
-      .findFirst().get();
-    assertNotNull(info);
-    IMethodElement elem = info.getMethods().stream() //
-      .filter(it -> "GetValue".equals(it.getName())) //
-      .findFirst().get();
-    assertNotNull(elem);
-    assertTrue(elem instanceof EnumGetValueMethodElement);
-    assertEquals(((EnumGetValueMethodElement) elem).getParent(), info);
+      ITypeInfo info = BuiltinClasses.getBuiltinClasses(version).stream() //
+        .filter(it -> "Progress.ApplicationServer.AdapterTypes".equals(it.getTypeName())) //
+        .findFirst().get();
+      assertNotNull(info);
+      IMethodElement elem = info.getMethods().stream() //
+        .filter(it -> "GetValue".equals(it.getName())) //
+        .findFirst().get();
+      assertNotNull(elem);
+      assertTrue(elem instanceof EnumGetValueMethodElement);
+      assertEquals(((EnumGetValueMethodElement) elem).getParent(), info);
 
-    List<ITypeInfo> list = new ArrayList<>();
-    try (InputStream input = Files.newInputStream(Paths.get("target/kryo/builtin.bin"));
-        Input input2 = new Input(input)) {
-      while (input2.available() > 0) {
-        Object obj = kryo.readClassAndObject(input2);
-        assertTrue(obj instanceof ITypeInfo);
-        list.add((ITypeInfo) obj);
+      List<ITypeInfo> list = new ArrayList<>();
+      try (InputStream input = Files.newInputStream(Paths.get("target/kryo/builtin.bin"));
+          Input input2 = new Input(input)) {
+        while (input2.available() > 0) {
+          Object obj = kryo.readClassAndObject(input2);
+          assertTrue(obj instanceof ITypeInfo);
+          list.add((ITypeInfo) obj);
+        }
       }
-    }
 
-    assertEquals(list.size(), BuiltinClasses.getBuiltinClasses().size());
-    ITypeInfo info2 = list.stream() //
-      .filter(it -> "Progress.ApplicationServer.AdapterTypes".equals(it.getTypeName())) //
-      .findFirst().get();
-    IMethodElement elem2 = info2.getMethods().stream().filter(it -> "GetValue".equals(it.getName())) //
-      .findFirst().get();
-    assertNotNull(elem2);
-    assertTrue(elem2 instanceof EnumGetValueMethodElement);
-    assertEquals(((EnumGetValueMethodElement) elem2).getParent(), info2);
+      assertEquals(list.size(), BuiltinClasses.getBuiltinClasses(version).size());
+      ITypeInfo info2 = list.stream() //
+        .filter(it -> "Progress.ApplicationServer.AdapterTypes".equals(it.getTypeName())) //
+        .findFirst().get();
+      IMethodElement elem2 = info2.getMethods().stream().filter(it -> "GetValue".equals(it.getName())) //
+        .findFirst().get();
+      assertNotNull(elem2);
+      assertTrue(elem2 instanceof EnumGetValueMethodElement);
+      assertEquals(((EnumGetValueMethodElement) elem2).getParent(), info2);
+    }
   }
 
   @Test
   public void testEnumGetValue() {
-    ITypeInfo info = BuiltinClasses.getBuiltinClasses().stream() //
-      .filter(it -> "Progress.ApplicationServer.AdapterTypes".equals(it.getTypeName())) //
-      .findFirst().get();
-    IMethodElement elem = info.getMethods().stream() //
-      .filter(it -> "GetValue".equals(it.getName())) //
-      .findFirst().get();
-    assertEquals(elem.getReturnType(), DataType.INTEGER);
+    for (OpenEdgeVersion version : OpenEdgeVersion.values()) {
+      ITypeInfo info = BuiltinClasses.getBuiltinClasses(version).stream() //
+        .filter(it -> "Progress.ApplicationServer.AdapterTypes".equals(it.getTypeName())) //
+        .findFirst().get();
+      IMethodElement elem = info.getMethods().stream() //
+        .filter(it -> "GetValue".equals(it.getName())) //
+        .findFirst().get();
+      assertEquals(elem.getReturnType(), DataType.INTEGER);
+    }
 
   }
 
@@ -814,9 +830,9 @@ public class RCodeInfoTest {
     typeInfo.addTable(table1);
 
     assertTrue(typeInfo.hasTempTable("ttTest"));
-    assertFalse (typeInfo.hasTempTable("ttTest2"));
+    assertFalse(typeInfo.hasTempTable("ttTest2"));
     assertTrue(typeInfo.hasBuffer("ttTest"));
-    assertFalse (typeInfo.hasBuffer("ttTest2"));
+    assertFalse(typeInfo.hasBuffer("ttTest2"));
     assertNotNull(typeInfo.getTempTable("ttTest"));
     assertNotNull(typeInfo.getBuffer("ttTest"));
     assertEquals(table1.getName(), "ttTest");
@@ -830,6 +846,92 @@ public class RCodeInfoTest {
     assertFalse(table1.isNoUndo());
     assertFalse(table1.isSerializable());
     assertTrue(table1.isPublic());
+  }
+
+  @Test
+  public void testDataset01() {
+    var typeInfo = new TypeInfo("rssw.sonar.MyTt", false, false, "Progress.Lang.Object", "", "");
+    var dr01 = new DataRelationElement("custOrd", "customer", "order", "custnum,custnum");
+    var dr02 = new DataRelationElement("orderitem", "order", "item", "itemnum,itemnum");
+    var ds1 = new DatasetElement("ds1", new String[]{"customer", "order", "item"}, new DataRelationElement[] {dr01, dr02});
+    typeInfo.addDataset(ds1);
+
+    assertNotNull(typeInfo.getDataset("ds1"));
+    assertNull(typeInfo.getDataset("ds2"));
+    var xds1 = typeInfo.getDataset("ds1");
+    assertEquals(xds1.getBufferNames(), new String[]{"customer", "order", "item"});
+    assertEquals(xds1.getDataRelations().length, 2);
+  }
+
+  @Test
+  public void testTypeInfoJsonSerialization() throws IOException {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/TestClassElementsV12.r"))) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertTrue(rci.isClass());
+      assertNotNull(rci.getTypeInfo());
+
+      // Serialize to JSON
+      Gson gson = new GsonBuilder().setPrettyPrinting().create();
+      String json = gson.toJson(rci.getTypeInfo());
+      assertNotNull(json);
+      assertFalse(json.isEmpty());
+
+      // Parse the JSON and verify attributes
+      JsonObject root = JsonParser.parseString(json).getAsJsonObject();
+
+      // Verify basic structure exists
+      assertTrue(root.has("typeName"), "JSON should contain typeName: " + json);
+      assertEquals(root.get("typeName").getAsString(), "rcode.TestClassElements");
+
+      // Verify parent type name
+      assertTrue(root.has("parentTypeName"));
+      assertEquals(root.get("parentTypeName").getAsString(), "Progress.Lang.Object");
+
+      // Verify flags
+      assertTrue(root.has("isInterface"));
+      assertFalse(root.get("isInterface").getAsBoolean());
+      assertTrue(root.has("isAbstract"));
+      assertFalse(root.get("isAbstract").getAsBoolean());
+
+      // Verify methods array exists and has content
+      assertTrue(root.has("methods"));
+      JsonArray methods = root.getAsJsonArray("methods");
+      assertTrue(methods.size() > 0);
+
+      // Verify properties array exists
+      assertTrue(root.has("properties"));
+      JsonArray properties = root.getAsJsonArray("properties");
+      assertNotNull(properties);
+
+      // Verify tables array exists and has content
+      assertTrue(root.has("tables"));
+      JsonArray tables = root.getAsJsonArray("tables");
+      assertEquals(tables.size(), 7);
+
+      // Verify first table has expected structure
+      JsonObject firstTable = tables.get(0).getAsJsonObject();
+      assertTrue(firstTable.has("name"));
+      assertTrue(firstTable.has("fields"));
+      assertTrue(firstTable.has("indexes"));
+
+      // Verify datasets array exists
+      assertTrue(root.has("datasets"));
+      JsonArray datasets = root.getAsJsonArray("datasets");
+      assertEquals(datasets.size(), 1);
+
+      // Verify events array exists
+      assertTrue(root.has("events"));
+      JsonArray events = root.getAsJsonArray("events");
+      assertEquals(events.size(), 1);
+
+      // Verify first event has name
+      JsonObject firstEvent = events.get(0).getAsJsonObject();
+      assertTrue(firstEvent.has("name"));
+      assertEquals(firstEvent.get("name").getAsString(), "NewCustomer");
+
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
   }
 
 }

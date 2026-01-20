@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -27,6 +27,7 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.ProgressString;
 import org.prorefactor.core.nodetypes.FieldRefNode;
+import org.prorefactor.core.nodetypes.ProgramRootNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.IIndex;
@@ -170,7 +171,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterRecordFunction(RecordFunctionContext ctx) {
-    setContextQualifier(ctx.record(), ContextQualifier.REF);
+    setContextQualifier(ctx.recFuncRecord().record(), ContextQualifier.REF);
   }
 
   @Override
@@ -2160,14 +2161,20 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   private DataType getDataTypeFromContext(DatatypeContext ctx) {
-    if ((ctx.getStart().getType() == ABLNodeType.CLASS.getType())
-        || (ctx.getStop().getType() == ABLNodeType.TYPE_NAME.getType())) {
-      String qualName = support.lookupClassName(ctx.getStop().getText());
+    // First, search for typeName context (typeName can follow optional CLASS keyword)
+    TypeNameContext typeNameContext = null;
+    for (int idx = 0; idx < ctx.getChildCount(); idx++) {
+      if (ctx.getChild(idx) instanceof TypeNameContext tnc)
+        typeNameContext = tnc;
+    }
+    if (typeNameContext != null) {
+      String qualName = support.lookupClassName(typeNameContext.getText());
       if (Strings.isNullOrEmpty(qualName))
-        return new DataType(ctx.getStop().getText());
+        return new DataType(typeNameContext.getText());
       else
         return new DataType(qualName);
     } else {
+      // TypeName not found, it's one of the simple data types
       return ABLNodeType.getDataType(ctx.getStop().getType());
     }
   }
@@ -2487,7 +2494,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     }
     if (cq == ContextQualifier.STATIC) {
       ITypeInfo info = refSession.getTypeInfoCI(support.lookupClassName(refNode.getIdNode().getText()));
-      refNode.setStaticReference(info == null ? BuiltinClasses.PROGRESS_LANG_OBJECT : info);
+      refNode.setStaticReference(
+          info == null ? ((ProgramRootNode) rootScope.getRootBlock().getNode()).getTypeInfoProvider().apply(
+              BuiltinClasses.PLO_CLASSNAME) : info);
       if (LOG.isTraceEnabled())
         LOG.trace("Static reference to {} - TypeInfo: {}", refNode.getIdNode().getText(),
             refNode.getStaticReference().getTypeName());

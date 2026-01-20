@@ -166,7 +166,7 @@ addFieldOption:
     'DESCRIPTION' val=QUOTED_STRING     # fieldDescription
   | 'FORMAT' val=QUOTED_STRING          # fieldFormat
   | 'FORMAT-SA' ('?' | QUOTED_STRING)   # fieldFormatSA
-  | 'INITIAL' ('?' | QUOTED_STRING)     # fieldInitial
+  | 'INITIAL' ('?' | UNQUOTED_STRING | QUOTED_STRING)     # fieldInitial
   | 'INITIAL-SA' ('?' | QUOTED_STRING)  # fieldInitialSA
   | 'LABEL' ('?' | QUOTED_STRING)       # fieldLabel
   | 'LABEL-SA' ('?' | QUOTED_STRING)    # fieldLabelSA

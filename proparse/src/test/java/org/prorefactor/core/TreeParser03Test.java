@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -49,8 +49,12 @@ import org.prorefactor.treeparser.symbols.widgets.IFieldLevelWidget;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.ParameterMode;
 import eu.rssw.pct.elements.PrimitiveDataType;
+import eu.rssw.pct.elements.fixed.MethodElement;
+import eu.rssw.pct.elements.fixed.TypeInfo;
 
 /**
  * This class simply runs the tree parser through various code, and as long as the tree parser does not throw any
@@ -62,6 +66,22 @@ public class TreeParser03Test extends AbstractProparseTest {
   @BeforeTest
   public void setUp() throws IOException {
     session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
+
+    var test43 = new TypeInfo("test43", false, false, BuiltinClasses.PLO_CLASSNAME, "");
+    var test43Foo1 = new MethodElement("foo1", false, DataType.VOID, new eu.rssw.pct.elements.fixed.Parameter[] {
+        new eu.rssw.pct.elements.fixed.Parameter(0, "ipPrm", 0, ParameterMode.OUTPUT, DataType.INTEGER)});
+    var test43Foo2 = new MethodElement("foo2", false, DataType.INTEGER, new eu.rssw.pct.elements.fixed.Parameter[] {});
+    var test43Foo21 = new MethodElement("foo2", false, DataType.INTEGER, new eu.rssw.pct.elements.fixed.Parameter[] {
+        new eu.rssw.pct.elements.fixed.Parameter(0, "xx", 0, ParameterMode.INPUT, DataType.INTEGER)});
+    var test43Foo22 = new MethodElement("foo2", false, DataType.INTEGER,
+        new eu.rssw.pct.elements.fixed.Parameter[] {
+            new eu.rssw.pct.elements.fixed.Parameter(0, "xx", 0, ParameterMode.INPUT, DataType.INTEGER),
+            new eu.rssw.pct.elements.fixed.Parameter(1, "yy", 0, ParameterMode.INPUT, DataType.CHARACTER)});
+    test43.addMethod(test43Foo1);
+    test43.addMethod(test43Foo2);
+    test43.addMethod(test43Foo21);
+    test43.addMethod(test43Foo22);
+    session.injectTypeInfo(test43);
   }
 
   @Test
@@ -960,7 +980,7 @@ public class TreeParser03Test extends AbstractProparseTest {
     }
     assertNotNull(v1);
     assertEquals(v1.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
-    assertEquals(v1.getDataType().getClassName(), "System.Collections.Generic.List<char>");
+    assertEquals(v1.getDataType().getClassName(), "System.Collections.Generic.List");
     assertEquals(v1.getExtent(), 0);
   }
 
@@ -1665,4 +1685,65 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertFalse(b2.isReferencedInFrame());
   }
 
+  @Test
+  public void testGenerics01() {
+    ParseUnit unit = getParseUnit("def var xx as Progress.Collections.IMap<Employee, Manager>.", session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+
+    assertEquals(unit.getRootScope().getVariables().size(), 1);
+    var xx = unit.getRootScope().getVariable("xx");
+    assertNotNull(xx);
+    assertEquals(xx.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+    assertEquals(xx.getDataType().getClassName(), "Progress.Collections.IMap");
+  }
+
+  @Test
+  public void testGenerics02() {
+    ParseUnit unit = getParseUnit(
+        "def var xx as Progress.Collections.IMap<Progress.Collections.Hashable<K,V>, Progress.Collections.Hashable<L,M>>.",
+        session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 1);
+    assertEquals(unit.getRootScope().getVariables().size(), 1);
+
+    var xx = unit.getRootScope().getVariable("xx");
+    assertNotNull(xx);
+    assertEquals(xx.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+    assertEquals(xx.getDataType().getClassName(), "Progress.Collections.IMap");
+  }
+
+  @Test
+  public void test43() {
+    var unit = getParseUnit(new File("src/test/resources/treeparser03/test43.cls"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+    var lst = unit.getRootScope().lookupRoutines("foo1");
+    assertEquals(lst.size(), 1);
+    var r1 = lst.get(0);
+    assertNotNull(r1.getMethodElement());
+    var lst2 = unit.getRootScope().lookupRoutines("foo2");
+    assertEquals(lst2.size(), 3);
+    assertNotNull(lst2.get(0).getMethodElement());
+    assertNotNull(lst2.get(1).getMethodElement());
+    assertNotNull(lst2.get(2).getMethodElement());
+  }
+
+  @Test
+  public void test44() {
+    var unit = getParseUnit(new File("src/test/resources/treeparser03/test44.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+    var lst = unit.getRootScope().lookupRoutines("foo1");
+    assertEquals(lst.size(), 1);
+    var r1 = lst.get(0);
+    assertNull(r1.getMethodElement());
+  }
+  
 }

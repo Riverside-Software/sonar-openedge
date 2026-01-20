@@ -5,7 +5,7 @@
   <parent>
     <groupId>eu.rssw</groupId>
     <artifactId>sonar-openedge</artifactId>
-    <version>3.5.3</version>
+    <version>3.6.0</version>
   </parent>
   <groupId>eu.rssw.openedge.rcode</groupId>
   <artifactId>rcode-reader</artifactId>
@@ -21,6 +21,11 @@
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
       <version>3.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.10.1</version>
     </dependency>
     <dependency>
       <groupId>com.esotericsoftware</groupId>

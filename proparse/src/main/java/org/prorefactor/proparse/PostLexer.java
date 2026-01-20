@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -52,6 +52,7 @@ public class PostLexer implements TokenSource {
   private ProToken currToken;
 
   private final Queue<Token> heap = new LinkedList<>();
+  private int currLevel = 0;
 
   public PostLexer(ABLLexer parent, Lexer lexer) {
     this.lexer = lexer;
@@ -95,6 +96,7 @@ public class PostLexer implements TokenSource {
           return currToken;
 
         default:
+          currToken.setPreprocessorLevel(currLevel);
           return currToken;
 
       }
@@ -156,6 +158,7 @@ public class PostLexer implements TokenSource {
 
   private void preproIf() {
     LOGGER.trace("Entering preproIf()");
+    currLevel++;
 
     // Preserve the currToken current position for listing, before evaluating the expression.
     // We can't just write to listing here, because the expression evaluation may
@@ -224,6 +227,7 @@ public class PostLexer implements TokenSource {
 
   private void preproEndif() {
     LOGGER.trace("Entering preproEndif()");
+    currLevel--;
     prepro.getLstListener().preproEndIf(currToken.getLine(), currToken.getCharPositionInLine());
     if (!preproIfVec.isEmpty())
       preproIfVec.removeLast();
@@ -233,8 +237,9 @@ public class PostLexer implements TokenSource {
   private boolean preproIfCond(boolean evaluate) {
     LOGGER.trace("Entering preproIfCond()");
 
-    if (evaluate)
+    if (evaluate) {
       heap.offer(currToken);
+    }
 
     // An &IF here in this &IF condition is not legal. Progress would barf on it.
     // That allows us to simply use a global flag to watch for &THEN.
@@ -258,9 +263,10 @@ public class PostLexer implements TokenSource {
         case PreprocessorParser.WS:
           break;
         default:
-          if (evaluate)
+          if (evaluate) {
             // If not evaluating, just discard
             tokens.add(currToken);
+          }
       }
     }
 

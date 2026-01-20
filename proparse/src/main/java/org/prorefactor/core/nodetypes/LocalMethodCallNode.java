@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -47,7 +47,7 @@ public class LocalMethodCallNode extends ExpressionNode {
     if (root != null) {
       ITypeInfo typeInfo = root.getTypeInfo();
       if (root.isClass() && (typeInfo == null))
-        typeInfo = BuiltinClasses.PROGRESS_LANG_OBJECT;
+        typeInfo = root.getTypeInfoProvider().apply(BuiltinClasses.PLO_CLASSNAME);
       method = typeInfo == null ? null : getObjectMethod(root.getTypeInfoProvider(), this, typeInfo, methodName);
     }
   }

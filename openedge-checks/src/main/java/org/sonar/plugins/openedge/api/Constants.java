@@ -1,6 +1,6 @@
 /*
  * OpenEdge plugin for SonarQube
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  * contact AT riverside DASH software DOT fr
  * 
  * This program is free software; you can redistribute it and/or
@@ -75,6 +75,7 @@ public class Constants {
   public static final String CLASS_DOCUMENTATION = "sonar.oe.classdoc";
   public static final String RTB_COMPATIBILITY = "sonar.oe.rtb";
   public static final String REQUIRE_FULL_NAMES = "sonar.oe.require.full_names";
+  public static final String DEPENDENCIES_SOURCE = "sonar.oe.dependencies.source";
 
   private Constants() {
     // No-op

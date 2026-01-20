@@ -1,6 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2003-2015 John Green
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -71,8 +71,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import com.google.common.base.Strings;
-import com.google.common.io.ByteSource;
-import com.google.common.io.ByteStreams;
 import com.progress.xref.CrossReference;
 import com.progress.xref.CrossReference.Source;
 import com.progress.xref.CrossReference.Source.Reference;
@@ -404,6 +402,7 @@ public class ParseUnit {
         } catch (ParseCancellationException uncaught2) {
           parseTimeLL = System.nanoTime() - startTimeNs;
           syntaxError = true;
+          lexer.parseComplete();
           throw uncaught2;
         }
       }
@@ -694,14 +693,13 @@ public class ParseUnit {
     return appBuilderSections.getOrDefault(file, IntervalSet.EMPTY_SET).contains(line);
   }
 
-  private ByteSource getByteSource() {
-    if (str != null) {
-      return ByteSource.wrap(str.getBytes(charset));
-    }
+  private byte[] getByteSource() {
+    if (str != null)
+      return str.getBytes(charset);
     try (InputStream s = input == null ? new FileInputStream(file) : input) {
       if (s.markSupported())
         s.reset();
-      return ByteSource.wrap(ByteStreams.toByteArray(s));
+      return s.readAllBytes();
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }

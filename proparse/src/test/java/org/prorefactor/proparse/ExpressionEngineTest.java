@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2015-2025 Riverside Software
+ * Copyright (c) 2015-2026 Riverside Software
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -1258,4 +1258,26 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     IExpression exp1 = nodes.get(0);
     assertEquals(exp1.getDataType().getPrimitive(), PrimitiveDataType.CHARACTER);
   }
+  
+  @Test
+  public void testGenerics01() {
+    testSimpleExpression(
+        "def var xx as Progress.Collections.IMap<Employee,Manager>. message new Progress.Collections.IMap<Employee,Manager>().",
+        new DataType("Progress.Collections.IMap"));
+    testSimpleExpression(
+        "def var xx as class Progress.Collections.IMap<Employee,Manager>. message new Progress.Collections.IMap<Employee,Manager>().",
+        new DataType("Progress.Collections.IMap"));
+    testSimpleExpression(
+        "def var xx as Progress.Collections.IMap<OpenEdge.Core.String,OpenEdge.Core.String>. message new Progress.Collections.IMap<OpenEdge.Core.String,OpenEdge.Core.String>().",
+        new DataType("Progress.Collections.IMap"));
+    testSimpleExpression(
+        "def var xx as class Progress.Collections.IMap<OpenEdge.Core.String,OpenEdge.Core.String>. message new Progress.Collections.IMap<OpenEdge.Core.String,OpenEdge.Core.String>().",
+        new DataType("Progress.Collections.IMap"));
+    testSimpleExpression(
+        "def var xx as Progress.Collections.IMap<Progress.Collections.ListIterator<OpenEdge.Core.String>,OpenEdge.Core.String>. message new Progress.Collections.IMap<Progress.Collections.ListIterator<OpenEdge.Core.String>,OpenEdge.Core.String>().",
+        new DataType("Progress.Collections.IMap"));
+
+  } 
+
+
 }
