@@ -16,7 +16,9 @@ package org.prorefactor.treeparser;
 
 import javax.inject.Inject;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
@@ -36,6 +38,7 @@ import org.prorefactor.proparse.antlr4.Proparse.WidNameContext;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.Query;
+import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
 
@@ -104,22 +107,27 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
 
   @Override
   public void enterWidName(WidNameContext ctx) {
+    if (ctx.systemHandleName() != null || ctx.MENUITEM() != null || ctx.MENU() != null || ctx.SUBMENU() != null) {
+      // nothing for the first version
+    }
     if (ctx.BUFFER() != null) {
       TableBuffer tableBuffer = currentScope.lookupBuffer(ctx.bufferIdentifier().getText());
       if (tableBuffer != null) {
         tableBuffer.noteReference(support.getNode(ctx), ContextQualifier.SYMBOL);
+        setSymbolOnRef(ctx, tableBuffer);
       }
     } else if (ctx.TEMPTABLE() != null) {
       TableBuffer tableBuffer = currentScope.lookupBuffer(ctx.tempTableIdentifier().getText());
       if (tableBuffer != null) {
         tableBuffer.noteReference(support.getNode(ctx), ContextQualifier.SYMBOL);
+        setSymbolOnRef(ctx, tableBuffer);
       }
-    }
-    else if (ctx.DATASET() != null) {
-      Dataset dataset = currentScope.lookupDataset(ctx.datasetIdentifier().getText());
-      if (dataset != null) {
-        dataset.noteReference(support.getNode(ctx), ContextQualifier.REF);
-        support.getNode(ctx).setSymbol((Dataset) dataset);
+    } else {
+      var symbol = currentScope.lookupSymbol(ctx.getStart().getType(), ctx.getStop().getText());
+      if (symbol != null) {
+        symbol.noteReference(support.getNode(ctx), ContextQualifier.REF);
+        setSymbolOnRef(ctx, symbol);
+
       }
     }
   }
@@ -160,6 +168,14 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
         refNode.setSymbol((Variable) result.getSymbol());
         result.getSymbol().noteReference(refNode, qual);
       }
+    }
+  }
+
+  private void setSymbolOnRef(ParserRuleContext ctx, Symbol symbol) {
+    if (support.getNode(ctx).getType() == ABLNodeType.WIDGET_REF.getType()) {
+      support.getNode(ctx).setSymbol(symbol);
+    } else if (support.getNode(ctx).getParent() != null) {
+      support.getNode(ctx).getParent().setSymbol(symbol);
     }
   }
 

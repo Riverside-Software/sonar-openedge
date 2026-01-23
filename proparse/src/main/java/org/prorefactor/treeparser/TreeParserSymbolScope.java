@@ -156,14 +156,14 @@ public class TreeParserSymbolScope {
       add((Routine) symbol);
     } else if (symbol instanceof TableBuffer) {
       add((TableBuffer) symbol);
-    } else {
-      Map<String, Symbol> map = typeMap.get(symbol.getProgressType());
-      if (map == null) {
-        map = new HashMap<>();
-        typeMap.put(symbol.getProgressType(), map);
-      }
-      map.put(symbol.getName().toLowerCase(), symbol);
+    } 
+    Map<String, Symbol> map = typeMap.get(symbol.getProgressType());
+    if (map == null) {
+      map = new HashMap<>();
+      typeMap.put(symbol.getProgressType(), map);
     }
+    map.put(symbol.getName().toLowerCase(), symbol);
+    
   }
 
   /** Add a new scope to this scope. */

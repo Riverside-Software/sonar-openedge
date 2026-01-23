@@ -123,10 +123,10 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     if (qual != null) {
       RecordNameNode recordNode = (RecordNameNode) support.getNode(ctx);
       recordNameNode(recordNode, qual);
-      
+
       // If we're defining a dataset, add the buffer to it
       if (!stack.isEmpty() && stack.peek() instanceof Dataset && recordNode.getTableBuffer() != null) {
-        if(!((Dataset) stack.peek()).hasBuffer(recordNode.getTableBuffer())) {
+        if (!((Dataset) stack.peek()).hasBuffer(recordNode.getTableBuffer())) {
           ((Dataset) stack.peek()).addBuffer(recordNode.getTableBuffer());
         }
       }
@@ -231,7 +231,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterParameterArgDataset(ParameterArgDatasetContext ctx) {
     setContextQualifier(ctx.identifier(), ContextQualifier.INIT);
   }
-  
+
   @Override
   public void enterParameterArgExpression(ParameterArgExpressionContext ctx) {
     setContextQualifier(ctx.expression(), contextQualifiers.removeFrom(ctx));
@@ -309,7 +309,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       return support.getNode(((FunctionParamStandardDatasetHandleContext) ctx).hn2);
     return support.getNode(ctx);
   }
-  
+
   @Override
   public void exitFunctionParamStandard(FunctionParamStandardContext ctx) {
     wipParameters.removeFirst();
@@ -932,8 +932,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       buffer.add(currentScope.lookupTableOrBufferSymbol(rec.getText()));
     }
     if (!stack.isEmpty() && stack.peek() instanceof Dataset && buffer.size() == 2) {
-      ((Dataset) stack.peek()).addRelation(
-          new DataRelation((ctx.identifier() != null ? ctx.identifier().getText() : ""), currentScope, buffer.get(0), buffer.get(1)));
+      ((Dataset) stack.peek()).addRelation(new DataRelation(
+          (ctx.identifier() != null ? ctx.identifier().getText() : ""), currentScope, buffer.get(0), buffer.get(1)));
     }
   }
 
@@ -954,7 +954,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       nameResolution.put(ctx.fieldExpr().get(zz).field(), TableNameResolution.PREVIOUS);
       setContextQualifier(ctx.fieldExpr().get(zz + 1), ContextQualifier.SYMBOL);
       nameResolution.put(ctx.fieldExpr().get(zz + 1).field(), TableNameResolution.LAST);
-      
+
       var relName = ctx.fieldExpr().get(zz + 1).getParent().getParent().getChild(1).getText();
       if (!stack.isEmpty() && stack.peek() instanceof Dataset && !relName.isEmpty()
           && ((Dataset) stack.peek()).hasRelation(relName)) {
@@ -1150,7 +1150,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     } else if (ctx.LIKE() != null) {
       defLike(support.getNode(ctx.fieldExpr().field()));
     } else {
-      // Use same datatype as new variable 
+      // Use same datatype as new variable
     }
     if ((currSymbol instanceof Variable) && (ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
       defineInitialValue((Variable) currSymbol, ctx.initialConstant(0).varStatementInitialValue());
@@ -2316,8 +2316,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     } else {
       JPNode naturalNode = likeNode.firstNaturalChild();
       if (naturalNode != null) {
-        LOG.error("Failed to find LIKE datatype '{}' at {}:{} for symbol '{}'", naturalNode.getText(), naturalNode.getFileName(), naturalNode.getLine(), 
-          currSymbol == null ? "<undefined>" : currSymbol.getName() );
+        LOG.error("Failed to find LIKE datatype '{}' at {}:{} for symbol '{}'", naturalNode.getText(),
+            naturalNode.getFileName(), naturalNode.getLine(),
+            currSymbol == null ? "<undefined>" : currSymbol.getName());
       }
     }
   }
@@ -2424,7 +2425,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       LOG.trace("{}> Table definition {} {}", indent(), defNode, storeType);
 
     TableBuffer buffer = rootScope.defineTable(name, storeType,
-        !defNode.queryCurrentStatement(ABLNodeType.NOUNDO).isEmpty(), !defNode.queryCurrentStatement(ABLNodeType.UNDO).isEmpty());
+        !defNode.queryCurrentStatement(ABLNodeType.NOUNDO).isEmpty(),
+        !defNode.queryCurrentStatement(ABLNodeType.UNDO).isEmpty());
     currSymbol = buffer;
     currSymbol.setDefinitionNode(defNode.getIdNode());
     currDefTable = buffer;
@@ -2527,7 +2529,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     // Check if this is a FieldRef being "inline defined". If so, we define it right now.
     // refNode.isInlineVar returns true for all variable references, not only in the definition node
     if (refNode.isInlineVar() && (currentScope.getVariable(name) == null)) {
-        addToSymbolScope(defineVariable(ctx, refNode, name, Variable.Type.VARIABLE));
+      addToSymbolScope(defineVariable(ctx, refNode, name, Variable.Type.VARIABLE));
     }
     if (cq == ContextQualifier.STATIC) {
       ITypeInfo info = refSession.getTypeInfoCI(support.lookupClassName(refNode.getIdNode().getText()));
