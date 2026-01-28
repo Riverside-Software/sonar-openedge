@@ -15,8 +15,15 @@
  ********************************************************************************/
 package org.prorefactor.core.schema;
 
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import eu.rssw.pct.mapping.OpenEdgeVersion;
 
 /**
  * Database objects are created by the Schema class, and they are used when looking up table names from 4gl compile
@@ -24,33 +31,42 @@ import java.util.TreeSet;
  */
 public class Database implements IDatabase {
   private final String name;
-  private final SortedSet<ITable> tableSet = new TreeSet<>(Constants.TABLE_NAME_ORDER);
+  private final Set<ITable> tableSet = new HashSet<>();
 
   /**
    * New Database object
    * @param name Main DB name
    */
-  public Database(String name) {
-    this.name = name;
+  public Database(@Nonnull String name) {
+    this(name, null);
+  }
+
+  public Database(@Nonnull String name, @Nullable OpenEdgeVersion metaschema) {
+    this.name = Objects.requireNonNull(name);
+    if (metaschema != null) {
+      tableSet.addAll(MetaSchemaProvider.getMetaSchema(this, metaschema));
+    }
   }
 
   @Override
-  public void add(ITable table) {
-    tableSet.add(table);
-  }
-
-  @Override
+  @Nonnull
   public String getName() {
     return name;
   }
 
   @Override
-  public SortedSet<ITable> getTableSet() {
-    return tableSet;
+  @Nonnull
+  public List<ITable> getTableSet() {
+    return tableSet.stream().sorted(Constants.TABLE_NAME_ORDER).toList();
   }
 
   @Override
   public String toString() {
     return new StringBuilder("DB ").append(name).toString();
   }
+
+  public void add(ITable table) {
+    tableSet.add(table);
+  }
+
 }

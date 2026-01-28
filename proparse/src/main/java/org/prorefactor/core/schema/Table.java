@@ -41,7 +41,6 @@ public class Table implements ITable {
     this.name = name;
     this.database = database;
     this.type = TableType.DB_TABLE;
-    database.add(this);
   }
 
   /** Constructor for temp / work tables */

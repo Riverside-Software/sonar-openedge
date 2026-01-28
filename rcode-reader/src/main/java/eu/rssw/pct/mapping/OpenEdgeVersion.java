@@ -27,6 +27,20 @@ public enum OpenEdgeVersion {
   V128,
   V130;
 
+  public String getMetaschema() {
+    switch (this) {
+      case V117:
+        return "/doc/11.7/meta.txt";
+      case V122:
+        return "/doc/12.2/meta.txt";
+      case V128:
+        return "/doc/12.8/meta.txt";
+      case V130:
+        return "/doc/13.0/meta.txt";
+    }
+    return "/doc/12.8/meta.txt";
+  }
+
   public String getSystemHandlesPath() {
     switch (this) {
       case V117:
