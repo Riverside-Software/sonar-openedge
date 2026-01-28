@@ -20,6 +20,7 @@
 package org.sonar.plugins.openedge.foundation;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.prorefactor.core.schema.IField;
@@ -36,7 +37,7 @@ public class TableWrapperTest {
   
   @Test
   public void testFromDotSchema() throws IOException {
-    Schema sch = new Schema("src/test/resources/project1/src/schema/sp2k.cache");
+    Schema sch = new Schema(Path.of( "src/test/resources/project1/src/schema/sp2k.cache"));
     IField fld1 = sch.lookupUnqualifiedField("minqty", false);
     Assert.assertNotNull(fld1);
     IField fld2 = sch.lookupUnqualifiedField("minqt", false);

@@ -43,7 +43,6 @@ public class Table implements ITable {
     this.name = name;
     this.database = database;
     this.storetype = IConstants.ST_DBTABLE;
-    database.add(this);
   }
 
   /** Constructor for temp / work tables */
