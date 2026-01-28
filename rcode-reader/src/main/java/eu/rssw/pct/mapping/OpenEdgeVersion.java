@@ -38,7 +38,7 @@ public enum OpenEdgeVersion {
       case V130:
         return "doc/13.0/syshdl.json";
     }
-    return "";
+    return "doc/12.8/syshdl.json";
   }
 
   public String getClassStructurePath() {
@@ -52,7 +52,7 @@ public enum OpenEdgeVersion {
       case V130:
         return "doc/13.0/classes.json";
     }
-    return "";
+    return "doc/12.8/classes.json";
   }
   
   public String getClassDocumentationPath() {
@@ -66,7 +66,7 @@ public enum OpenEdgeVersion {
       case V130:
         return "doc/13.0/classDoc.json";
     }
-    return "";
+    return "doc/12.8/classDoc.json";
   }
   
   public String getFunctionsDocumentationPath() {
@@ -80,7 +80,7 @@ public enum OpenEdgeVersion {
       case V130:
         return "doc/13.0/functionsDoc.json";
     }
-    return "";
+    return "doc/12.8/functionsDoc.json";
   }
 
   @Nonnull
