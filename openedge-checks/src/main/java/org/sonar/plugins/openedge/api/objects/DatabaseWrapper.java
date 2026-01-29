@@ -19,21 +19,41 @@
  */
 package org.sonar.plugins.openedge.api.objects;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.prorefactor.core.schema.Constants;
 import org.prorefactor.core.schema.IDatabase;
 import org.prorefactor.core.schema.ITable;
+import org.prorefactor.core.schema.MetaSchemaProvider;
 
 import eu.rssw.antlr.database.objects.DatabaseDescription;
+import eu.rssw.pct.mapping.OpenEdgeVersion;
 
 public class DatabaseWrapper implements IDatabase {
   private final DatabaseDescription dbDesc;
+  private final Set<ITable> tableSet = new HashSet<>();
 
   public DatabaseWrapper(DatabaseDescription dbDesc) {
-    this.dbDesc = dbDesc;
+    this(dbDesc, null);
   }
 
+  public DatabaseWrapper(@Nonnull DatabaseDescription dbDesc, @Nullable OpenEdgeVersion metaschema) {
+    this.dbDesc = Objects.requireNonNull(dbDesc);
+    for (var tbl : dbDesc.getTables()) {
+      tableSet.add(new TableWrapper(this, tbl));
+    }
+    if (metaschema != null) {
+      tableSet.addAll(MetaSchemaProvider.getMetaSchema(this, metaschema));
+    }
+  }
+
+  @Nonnull
   public DatabaseDescription getDbDesc() {
     return dbDesc;
   }
@@ -49,10 +69,6 @@ public class DatabaseWrapper implements IDatabase {
       .map(it -> (ITable) new TableWrapper(this, it)) //
       .sorted(Constants.TABLE_NAME_ORDER) //
       .toList();
-  }
-
-  public void add(ITable table) {
-    throw new UnsupportedOperationException("Unable to add table " + table.getName());
   }
 
 }
