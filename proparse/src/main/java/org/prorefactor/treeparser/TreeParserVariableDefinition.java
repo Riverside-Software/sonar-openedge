@@ -283,14 +283,14 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   private JPNode getDefinitionNodeFromParam(FunctionParamStdContext ctx) {
-    if (ctx instanceof FunctionParamStandardTableContext)
-      return support.getNode(((FunctionParamStandardTableContext) ctx).record());
-    else if (ctx instanceof FunctionParamStandardTableHandleContext)
-      return support.getNode(((FunctionParamStandardTableHandleContext) ctx).hn);
-    else if (ctx instanceof FunctionParamStandardDatasetContext)
-      return support.getNode(((FunctionParamStandardDatasetContext) ctx).identifier());
-    else if (ctx instanceof FunctionParamStandardDatasetHandleContext)
-      return support.getNode(((FunctionParamStandardDatasetHandleContext) ctx).hn2);
+    if (ctx instanceof FunctionParamStandardTableContext ctx2)
+      return support.getNode(ctx2.record());
+    else if (ctx instanceof FunctionParamStandardTableHandleContext ctx2)
+      return support.getNode(ctx2.hn);
+    else if (ctx instanceof FunctionParamStandardDatasetContext ctx2)
+      return support.getNode(ctx2.identifier());
+    else if (ctx instanceof FunctionParamStandardDatasetHandleContext ctx2)
+      return support.getNode(ctx2.hn2);
     return support.getNode(ctx);
   }
   
@@ -1076,13 +1076,13 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterDefineParamVar(DefineParamVarContext ctx) {
     if (ctx.datatypeVar() != null) {
       // AS HANDLE TO datatype
-      if (currSymbol instanceof Primitive)
-        ((Primitive) currSymbol).setDataType(DataType.HANDLE);
+      if (currSymbol instanceof Primitive p)
+        p.setDataType(DataType.HANDLE);
     } else {
       defAs(ctx.datatype());
     }
-    if ((currSymbol instanceof Variable) && (ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
-      defineInitialValue((Variable) currSymbol, ctx.initialConstant(0).varStatementInitialValue());
+    if ((currSymbol instanceof Variable v) && (ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
+      defineInitialValue(v, ctx.initialConstant(0).varStatementInitialValue());
     }
   }
 
@@ -1101,8 +1101,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     } else {
       defLike(support.getNode(ctx.fieldExpr().field()));
     }
-    if ((currSymbol instanceof Variable) && (ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
-      defineInitialValue((Variable) currSymbol, ctx.initialConstant(0).varStatementInitialValue());
+    if ((currSymbol instanceof Variable v) && (ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
+      defineInitialValue(v, ctx.initialConstant(0).varStatementInitialValue());
     }
   }
 
@@ -1115,8 +1115,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     } else {
       // Use same datatype as new variable 
     }
-    if ((currSymbol instanceof Variable) && (ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
-      defineInitialValue((Variable) currSymbol, ctx.initialConstant(0).varStatementInitialValue());
+    if ((currSymbol instanceof Variable v) && (ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
+      defineInitialValue(v, ctx.initialConstant(0).varStatementInitialValue());
     }
   }
 
@@ -1458,9 +1458,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       defAs(ctx.datatype());
     } else if (ctx.LIKE() != null) {
       setContextQualifier(ctx.fieldExpr(), ContextQualifier.SYMBOL);
-    } else if ((ctx.initialConstant() != null) && (currSymbol instanceof Variable)) {
+    } else if ((ctx.initialConstant() != null) && (currSymbol instanceof Variable v)) {
       // Initial value only set for variables, not for TT fields
-      defineInitialValue((Variable) currSymbol, ctx.initialConstant().varStatementInitialValue());
+      defineInitialValue(v, ctx.initialConstant().varStatementInitialValue());
     }
   }
 
@@ -2180,21 +2180,21 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   private void defAs(DatatypeContext ctx) {
-    if (currSymbol instanceof Primitive)
-      defAs((Primitive) currSymbol, ctx);
+    if (currSymbol instanceof Primitive p)
+      defAs(p, ctx);
     else {
       LOG.error("Unable to find 'AS' datatype in '{}' at position {}:{}:{}", ctx.getText(),
-          ctx.start instanceof ProToken ? ((ProToken) ctx.start).getFileName() : "<unknown_file>", ctx.start.getLine(),
+          ctx.start instanceof ProToken tok ? tok.getFileName() : "<unknown_file>", ctx.start.getLine(),
           ctx.start.getCharPositionInLine());
     }
   }
 
   private void defAs(ClassTypeNameContext ctx) {
-    if (currSymbol instanceof Primitive)
-      defAs((Primitive) currSymbol, ctx);
+    if (currSymbol instanceof Primitive p)
+      defAs(p, ctx);
     else {
       LOG.error("Unable to find 'AS' datatype in '{}' at position {}:{}:{}", ctx.getText(),
-          ctx.start instanceof ProToken ? ((ProToken) ctx.start).getFileName() : "<unknown_file>", ctx.start.getLine(),
+          ctx.start instanceof ProToken tok ? tok.getFileName() : "<unknown_file>", ctx.start.getLine(),
           ctx.start.getCharPositionInLine());
     }
   }
@@ -2259,7 +2259,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Variable extent '{}'", indent(), text);
 
-    Primitive primitive = currSymbol instanceof Primitive ? (Primitive) currSymbol : null;
+    Primitive primitive = currSymbol instanceof Primitive p ? p : null;
     if (primitive == null)
       return;
     try {
@@ -2271,8 +2271,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   private void defLike(JPNode likeNode) {
     LOG.trace("Entering defLike {}", likeNode);
-    Primitive likePrim = likeNode.getSymbol() instanceof Primitive ? (Primitive) likeNode.getSymbol() : null;
-    Primitive newPrim = currSymbol instanceof Primitive ? (Primitive) currSymbol : null;
+    Primitive likePrim = likeNode.getSymbol() instanceof Primitive p ? p : null;
+    Primitive newPrim = currSymbol instanceof Primitive p ? p : null;
     if ((likePrim != null) && (newPrim != null)) {
       newPrim.assignAttributesLike(likePrim);
       currSymbol.setLikeSymbol(likeNode.getSymbol());
@@ -2551,8 +2551,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     }
 
     refNode.setSymbol((Symbol) result.getSymbol());
-    if (result.getSymbol() instanceof FieldBuffer) {
-      FieldBuffer fb = (FieldBuffer) result.getSymbol();
+    if (result.getSymbol() instanceof FieldBuffer fb) {
       if ((fb.getField() == null) || (fb.getField().getTable() == null))
         refNode.setStoreType(IConstants.ST_TTABLE);
       else
