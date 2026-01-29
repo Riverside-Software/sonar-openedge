@@ -55,11 +55,6 @@ public class RCodeTTFieldWrapper implements IField {
   }
 
   @Override
-  public IField copyBare(ITable toTable) {
-    return new RCodeTTFieldWrapper(toTable, field);
-  }
-
-  @Override
   public void assignAttributesLike(Primitive likePrim) {
     throw new UnsupportedOperationException();
   }

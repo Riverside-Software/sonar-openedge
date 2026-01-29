@@ -53,21 +53,6 @@ public class Field implements IField {
     extent = likePrim.getExtent();
   }
 
-  /**
-   * Copy the bare minimum attributes to a new Field object.
-   * 
-   * @param toTable The table that the field is being added to.
-   * @return The newly created Field, though you may not need it for anything since it has already been added to the
-   *         Table.
-   */
-  @Override
-  public IField copyBare(ITable toTable) {
-    Field f = new Field(this.name, toTable);
-    f.dataType = this.dataType;
-    f.extent = this.extent;
-    return f;
-  }
-
   @Override
   public DataType getDataType() {
     return dataType;

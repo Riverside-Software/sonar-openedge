@@ -64,11 +64,6 @@ public class FieldWrapper implements IField {
   }
 
   @Override
-  public IField copyBare(ITable toTable) {
-    return new FieldWrapper(toTable, field);
-  }
-
-  @Override
   public void assignAttributesLike(Primitive likePrim) {
     throw new UnsupportedOperationException();
   }
