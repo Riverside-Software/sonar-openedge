@@ -116,7 +116,7 @@ public class FieldBuffer extends Symbol implements Primitive {
    * 
    * @see org.prorefactor.treeparser.symbols.Symbol#getProgressType() To see if this field buffer is for a schema table,
    *      temp-table, or work-table, see Table.getStoreType().
-   * @see org.prorefactor.core.schema.ITable#getStoretype()
+   * @see org.prorefactor.core.schema.ITable#getTableType()
    */
   @Override
   public ABLNodeType getNodeType() {

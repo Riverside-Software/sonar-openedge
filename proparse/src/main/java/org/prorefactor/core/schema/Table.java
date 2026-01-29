@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.prorefactor.core.IConstants;
-
 /**
  * Table objects are created both by the Schema class and also when temp and work tables are defined within a 4gl
  * compile unit. For temp and work tables, the database is Schema.nullDatabase.
@@ -29,7 +27,7 @@ import org.prorefactor.core.IConstants;
 public class Table implements ITable {
   private final IDatabase database;
   private final String name;
-  private final int storetype;
+  private final TableType type;
   private boolean parentNoUndo = false;
   private boolean undo = false;
   private boolean noUndo = false;
@@ -42,21 +40,21 @@ public class Table implements ITable {
   public Table(String name, IDatabase database) {
     this.name = name;
     this.database = database;
-    this.storetype = IConstants.ST_DBTABLE;
+    this.type = TableType.DB_TABLE;
     database.add(this);
   }
 
   /** Constructor for temp / work tables */
-  public Table(String name, int storetype) {
+  public Table(String name, TableType type) {
     this.name = name;
-    this.storetype = storetype;
+    this.type = type;
     this.database = Constants.nullDatabase;
   }
 
   /** Constructor for temporary "comparator" objects. */
   public Table(String name) {
     this.name = name;
-    this.storetype = IConstants.ST_DBTABLE;
+    this.type = TableType.DB_TABLE;
     this.database = Constants.nullDatabase;
   }
 
@@ -106,8 +104,8 @@ public class Table implements ITable {
   }
 
   @Override
-  public int getStoretype() {
-    return storetype;
+  public TableType getTableType() {
+    return type;
   }
 
   public void setParentNoUndo(boolean parentNoUndo) {
@@ -145,8 +143,7 @@ public class Table implements ITable {
 
   @Override
   public String toString() {
-    return new StringBuilder(storetype == IConstants.ST_DBTABLE ? "DB Table"
-        : storetype == IConstants.ST_TTABLE ? "Temp-table" : "Work-table").append(' ').append(name).toString();
+    return new StringBuilder(type.toString()).append(' ').append(name).toString();
   }
 
   /**

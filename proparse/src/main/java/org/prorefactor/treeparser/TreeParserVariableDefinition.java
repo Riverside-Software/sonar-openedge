@@ -34,6 +34,7 @@ import org.prorefactor.core.schema.IIndex;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Index;
 import org.prorefactor.core.schema.Table;
+import org.prorefactor.core.schema.TableType;
 import org.prorefactor.proparse.antlr4.Proparse.*;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.proparse.support.ParserSupport;
@@ -2099,7 +2100,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
     // For an unnamed buffer, determine if it's abbreviated.
     // Note that named buffers, temp and work table names cannot be abbreviated.
-    if (buffer.isDefault() && table.getStoretype() == IConstants.ST_DBTABLE) {
+    if (buffer.isDefault() && table.getTableType() == TableType.DB_TABLE) {
       String[] nameParts = nodeText.split("\\.");
       int tableNameLen = nameParts[nameParts.length - 1].length();
       if (table.getName().length() > tableNameLen)
@@ -2382,7 +2383,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       currDefIndex.addField(fld);
   }
 
-  private void defineTable(JPNode defNode, String name, int storeType) {
+  private void defineTable(JPNode defNode, String name, TableType storeType) {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Table definition {} {}", indent(), defNode, storeType);
 
@@ -2420,7 +2421,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   private void defineTempTable(JPNode defAST, String name) {
-    defineTable(defAST, name, IConstants.ST_TTABLE);
+    defineTable(defAST, name, TableType.TEMP_TABLE);
   }
 
   /** Get the Table symbol linked from a RECORD_NAME AST. */
@@ -2468,7 +2469,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   private void defineWorktable(JPNode defAST, String name) {
-    defineTable(defAST, name, IConstants.ST_WTABLE);
+    defineTable(defAST, name, TableType.WORK_TABLE);
   }
 
   private void frameRef(JPNode idAST) {

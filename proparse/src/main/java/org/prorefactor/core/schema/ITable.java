@@ -31,11 +31,17 @@ public interface ITable {
    */
   String getName();
 
+  TableType getTableType();
+
   /**
    * @return {@link IConstants#ST_DBTABLE} for DB table, {@link IConstants#ST_TTABLE} for temp-tables or
    *         {@link IConstants#ST_WTABLE} for work-tables
+   * @deprecated Use getTableType()
    */
-  int getStoretype();
+  @Deprecated(since = "3.7")
+  default int getStoretype() {
+    return getTableType().getStoreType();
+  }
 
   /**
    * Lookup a field by name. We do not test for uniqueness. We leave that job to the compiler. This function expects an

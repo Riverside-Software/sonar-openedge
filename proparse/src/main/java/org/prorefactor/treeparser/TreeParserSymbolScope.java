@@ -26,8 +26,8 @@ import java.util.Set;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.IConstants;
 import org.prorefactor.core.schema.ITable;
+import org.prorefactor.core.schema.TableType;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.Datasource;
@@ -136,8 +136,8 @@ public class TreeParserSymbolScope {
 
   /** Add a TableBuffer to the appropriate map. */
   private void addTableBuffer(String name, ITable table, TableBuffer buffer) {
-    if (name.length() == 0) {
-      if (table.getStoretype() == IConstants.ST_DBTABLE)
+    if (name.isEmpty()) {
+      if (table.getTableType() == TableType.DB_TABLE)
         unnamedBuffers.put(table, buffer);
       else // default buffers for temp/work tables go into the "named" buffer map
         bufferMap.put(table.getName().toLowerCase(), buffer);
@@ -394,7 +394,7 @@ public class TreeParserSymbolScope {
     }
     TableBuffer symbol = bufferMap.get(bufferPart.toLowerCase());
     if (symbol == null || (!dbPart.isEmpty() && !dbPart.equalsIgnoreCase(symbol.getTable().getDatabase().getName()))
-        || (!dbPart.isEmpty() && (symbol.getTable().getStoretype() == IConstants.ST_TTABLE))) {
+        || (!dbPart.isEmpty() && (symbol.getTable().getTableType() == TableType.TEMP_TABLE))) {
       if (parentScope != null) {
         TableBuffer tb = parentScope.lookupBuffer(inName);
         if (tb != null) {

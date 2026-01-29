@@ -30,6 +30,7 @@ import java.util.List;
 
 import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.prorefactor.core.schema.TableType;
 import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
@@ -626,7 +627,7 @@ public class BugFixTest extends AbstractProparseTest {
     assertEquals(node.query(ABLNodeType.RECORD_NAME).size(), 1);
     Object obj = node.query(ABLNodeType.RECORD_NAME).get(0).getSymbol();
     assertNotNull(obj);
-    assertEquals(((TableBuffer) obj).getTable().getStoretype(), IConstants.ST_DBTABLE);
+    assertEquals(((TableBuffer) obj).getTable().getTableType(), TableType.DB_TABLE);
 
     // Second FIND statement
     node = unit.getTopNode().queryStateHead(ABLNodeType.FIND).get(1);
@@ -634,7 +635,7 @@ public class BugFixTest extends AbstractProparseTest {
     assertEquals(node.query(ABLNodeType.RECORD_NAME).size(), 1);
     obj = node.query(ABLNodeType.RECORD_NAME).get(0).getSymbol();
     assertNotNull(obj);
-    assertEquals(((TableBuffer) obj).getTable().getStoretype(), IConstants.ST_TTABLE);
+    assertEquals(((TableBuffer) obj).getTable().getTableType(), TableType.TEMP_TABLE);
 
     // Third FIND statement
     node = unit.getTopNode().queryStateHead(ABLNodeType.FIND).get(2);
@@ -642,7 +643,7 @@ public class BugFixTest extends AbstractProparseTest {
     assertEquals(node.query(ABLNodeType.RECORD_NAME).size(), 1);
     obj = node.query(ABLNodeType.RECORD_NAME).get(0).getSymbol();
     assertNotNull(obj);
-    assertEquals(((TableBuffer) obj).getTable().getStoretype(), IConstants.ST_DBTABLE);
+    assertEquals(((TableBuffer) obj).getTable().getTableType(), TableType.DB_TABLE);
 
     // Fourth FIND statement
     node = unit.getTopNode().queryStateHead(ABLNodeType.FIND).get(3);
@@ -650,7 +651,7 @@ public class BugFixTest extends AbstractProparseTest {
     assertEquals(node.query(ABLNodeType.RECORD_NAME).size(), 1);
     obj = node.query(ABLNodeType.RECORD_NAME).get(0).getSymbol();
     assertNotNull(obj);
-    assertEquals(((TableBuffer) obj).getTable().getStoretype(), IConstants.ST_TTABLE);
+    assertEquals(((TableBuffer) obj).getTable().getTableType(), TableType.TEMP_TABLE);
   }
 
   @Test

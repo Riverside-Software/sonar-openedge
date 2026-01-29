@@ -22,12 +22,12 @@ import java.io.IOException;
 import java.util.TreeSet;
 
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.IConstants;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.StatementBlockNode;
 import org.prorefactor.core.nodetypes.TwoArgumentsExpression;
+import org.prorefactor.core.schema.TableType;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.Block;
@@ -65,7 +65,7 @@ public class AttributedWriter extends AbstractProparseTest {
     TreeSet<String> names = new TreeSet<String>();
     for (TableBuffer buffSymbol : buffers) {
       StringBuffer name = new StringBuffer();
-      if (buffSymbol.getTable().getStoretype() == IConstants.ST_DBTABLE) {
+      if (buffSymbol.getTable().getTableType() == TableType.DB_TABLE) {
         name.append(buffSymbol.getTable().getDatabase().getName());
         name.append(".");
       }

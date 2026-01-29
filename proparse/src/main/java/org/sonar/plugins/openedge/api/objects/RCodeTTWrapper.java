@@ -16,12 +16,12 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.prorefactor.core.IConstants;
 import org.prorefactor.core.schema.Constants;
 import org.prorefactor.core.schema.IDatabase;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.IIndex;
 import org.prorefactor.core.schema.ITable;
+import org.prorefactor.core.schema.TableType;
 
 import eu.rssw.pct.elements.IIndexElement;
 import eu.rssw.pct.elements.ITableElement;
@@ -114,8 +114,8 @@ public class RCodeTTWrapper implements ITable {
   }
 
   @Override
-  public int getStoretype() {
-    return IConstants.ST_TTABLE;
+  public TableType getTableType() {
+    return TableType.TEMP_TABLE;
   }
 
   @Override

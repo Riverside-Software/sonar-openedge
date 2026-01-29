@@ -25,12 +25,12 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.prorefactor.core.IConstants;
 import org.prorefactor.core.schema.Constants;
 import org.prorefactor.core.schema.IDatabase;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.IIndex;
 import org.prorefactor.core.schema.ITable;
+import org.prorefactor.core.schema.TableType;
 
 import eu.rssw.antlr.database.objects.Field;
 import eu.rssw.antlr.database.objects.Index;
@@ -125,8 +125,8 @@ public class TableWrapper implements ITable {
   }
 
   @Override
-  public int getStoretype() {
-    return IConstants.ST_DBTABLE;
+  public TableType getTableType() {
+    return TableType.DB_TABLE;
   }
 
   @Override
