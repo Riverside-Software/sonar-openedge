@@ -19,84 +19,64 @@
  */
 package org.sonar.plugins.openedge.foundation;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
-import org.prorefactor.core.schema.IField;
-import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Schema;
 import org.sonar.plugins.openedge.api.objects.DatabaseWrapper;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import eu.rssw.antlr.database.DumpFileUtils;
-import eu.rssw.antlr.database.objects.DatabaseDescription;
+import eu.rssw.pct.mapping.OpenEdgeVersion;
 
 public class TableWrapperTest {
-  
-  @Test
-  public void testFromDotSchema() throws IOException {
-    Schema sch = new Schema(Path.of( "src/test/resources/project1/src/schema/sp2k.cache"));
-    IField fld1 = sch.lookupUnqualifiedField("minqty", false);
-    Assert.assertNotNull(fld1);
-    IField fld2 = sch.lookupUnqualifiedField("minqt", false);
-    Assert.assertNotNull(fld2);
-    IField fld3 = sch.lookupUnqualifiedField("custnum", false);
-    Assert.assertNotNull(fld3);
-    Assert.assertEquals(fld3.getTable().getName(), "BillTo");
 
-    ITable tbl1 = sch.lookupTable("customer");
-    Assert.assertNotNull(tbl1);
-    ITable tbl2 = sch.lookupTable("custome");
-    Assert.assertNotNull(tbl2);
-    ITable tbl3 = sch.lookupTable("bin");
-    Assert.assertNotNull(tbl3);
-    IField fld4 = tbl3.lookupField("binnum");
-    Assert.assertNotNull(fld4);
-    Assert.assertEquals(fld4.getName(), "BinNum");
-    IField fld5 = tbl3.lookupField("binnu");
-    Assert.assertNotNull(fld5);
-    Assert.assertEquals(fld5.getName(), "BinNum");
-    IField fld6 = tbl3.lookupField("binna");
-    Assert.assertNotNull(fld6);
-    Assert.assertEquals(fld6.getName(), "BinName");
+  @Test
+  public void testFromDotDF01() throws IOException {
+    var dbDesc = DumpFileUtils.getDatabaseDescription(Path.of("src/test/resources/project1/src/schema/sp2k.df"));
+    var sch = new Schema(new DatabaseWrapper(dbDesc));
+
+    var fld1 = sch.lookupUnqualifiedField("minqty", false);
+    assertNotNull(fld1);
+    var fld2 = sch.lookupUnqualifiedField("minqt", false);
+    assertNotNull(fld2);
+    var fld3 = sch.lookupUnqualifiedField("custnum", false);
+    assertNotNull(fld3);
+    assertEquals(fld3.getTable().getName(), "BillTo");
+
+    var tbl1 = sch.lookupTable("customer");
+    assertNotNull(tbl1);
+    var tbl2 = sch.lookupTable("custome");
+    assertNotNull(tbl2);
+    var tbl3 = sch.lookupTable("bin");
+    assertNotNull(tbl3);
+    var fld4 = tbl3.lookupField("binnum");
+    assertNotNull(fld4);
+    assertEquals(fld4.getName(), "BinNum");
+    var fld5 = tbl3.lookupField("binnu");
+    assertNotNull(fld5);
+    assertEquals(fld5.getName(), "BinNum");
+    var fld6 = tbl3.lookupField("binna");
+    assertNotNull(fld6);
+    assertEquals(fld6.getName(), "BinName");
+    // No metaschema injected in this test case
+    assertNull(sch.lookupTable("_File"));
     // TODO Ambiguous field, should return null
     // IField fld7 = tbl3.lookupField("binn");
     // Assert.assertNull(fld7);
   }
 
   @Test
-  public void testFromDotDF() throws IOException {
-    DatabaseDescription dbDesc = DumpFileUtils.getDatabaseDescription(Paths.get("src/test/resources/project1/src/schema/sp2k.df"));
-    Schema sch = new Schema(new DatabaseWrapper(dbDesc));
-
-    IField fld1 = sch.lookupUnqualifiedField("minqty", false);
-    Assert.assertNotNull(fld1);
-    IField fld2 = sch.lookupUnqualifiedField("minqt", false);
-    Assert.assertNotNull(fld2);
-    IField fld3 = sch.lookupUnqualifiedField("custnum", false);
-    Assert.assertNotNull(fld3);
-    Assert.assertEquals(fld3.getTable().getName(), "BillTo");
-
-    ITable tbl1 = sch.lookupTable("customer");
-    Assert.assertNotNull(tbl1);
-    ITable tbl2 = sch.lookupTable("custome");
-    Assert.assertNotNull(tbl2);
-    ITable tbl3 = sch.lookupTable("bin");
-    Assert.assertNotNull(tbl3);
-    IField fld4 = tbl3.lookupField("binnum");
-    Assert.assertNotNull(fld4);
-    Assert.assertEquals(fld4.getName(), "BinNum");
-    IField fld5 = tbl3.lookupField("binnu");
-    Assert.assertNotNull(fld5);
-    Assert.assertEquals(fld5.getName(), "BinNum");
-    IField fld6 = tbl3.lookupField("binna");
-    Assert.assertNotNull(fld6);
-    Assert.assertEquals(fld6.getName(), "BinName");
-    // TODO Ambiguous field, should return null
-    // IField fld7 = tbl3.lookupField("binn");
-    // Assert.assertNull(fld7);
+  public void testFromDotDF02() throws IOException {
+    var dbDesc = DumpFileUtils.getDatabaseDescription(Path.of("src/test/resources/project1/src/schema/sp2k.df"));
+    var sch = new Schema(new DatabaseWrapper(dbDesc, OpenEdgeVersion.V128));
+    assertNotNull(sch.lookupTable("customer"));
+    assertNotNull(sch.lookupTable("_File"));
+    assertNull(sch.lookupTable("_FooBar"));
   }
 
 }

@@ -21,6 +21,7 @@ package org.prorefactor.core.schema;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -28,9 +29,9 @@ import java.nio.file.Path;
 import org.testng.annotations.Test;
 
 public class TableWrapperTest {
-  
+
   @Test
-  public void testFromDotSchema() throws IOException {
+  public void testFromDotSchema01() throws IOException {
     var sch1 = new Schema(Path.of("src/test/resources/schema/sports2000.cache"));
 
     var fld1 = sch1.lookupUnqualifiedField("minqty", false);
@@ -62,9 +63,19 @@ public class TableWrapperTest {
     assertNotNull(tbl4.lookupField("regext"));
     var tbl5 = sch1.lookupTable("Timesheet");
     assertNotNull(tbl5);
+    // No metaschema injected in this test case
+    assertNull(sch1.lookupTable("_File"));
     // TODO Ambiguous field, should return null
     // IField fld7 = tbl3.lookupField("binn");
     // Assert.assertNull(fld7);
   }
 
+  @Test
+  public void testFromDotSchema02() throws IOException {
+    // Inject metaschema
+    var sch1 = new Schema(Path.of("src/test/resources/schema/sports2000.cache"), true);
+    assertNotNull(sch1.lookupTable("customer"));
+    assertNotNull(sch1.lookupTable("_File"));
+    assertNull(sch1.lookupTable("_FooBar"));
+  }
 }

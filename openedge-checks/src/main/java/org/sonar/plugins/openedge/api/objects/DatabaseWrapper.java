@@ -65,8 +65,7 @@ public class DatabaseWrapper implements IDatabase {
 
   @Override
   public List<ITable> getTableSet() {
-    return dbDesc.getTables().stream() //
-      .map(it -> (ITable) new TableWrapper(this, it)) //
+    return tableSet.stream() //
       .sorted(Constants.TABLE_NAME_ORDER) //
       .toList();
   }
