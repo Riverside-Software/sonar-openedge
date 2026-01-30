@@ -2595,7 +2595,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       if ((fb.getField() == null) || (fb.getField().getTable() == null))
         refNode.setStoreType(IConstants.ST_TTABLE);
       else
-        refNode.setStoreType(fb.getField().getTable().getStoretype());
+        refNode.setStoreType(fb.getField().getTable().getTableType().getStoreType());
     } else {
       refNode.setStoreType(IConstants.ST_VAR);
     }

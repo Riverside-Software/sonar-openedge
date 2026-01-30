@@ -1783,7 +1783,7 @@ public class TreeParser03Test extends AbstractProparseTest {
     var param = procCall.query(ABLNodeType.PARAMETER_ITEM);
     assertNotNull(param);
     assertEquals(param.size(), 1);
-    var dataset2 = param.get(0).getSymbol();
+    var dataset2 = param.get(0).getDirectChildren(ABLNodeType.WIDGET_REF).get(0).getSymbol();
     assertNotNull(dataset2);
     assertEquals(dataset2.getDefineNode().getLine(), 2);
   }
@@ -1826,10 +1826,9 @@ public class TreeParser03Test extends AbstractProparseTest {
     var param = procCall.query(ABLNodeType.PARAMETER_ITEM);
     assertNotNull(param);
     assertEquals(param.size(), 2);
-    var dataset2 = param.get(0).getSymbol();
+    var dataset2 = param.get(0).getDirectChildren(ABLNodeType.WIDGET_REF).get(0).getSymbol();
     assertNotNull(dataset2);
     assertEquals(dataset2.getDefineNode().getLine(), 2);
-
   }
 
   @Test

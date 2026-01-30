@@ -496,6 +496,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitParameterArgDataset(ParameterArgDatasetContext ctx) {
+    Builder holder = createTree(ctx, ABLNodeType.WIDGET_REF).setRuleNode(ctx);
+    return holder;
+  }
+
+  @Override
   public Builder visitFieldFrameOrBrowse(FieldFrameOrBrowseContext ctx) {
     return createTreeFromFirstNode(ctx).setRuleNode(ctx);
   }

@@ -68,7 +68,7 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
 
   @Override
   public void exitParameterArgDataset(ParameterArgDatasetContext ctx) {
-    noteReference(support.getNode(ctx.getParent()), contextQualifiers.get(ctx));
+    noteReference(support.getNode(ctx), contextQualifiers.get(ctx));
   }
 
   @Override
@@ -76,8 +76,8 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
     if (ctx.identifier() != null) {
       Dataset dataset = currentScope.lookupDataset(ctx.identifier().getText());
       if (dataset != null) {
-        dataset.noteReference(support.getNode(ctx.getParent()), ContextQualifier.REF);
-        support.getNode(ctx.getParent()).setSymbol(dataset);
+        dataset.noteReference(support.getNode(ctx), ContextQualifier.REF);
+        support.getNode(ctx).setSymbol(dataset);
       }
     }
   }
@@ -125,8 +125,8 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
     } else {
       var symbol = currentScope.lookupSymbol(ctx.getStart().getType(), ctx.getStop().getText());
       if (symbol != null) {
-        symbol.noteReference(support.getNode(ctx), ContextQualifier.REF);
-        setSymbolOnRef(ctx, symbol);
+        symbol.noteReference(support.getNode(ctx).getParent(), ContextQualifier.REF);
+        setSymbolOnRef(ctx, (Symbol) symbol);
 
       }
     }
