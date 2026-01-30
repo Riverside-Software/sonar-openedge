@@ -27,7 +27,6 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.proparse.antlr4.Proparse;
-import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.prorefactor.treeparser.symbols.widgets.Frame;
@@ -353,7 +352,7 @@ public class Block {
       if (flw != null)
         return result.setSymbol(flw).build();
 
-      Symbol s = symbolScope.lookupSymbol(Proparse.EVENT, name);
+      var s = symbolScope.lookupSymbol(Proparse.EVENT, name);
       if (s != null) {
         return result.setSymbol(s).build();
       }
