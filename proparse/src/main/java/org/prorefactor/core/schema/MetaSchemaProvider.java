@@ -62,10 +62,11 @@ public class MetaSchemaProvider {
         int ch2 = line.lastIndexOf(':');
         if ((currTable == null) || (ch1 == -1) || (ch2 == -1))
           throw new IOException("Invalid file format: " + line);
-        var f = new Field(line.substring(1, ch1), currTable);
-        f.setDataType(DataType.get(line.substring(ch1 + 1, ch2)));
-        f.setExtent(Integer.parseInt(line.substring(ch2 + 1)));
-        currTable.add(f);
+        var fld = new Field.Builder(line.substring(1, ch1));
+        fld.setParent(  currTable);
+        fld.setDataType(DataType.get(line.substring(ch1 + 1, ch2)));
+        fld.setExtent(Integer.parseInt(line.substring(ch2 + 1)));
+        currTable.add(fld.build());
       } else if (line.startsWith("I")) {
         if (currTable == null)
           throw new IOException("No associated table for " + line);

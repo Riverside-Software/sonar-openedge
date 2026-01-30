@@ -19,7 +19,14 @@ import java.util.Comparator;
 
 public class Constants {
   public static final IDatabase nullDatabase = new Database("");
-  public static final ITable nullTable = new Table("");
+
+  /** Comparator for sorting by name. */
+  public static final Comparator<IField> FIELD_POSITION_ORDER = new Comparator<IField>() {
+    @Override
+    public int compare(IField f1, IField f2) {
+      return f1.getPosition() - f2.getPosition();
+    }
+  };
 
   // Sort databases by name
   public static final Comparator<IDatabase> DB_NAME_ORDER = (d1, d2) -> d1.getName().compareToIgnoreCase(d2.getName());

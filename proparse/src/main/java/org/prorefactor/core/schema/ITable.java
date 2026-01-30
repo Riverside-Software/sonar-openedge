@@ -16,7 +16,6 @@
 package org.prorefactor.core.schema;
 
 import java.util.List;
-import java.util.SortedSet;
 
 import org.prorefactor.core.IConstants;
 
@@ -46,10 +45,32 @@ public interface ITable {
   }
 
   /**
-   * Lookup a field by name. We do not test for uniqueness. We leave that job to the compiler. This function expects an
-   * unqualified field name (no name dots).
+   * Lookup a field by name (abbreviated fields are also resolved)
+   * @param name Unqualified field name (no name dots)
    */
-  IField lookupField(String name);
+  default IField lookupField(String name) {
+    var lcName = getLCName();
+    var iter = getFieldSet().iterator();
+    if (!iter.hasNext())
+      return null;
+    var field = iter.next();
+    while (field.getLCName().compareTo(lcName) < 0) {
+      if (iter.hasNext())
+        field = iter.next();
+      else
+        return null;
+    }
+    // Test that we got a match
+    if (!field.getLCName().startsWith(lcName))
+      return null;
+    // Test that we got a unique match
+    if ((lcName.length() < field.getName().length()) && iter.hasNext()) {
+      var next = iter.next();
+      if (next.getLCName().startsWith(lcName))
+        return null; // Ambiguous
+    }
+    return field;
+  }
 
   /**
    * Same as lookupField, except field names can't be abbreviated
@@ -72,7 +93,7 @@ public interface ITable {
   /**
    * @return Sorted (by field name) list of fields
    */
-  SortedSet<IField> getFieldSet();
+  List<IField> getFieldSet();
 
   /**
    * Get the ArrayList of fields in field position order (rather than sorted alpha)

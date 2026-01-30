@@ -15,11 +15,13 @@
  ********************************************************************************/
 package org.prorefactor.core.schema;
 
-import org.prorefactor.treeparser.Primitive;
+import org.prorefactor.treeparser.ReadOnlyPrimitive;
 
-public interface IField extends Primitive {
+public interface IField extends ReadOnlyPrimitive {
   String getName();
   String getLCName();
   ITable getTable();
-  void setTable(ITable table);
+  default int getPosition() {
+    return 0;
+  }
 }

@@ -21,15 +21,14 @@ import eu.rssw.pct.elements.DataType;
  * Field and Variable implement Primitive because they both have a "primitive" Progress data type (INTEGER, CHARACTER,
  * etc).
  */
-public interface Primitive extends ReadOnlyPrimitive {
+public interface ReadOnlyPrimitive {
+
+
+  DataType getDataType();
 
   /**
-   * Assign datatype, class, extent from another primitive (for the LIKE keyword)
+   * @return -32767 if undertermined array, 0 if not an array, or &gt; 0 if determined-length array
    */
-  void assignAttributesLike(Primitive likePrim);
-
-  Primitive setDataType(DataType dataType);
-
-  Primitive setExtent(int extent);
+  int getExtent();
 
 }
