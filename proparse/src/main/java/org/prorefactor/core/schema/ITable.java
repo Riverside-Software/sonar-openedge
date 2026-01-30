@@ -16,7 +16,6 @@
 package org.prorefactor.core.schema;
 
 import java.util.List;
-import java.util.SortedSet;
 
 import org.prorefactor.core.IConstants;
 
@@ -44,32 +43,44 @@ public interface ITable {
   }
 
   /**
-   * Lookup a field by name. We do not test for uniqueness. We leave that job to the compiler. This function expects an
-   * unqualified field name (no name dots).
+   * Lookup a field by name (abbreviated fields are also resolved)
+   * @param name Unqualified field name (no name dots)
    */
-  IField lookupField(String name);
+  default IField lookupField(String name) {
+    var lcName = name.toLowerCase();
+    var iter = getFieldSet().iterator();
+    if (!iter.hasNext())
+      return null;
+    var field = iter.next();
+    while (field.getName().toLowerCase().compareTo(lcName) < 0) {
+      if (iter.hasNext())
+        field = iter.next();
+      else
+        return null;
+    }
+    // Test that we got a match
+    if (!field.getName().toLowerCase().startsWith(lcName))
+      return null;
+    // Test that we got a unique match
+    if ((lcName.length() < field.getName().length()) && iter.hasNext()) {
+      var next = iter.next();
+      if (next.getName().toLowerCase().startsWith(lcName))
+        return null; // Ambiguous
+    }
+    return field;
+  }
 
   /**
    * Same as lookupField, except field names can't be abbreviated
    */
   default IField lookupFullNameField(String name) {
-    for (IField fld : getFieldSet()) {
-      if (fld.getName().equalsIgnoreCase(name))
-        return fld;
-    }
-    return null;
+    return getFieldSet().stream().filter(it -> it.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
   }
-
-  /** Add a Field to this table. "Package" visibility only. */
-  void add(IField field);
-
-  /** Add a new index to this table. "Package" visibility only. */
-  void add(IIndex index);
 
   /**
    * @return Sorted (by field name) list of fields
    */
-  SortedSet<IField> getFieldSet();
+  List<IField> getFieldSet();
 
   /**
    * Get the ArrayList of fields in field position order (rather than sorted alpha)

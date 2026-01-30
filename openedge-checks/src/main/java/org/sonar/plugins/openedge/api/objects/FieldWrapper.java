@@ -21,7 +21,6 @@ package org.sonar.plugins.openedge.api.objects;
 
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
-import org.prorefactor.treeparser.Primitive;
 
 import com.google.common.base.Preconditions;
 
@@ -61,26 +60,6 @@ public class FieldWrapper implements IField {
   @Override
   public ITable getTable() {
     return table;
-  }
-
-  @Override
-  public void assignAttributesLike(Primitive likePrim) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public Primitive setDataType(DataType dataType) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public Primitive setExtent(int extent) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public void setTable(ITable table) {
-    throw new UnsupportedOperationException();
   }
 
 }

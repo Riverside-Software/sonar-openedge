@@ -13,14 +13,22 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR LGPL-3.0
  ********************************************************************************/
-package org.prorefactor.core.schema;
+package org.prorefactor.treeparser;
 
-import org.prorefactor.treeparser.ReadOnlyPrimitive;
+import eu.rssw.pct.elements.DataType;
 
-public interface IField extends ReadOnlyPrimitive {
-  String getName();
-  ITable getTable();
-  default int getPosition() {
-    return 0;
-  }
+/**
+ * Field and Variable implement Primitive because they both have a "primitive" Progress data type (INTEGER, CHARACTER,
+ * etc).
+ */
+public interface ReadOnlyPrimitive {
+
+
+  DataType getDataType();
+
+  /**
+   * @return -32767 if undertermined array, 0 if not an array, or &gt; 0 if determined-length array
+   */
+  int getExtent();
+
 }

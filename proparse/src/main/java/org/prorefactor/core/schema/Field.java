@@ -15,6 +15,10 @@
  ********************************************************************************/
 package org.prorefactor.core.schema;
 
+import java.util.Objects;
+
+import javax.annotation.Nonnull;
+
 import org.prorefactor.treeparser.Primitive;
 
 import eu.rssw.pct.elements.DataType;
@@ -25,33 +29,20 @@ import eu.rssw.pct.elements.DataType;
  */
 public class Field implements IField {
   private final String name;
-  private int extent;
-  private DataType dataType;
-  private ITable table;
+  private final int extent;
+  private final DataType dataType;
+  private final ITable table;
 
   /**
    * Standard constructor.
-   * 
-   * @param table Use null if you want to assign the field to a table as a separate step.
    */
-  public Field(String inName, ITable table) {
-    this.name = inName;
-    this.table = table;
-    if (table != null)
-      table.add(this);
+  private Field(@Nonnull String inName, @Nonnull ITable table, @Nonnull DataType dataType, int extent) {
+    this.name = Objects.requireNonNull(inName);
+    this.table = Objects.requireNonNull(table);
+    this.dataType = Objects.requireNonNull(dataType);
+    this.extent = extent;
   }
 
-  /** Constructor for temporary "lookup" fields. "Package" visibility. */
-  Field(String inName) {
-    this.name = inName;
-    this.table = Constants.nullTable;
-  }
-
-  @Override
-  public void assignAttributesLike(Primitive likePrim) {
-    dataType = likePrim.getDataType();
-    extent = likePrim.getExtent();
-  }
 
   @Override
   public DataType getDataType() {
@@ -73,23 +64,40 @@ public class Field implements IField {
     return table;
   }
 
-  @Override
-  public Primitive setDataType(DataType dataType) {
-    this.dataType = dataType;
-    return this;
-  }
+  public static class Builder {
+    private String name;
+    private ITable parent;
+    private DataType dataType;
+    private int extent = 0;
 
-  @Override
-  public Primitive setExtent(int extent) {
-    this.extent = extent;
-    return this;
-  }
+    public Builder(String name) {
+      this.name = name;
+    }
 
-  /** Use this to set the field to a table if you used null for the table in the constructor. */
-  @Override
-  public void setTable(ITable table) {
-    this.table = table;
-    table.add(this);
+    public Builder setParent(ITable parent) {
+      this.parent = parent;
+      return this;
+    }
+
+    public Builder setDataType(DataType dataType) {
+      this.dataType = dataType;
+      return this;
+    }
+
+    public Builder setExtent(int extent) {
+      this.extent = extent;
+      return this;
+    }
+
+    public Builder assignAttributesLike(Primitive likePrim) {
+      this.dataType = likePrim.getDataType();
+      this.extent = likePrim.getExtent();
+      return this;
+    }
+
+    public Field build() {
+      return new Field(name, parent, dataType, extent);
+    }
   }
 
   /**
@@ -138,8 +146,8 @@ public class Field implements IField {
 
     public String generateName() {
       StringBuilder buff = new StringBuilder();
-      if (table != null && table.length() > 0) {
-        if (db != null && db.length() > 0) {
+      if (table != null && !table.isEmpty()) {
+        if (db != null && !db.isEmpty()) {
           buff.append(db);
           buff.append(".");
         }

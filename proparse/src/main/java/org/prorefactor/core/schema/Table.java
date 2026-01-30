@@ -16,9 +16,12 @@
 package org.prorefactor.core.schema;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.Objects;
+import java.util.Set;
+
+import javax.annotation.Nonnull;
 
 /**
  * Table objects are created both by the Schema class and also when temp and work tables are defined within a 4gl
@@ -32,38 +35,32 @@ public class Table implements ITable {
   private boolean undo = false;
   private boolean noUndo = false;
 
-  private List<IField> fieldPosOrder = new ArrayList<>();
   private List<IIndex> indexes = new ArrayList<>();
-  private SortedSet<IField> fieldSet = new TreeSet<>(Constants.FIELD_NAME_ORDER);
+  private Set<IField> fieldSet = new HashSet<>();
 
   /** Constructor for schema */
-  public Table(String name, IDatabase database) {
-    this.name = name;
-    this.database = database;
+  public Table(@Nonnull String name, @Nonnull IDatabase database) {
+    this.name = Objects.requireNonNull(name);
+    this.database = Objects.requireNonNull(database);
     this.type = TableType.DB_TABLE;
   }
 
   /** Constructor for temp / work tables */
-  public Table(String name, TableType type) {
-    this.name = name;
-    this.type = type;
+  @Deprecated
+  public Table(String name, int storetype) {
+    this(name, TableType.getTableType(storetype));
+  }
+
+  public Table(@Nonnull String name, @Nonnull TableType type) {
+    this.name = Objects.requireNonNull(name);
+    this.type = Objects.requireNonNull(type);
     this.database = Constants.nullDatabase;
   }
 
-  /** Constructor for temporary "comparator" objects. */
-  public Table(String name) {
-    this.name = name;
-    this.type = TableType.DB_TABLE;
-    this.database = Constants.nullDatabase;
-  }
-
-  @Override
   public void add(IField field) {
     fieldSet.add(field);
-    fieldPosOrder.add(field);
   }
 
-  @Override
   public void add(IIndex index) {
     indexes.add(index);
   }
@@ -75,12 +72,12 @@ public class Table implements ITable {
 
   @Override
   public List<IField> getFieldPosOrder() {
-    return fieldPosOrder;
+    return fieldSet.stream().sorted(Constants.FIELD_POSITION_ORDER).toList();
   }
 
   @Override
-  public SortedSet<IField> getFieldSet() {
-    return fieldSet;
+  public List<IField> getFieldSet() {
+    return fieldSet.stream().sorted(Constants.FIELD_NAME_ORDER).toList();
   }
 
   @Override
@@ -127,17 +124,6 @@ public class Table implements ITable {
       return true;
     else 
       return parentNoUndo;
-  }
-
-  @Override
-  public IField lookupField(String lookupName) {
-    SortedSet<IField> fieldTailSet = fieldSet.tailSet(new Field(lookupName));
-    if (fieldTailSet.isEmpty())
-      return null;
-    IField field = fieldTailSet.first();
-    if (field == null || !field.getName().toLowerCase().startsWith(lookupName.toLowerCase()))
-      return null;
-    return field;
   }
 
   @Override
