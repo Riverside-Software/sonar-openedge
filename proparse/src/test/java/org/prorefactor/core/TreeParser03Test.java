@@ -1795,7 +1795,7 @@ public class TreeParser03Test extends AbstractProparseTest {
         define dataset ds1 for tt1.
         define buffer ds1 for tt1.
         dataset ds1:fill().
-        run proc1 (input dataset ds1).
+        run proc1 (input dataset ds1, input i1).
 
         """;
     ParseUnit unit = getParseUnit(code, session);
@@ -1825,7 +1825,7 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertNotNull(procCall);
     var param = procCall.query(ABLNodeType.PARAMETER_ITEM);
     assertNotNull(param);
-    assertEquals(param.size(), 1);
+    assertEquals(param.size(), 2);
     var dataset2 = param.get(0).getSymbol();
     assertNotNull(dataset2);
     assertEquals(dataset2.getDefineNode().getLine(), 2);
