@@ -23,7 +23,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import org.prorefactor.core.nodetypes.IStatement;
 import org.prorefactor.core.nodetypes.IStatementBlock;
@@ -369,133 +369,173 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
 
   @Test
   public void executionGraphTest01() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test01.p"), session);
+    var unit = getParseUnit(new File("src/test/resources/treeparser05/test01.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
-    Routine r0 = unit.getRootScope().getRoutines().get(0);
-    ExecutionGraph graph0 = r0.getExecutionGraph();
+    var r0 = unit.getRootScope().getRoutines().get(0);
+    var graph0 = r0.getExecutionGraph();
     assertEquals(graph0.getVertices().size(), 8); // 7 statements + RootNode
-    assertEquals(graph0.getVertices().get(0).getNodeType(), ABLNodeType.PROGRAM_ROOT);
-    // Very simple flow
-    assertEquals(graph0.getEdges().get(0), Arrays.asList(1));
-    assertEquals(graph0.getEdges().get(1), Arrays.asList(2));
-    assertEquals(graph0.getEdges().get(2), Arrays.asList(3));
-    assertEquals(graph0.getEdges().get(3), Arrays.asList(4));
-    assertEquals(graph0.getEdges().get(4), Arrays.asList(5));
-    assertEquals(graph0.getEdges().get(5), Arrays.asList(6));
-    assertEquals(graph0.getEdges().get(6), Arrays.asList(7));
-    assertTrue(graph0.getEdges().get(7).isEmpty());
 
-    Routine r1 = unit.getRootScope().getRoutines().get(1);
-    ExecutionGraph graph1 = r1.getExecutionGraph();
+    assertEquals(getEdges(graph0, ABLNodeType.PROGRAM_ROOT, 0), "DEFINE:1");
+    assertEquals(getEdges(graph0, ABLNodeType.DEFINE, 1), "DEFINE:2");
+    assertEquals(getEdges(graph0, ABLNodeType.DEFINE, 2), "DEFINE:3");
+    assertEquals(getEdges(graph0, ABLNodeType.DEFINE, 3), "MESSAGE:6");
+    assertEquals(getEdges(graph0, ABLNodeType.MESSAGE, 6), "MESSAGE:7");
+    assertEquals(getEdges(graph0, ABLNodeType.MESSAGE, 7), "MESSAGE:14");
+    assertEquals(getEdges(graph0, ABLNodeType.MESSAGE, 14), "ANNOTATION:15");
+    assertEquals(getEdges(graph0, ABLNodeType.ANNOTATION, 15), "");
+
+    assertEquals(getReverseEdges(graph0, ABLNodeType.DEFINE, 1), "PROGRAM_ROOT:0");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.DEFINE, 2), "DEFINE:1");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.DEFINE, 3), "DEFINE:2");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.MESSAGE, 6), "DEFINE:3");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.MESSAGE, 7), "MESSAGE:6");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.MESSAGE, 14), "MESSAGE:7");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.ANNOTATION, 15), "MESSAGE:14");
+
+    var r1 = unit.getRootScope().getRoutines().get(1);
+    var graph1 = r1.getExecutionGraph();
     assertEquals(graph1.getVertices().size(), 3); // 2 statements + Procedure node
-    assertEquals(graph1.getVertices().get(0).getNodeType(), ABLNodeType.PROCEDURE);
-    assertEquals(graph1.getVertices().get(1).getNodeType(), ABLNodeType.DISPLAY);
-    assertEquals(graph1.getVertices().get(2).getNodeType(), ABLNodeType.DISPLAY);
-    // Very simple flow
-    assertEquals(graph1.getEdges().get(0), Arrays.asList(1));
-    assertEquals(graph1.getEdges().get(1), Arrays.asList(2));
-    assertTrue(graph1.getEdges().get(2).isEmpty());
+
+    assertEquals(getEdges(graph1, ABLNodeType.PROCEDURE, 9), "DISPLAY:10");
+    assertEquals(getEdges(graph1, ABLNodeType.DISPLAY, 10), "DISPLAY:11");
+    assertEquals(getEdges(graph1, ABLNodeType.DISPLAY, 11), "");
+
+    assertEquals(getReverseEdges(graph1, ABLNodeType.PROCEDURE, 9), "");
+    assertEquals(getReverseEdges(graph1, ABLNodeType.DISPLAY, 10), "PROCEDURE:9");
+    assertEquals(getReverseEdges(graph1, ABLNodeType.DISPLAY, 11), "DISPLAY:10");
   }
 
   @Test
   public void executionGraphTest02() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test02.p"), session);
+    var unit = getParseUnit(new File("src/test/resources/treeparser05/test02.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
-    Routine r0 = unit.getRootScope().getRoutines().get(0);
-    ExecutionGraph graph0 = r0.getExecutionGraph();
-    assertEquals(graph0.getVertices().size(), 9); // 8 statements + RootNode
-    assertEquals(graph0.getVertices().get(0).getNodeType(), ABLNodeType.PROGRAM_ROOT);
-    assertEquals(graph0.getEdges().get(0), Arrays.asList(1));
-    assertEquals(graph0.getEdges().get(1), Arrays.asList(2, 3, 4)); // IF
-    assertTrue(graph0.getEdges().get(2).isEmpty()); // THEN
-    assertTrue(graph0.getEdges().get(3).isEmpty()); // ELSE
-    assertEquals(graph0.getEdges().get(4), Arrays.asList(5, 7)); // IF
-    assertEquals(graph0.getEdges().get(5), Arrays.asList(6));
-    assertEquals(graph0.getEdges().get(7), Arrays.asList(8));
-    assertTrue(graph0.getEdges().get(6).isEmpty());
-    assertTrue(graph0.getEdges().get(8).isEmpty());
-    }
+    var r0 = unit.getRootScope().getRoutines().get(0);
+    var graph0 = r0.getExecutionGraph();
+
+    assertEquals(getEdges(graph0, ABLNodeType.PROGRAM_ROOT, 0), "IF:1");
+    assertEquals(getEdges(graph0, ABLNodeType.IF, 1), "IF:6 MESSAGE:2 MESSAGE:4");
+    assertEquals(getEdges(graph0, ABLNodeType.MESSAGE, 2), "IF:6");
+    assertEquals(getEdges(graph0, ABLNodeType.MESSAGE, 4), "IF:6");
+    assertEquals(getEdges(graph0, ABLNodeType.IF, 6), "DO:6 DO:9");
+    assertEquals(getEdges(graph0, ABLNodeType.DO, 6), "MESSAGE:7");
+    assertEquals(getEdges(graph0, ABLNodeType.DO, 9), "MESSAGE:10");
+    assertEquals(getEdges(graph0, ABLNodeType.MESSAGE, 7), "");
+    assertEquals(getEdges(graph0, ABLNodeType.MESSAGE, 10), "");
+
+    assertEquals(getReverseEdges(graph0, ABLNodeType.PROGRAM_ROOT, 0), "");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.IF, 1), "PROGRAM_ROOT:0");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.MESSAGE, 2), "IF:1");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.MESSAGE, 4), "IF:1");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.IF, 6), "IF:1 MESSAGE:2 MESSAGE:4");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.DO, 6), "IF:6");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.DO, 9), "IF:6");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.MESSAGE, 7), "DO:6");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.MESSAGE, 10), "DO:9");
+  }
 
   @Test
   public void executionGraphTest03() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test03.p"), session);
+    var unit = getParseUnit(new File("src/test/resources/treeparser05/test03.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
-    Routine r0 = unit.getRootScope().getRoutines().get(0);
-    ExecutionGraph graph0 = r0.getExecutionGraph();
+    var r0 = unit.getRootScope().getRoutines().get(0);
+    var graph0 = r0.getExecutionGraph();
     assertEquals(graph0.getVertices().size(), 5); // 4 statements + RootNode
-    assertEquals(graph0.getEdges().get(0), Arrays.asList(1));
-    assertEquals(graph0.getEdges().get(1), Arrays.asList(2));
-    assertEquals(graph0.getEdges().get(2), Arrays.asList(3));
-    assertEquals(graph0.getEdges().get(3), Arrays.asList(4));
-    assertTrue(graph0.getEdges().get(4).isEmpty());
+    assertEquals(getEdges(graph0, ABLNodeType.PROGRAM_ROOT, 0), "DEFINE:1");
+    assertEquals(getEdges(graph0, ABLNodeType.DEFINE, 1), "DO:20");
+    assertEquals(getEdges(graph0, ABLNodeType.DO, 20), "CREATE:21");
+    assertEquals(getEdges(graph0, ABLNodeType.CREATE, 21), "CREATE:22");
+    assertEquals(getEdges(graph0, ABLNodeType.CREATE, 22), "");
 
-    Routine r1 = unit.getRootScope().getRoutines().get(1);
-    ExecutionGraph graph1 = r1.getExecutionGraph();
+    var r1 = unit.getRootScope().getRoutines().get(1);
+    var graph1 = r1.getExecutionGraph();
     assertEquals(graph1.getVertices().size(), 7); // 6 statements + Procedure node
-    assertEquals(graph1.getEdges().get(0), Arrays.asList(1));
-    assertEquals(graph1.getEdges().get(1), Arrays.asList(2));
-    assertEquals(graph1.getEdges().get(2), Arrays.asList(3, 6));
-    assertEquals(graph1.getEdges().get(3), Arrays.asList(4));
-    assertEquals(graph1.getEdges().get(4), Arrays.asList(5));
-    assertTrue(graph1.getEdges().get(5).isEmpty());
-    assertTrue(graph1.getEdges().get(6).isEmpty());
+    assertEquals(getEdges(graph1, ABLNodeType.PROCEDURE, 3), "DO:4");
+    assertEquals(getEdges(graph1, ABLNodeType.DO, 4), "DO:5");
+    assertEquals(getEdges(graph1, ABLNodeType.DO, 5), "DISPLAY:6 MESSAGE:11");
+    assertEquals(getEdges(graph1, ABLNodeType.DISPLAY, 6), "DO:7");
+    assertEquals(getEdges(graph1, ABLNodeType.DO, 7), "MESSAGE:11 MESSAGE:8");
+    assertEquals(getEdges(graph1, ABLNodeType.MESSAGE, 8), "MESSAGE:11");
+    assertEquals(getEdges(graph1, ABLNodeType.MESSAGE, 11), "");
+
+    assertEquals(getReverseEdges(graph1, ABLNodeType.DO, 4), "PROCEDURE:3");
+    assertEquals(getReverseEdges(graph1, ABLNodeType.DO, 5), "DO:4");
+    assertEquals(getReverseEdges(graph1, ABLNodeType.DISPLAY, 6), "DO:5");
+    assertEquals(getReverseEdges(graph1, ABLNodeType.DO, 7), "DISPLAY:6");
+    assertEquals(getReverseEdges(graph1, ABLNodeType.MESSAGE, 8), "DO:7");
+    assertEquals(getReverseEdges(graph1, ABLNodeType.MESSAGE, 11), "DO:5 DO:7 MESSAGE:8");
   }
 
   @Test
   public void executionGraphTest05() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test05.p"), session);
+    var unit = getParseUnit(new File("src/test/resources/treeparser05/test05.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
-    Routine r0 = unit.getRootScope().getRoutines().get(0);
-    ExecutionGraph graph0 = r0.getExecutionGraph();
+    var r0 = unit.getRootScope().getRoutines().get(0);
+    var graph0 = r0.getExecutionGraph();
     assertEquals(graph0.getVertices().size(), 9); // 2 IF + 2 DO + FINALLY + 3 MESSAGE + Root
-    assertEquals(graph0.getEdges().get(0), Arrays.asList(1));
-    assertEquals(graph0.getEdges().get(1), Arrays.asList(2, 4, 7));
-    assertEquals(graph0.getEdges().get(2), Arrays.asList(3));
-    assertTrue(graph0.getEdges().get(3).isEmpty());
-    assertEquals(graph0.getEdges().get(4), Arrays.asList(5));
-    assertEquals(graph0.getEdges().get(5), Arrays.asList(6));
-    assertTrue(graph0.getEdges().get(6).isEmpty());
-    assertEquals(graph0.getEdges().get(7), Arrays.asList(8));
-    assertTrue(graph0.getEdges().get(8).isEmpty());
+
+    assertEquals(getEdges(graph0, ABLNodeType.PROGRAM_ROOT, 0), "IF:1");
+    assertEquals(getEdges(graph0, ABLNodeType.IF, 1), "DO:1 FINALLY:7 IF:4");
+    assertEquals(getEdges(graph0, ABLNodeType.DO, 1), "MESSAGE:2");
+    assertEquals(getEdges(graph0, ABLNodeType.MESSAGE, 2), "FINALLY:7");
+    assertEquals(getEdges(graph0, ABLNodeType.IF, 4), "DO:4 FINALLY:7");
+    assertEquals(getEdges(graph0, ABLNodeType.DO, 4), "MESSAGE:5");
+    assertEquals(getEdges(graph0, ABLNodeType.MESSAGE, 5), "FINALLY:7");
+    assertEquals(getEdges(graph0, ABLNodeType.FINALLY, 7), "MESSAGE:8");
+    assertEquals(getEdges(graph0, ABLNodeType.MESSAGE, 8), "");
+
+    assertEquals(getReverseEdges(graph0, ABLNodeType.IF, 1), "PROGRAM_ROOT:0");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.DO, 1), "IF:1");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.MESSAGE, 2), "DO:1");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.IF, 4), "IF:1");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.DO, 4), "IF:4");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.MESSAGE, 5), "DO:4");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.FINALLY, 7), "IF:1 IF:4 MESSAGE:2 MESSAGE:5");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.MESSAGE, 8), "FINALLY:7");
   }
 
   @Test
   public void executionGraphTest06() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test06.p"), session);
+    var unit = getParseUnit(new File("src/test/resources/treeparser05/test06.p"), session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
 
-    Routine r0 = unit.getRootScope().getRoutines().get(0);
-    ExecutionGraph graph0 = r0.getExecutionGraph();
+    var r0 = unit.getRootScope().getRoutines().get(0);
+    var graph0 = r0.getExecutionGraph();
     assertEquals(graph0.getVertices().size(), 5); // 2 IF + 1 DO + 1 MESSAGE + Root
-    assertEquals(graph0.getEdges().get(0), Arrays.asList(1));
-    assertEquals(graph0.getEdges().get(1), Arrays.asList(2));
-    assertEquals(graph0.getEdges().get(2), Arrays.asList(3));
-    assertEquals(graph0.getEdges().get(3), Arrays.asList(4));
-    assertTrue(graph0.getEdges().get(4).isEmpty());
+    assertEquals(getEdges(graph0, ABLNodeType.PROGRAM_ROOT, 0), "IF:1");
+    assertEquals(getEdges(graph0, ABLNodeType.IF, 1), "IF:2");
+    assertEquals(getEdges(graph0, ABLNodeType.IF, 2), "DO:2");
+    assertEquals(getEdges(graph0, ABLNodeType.DO, 2), "MESSAGE:3");
+    assertEquals(getEdges(graph0, ABLNodeType.MESSAGE, 3), "");
+
+    assertEquals(getReverseEdges(graph0, ABLNodeType.PROGRAM_ROOT, 0), "");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.IF, 1), "PROGRAM_ROOT:0");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.IF, 2), "IF:1");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.DO, 2), "IF:2");
+    assertEquals(getReverseEdges(graph0, ABLNodeType.MESSAGE, 3), "DO:2");
   }
 
   @Test
@@ -595,4 +635,34 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     assertNull(thenStmt.getNextStatement());
     assertEquals(thenStmt.getParentStatement(), currStmt);
   }
+
+  // ExecutionGraph tests
+  private static JPNode getIndex(ExecutionGraph graph, ABLNodeType nodeType, int line) {
+    for (var n: graph.getVertices()) {
+      if ((n.getNodeType() == nodeType) && (n.getLine() == line))
+        return n;
+    }
+    return null;
+  }
+
+  private static String getEdges(ExecutionGraph graph, ABLNodeType nodeType, int line) {
+    var idx = getIndex(graph, nodeType, line);
+    if (idx == null)
+      return "";
+    return graph.getEdges(idx).stream() //
+      .map(it -> graph.getVertices().get(it).getNodeType() + ":" + graph.getVertices().get(it).getLine()) //
+      .sorted() //
+      .collect(Collectors.joining(" "));
+  }
+
+  private static String getReverseEdges(ExecutionGraph graph, ABLNodeType nodeType, int line) {
+    var idx = getIndex(graph, nodeType, line);
+    if (idx == null)
+      return "";
+    return graph.getReverseEdges(idx).stream() //
+      .map(it -> graph.getVertices().get(it).getNodeType() + ":" + graph.getVertices().get(it).getLine()) //
+      .sorted() //
+      .collect(Collectors.joining(" "));
+  }
+
 }

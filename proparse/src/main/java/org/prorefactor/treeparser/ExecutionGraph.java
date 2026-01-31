@@ -22,6 +22,7 @@ import org.prorefactor.core.JPNode;
 public class ExecutionGraph {
   private final List<JPNode> vertices = new ArrayList<>();
   private final List<List<Integer>> edges = new ArrayList<>();
+  private final List<List<Integer>> revEdges = new ArrayList<>();
 
   public ExecutionGraph() {
     // No-op
@@ -31,6 +32,7 @@ public class ExecutionGraph {
     if (!vertices.contains(vertex)) {
       vertices.add(vertex);
       edges.add(new ArrayList<>());
+      revEdges.add(new ArrayList<>());
     }
   }
 
@@ -44,6 +46,10 @@ public class ExecutionGraph {
     List<Integer> list = edges.get(fromIndex);
     if (!list.contains(toIndex))
       list.add(toIndex);
+    var list2 = revEdges.get(toIndex);
+    if (!list2.contains(fromIndex))
+      list2.add(fromIndex);
+
   }
 
   public List<JPNode> getVertices() {
@@ -53,4 +59,19 @@ public class ExecutionGraph {
   public List<List<Integer>> getEdges() {
     return edges;
   }
+
+  public List<List<Integer>> getReverseEdges() {
+    return revEdges;
+  }
+
+  public List<Integer> getEdges(JPNode node) {
+    var idx = vertices.indexOf(node);
+    return idx == -1 ? List.of() : edges.get(idx); 
+  }
+
+  public List<Integer> getReverseEdges(JPNode node) {
+    var idx = vertices.indexOf(node);
+    return idx == -1 ? List.of() : revEdges.get(idx); 
+  }
+
 }
