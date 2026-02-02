@@ -328,8 +328,12 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getTopNode());
     assertNotNull(unit.getRootScope());
-    Variable xxx = unit.getRootScope().getVariable("xxx");
+    var xxx = unit.getRootScope().getVariable("xxx");
     assertNotNull(xxx);
+    assertEquals(xxx.getInitialValue(), "zzz");
+    var xxx2 = unit.getRootScope().getVariable("xxx2");
+    assertNotNull(xxx2);
+    assertEquals(xxx2.getInitialValue(), "zzz2");
   }
 
   @Test

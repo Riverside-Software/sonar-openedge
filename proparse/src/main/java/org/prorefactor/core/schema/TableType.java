@@ -46,14 +46,4 @@ public enum TableType {
     return "";
   }
 
-  public static TableType getTableType(int storeType) {
-    if (storeType == IConstants.ST_DBTABLE)
-      return DB_TABLE;
-    else if (storeType == IConstants.ST_TTABLE)
-      return TEMP_TABLE;
-    else if (storeType == IConstants.ST_WTABLE)
-      return WORK_TABLE;
-    else
-      return null;
-  }
 }
