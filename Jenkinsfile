@@ -60,6 +60,17 @@ pipeline {
         }
       }
     }
+
+    stage('🦺 Quality Gate') {
+      steps {
+        timeout(time: 5, unit: 'MINUTES') {
+          warnError('Failed quality gate') {
+            waitForQualityGate abortPipeline: true
+          }
+        }
+      }
+    }
+
   }
 
   post {
