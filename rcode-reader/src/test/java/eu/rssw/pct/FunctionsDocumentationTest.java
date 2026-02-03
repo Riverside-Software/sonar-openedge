@@ -75,6 +75,12 @@ public class FunctionsDocumentationTest {
         }
         assertFalse(functionDocumentation.hasParameters("unknown"));
         assertNull(functionDocumentation.getParameter("unknown"));
+        var completion1 = functionDocumentation.getCompletionVariants(true);
+        assertNotNull(completion1);
+        assertFalse(completion1.isEmpty());
+        var completion2 = functionDocumentation.getCompletionVariants(false);
+        assertNotNull(completion2);
+        assertFalse(completion2.isEmpty());
       }
     }
   }
@@ -197,5 +203,22 @@ public class FunctionsDocumentationTest {
     assertTrue(prm3.isOptional());
     var prm4 = ascDocumentation.getParameter("unknown");
     assertNull(prm4);
+  }
+
+  @Test
+  public void testCompletionElement() {
+    var substringFunc = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("SUBSTRING");
+    var list = substringFunc.getCompletionVariants(true);
+    assertEquals(list.size(), 3);
+    var c1 = list.get(0);
+    assertEquals(c1.getO1(), "SUBSTRING(CHAR source, INT position)");
+    assertEquals(c1.getO2(), "SUBSTRING(${1:source}, ${2:position})$0");
+    var c2 = list.get(1);
+    assertEquals(c2.getO1(), "SUBSTRING(CHAR source, INT position, INT length)");
+    assertEquals(c2.getO2(), "SUBSTRING(${1:source}, ${2:position}, ${3:length})$0");
+    var list2 = substringFunc.getCompletionVariants(false);
+    var c3 = list2.get(0);
+    assertEquals(c3.getO1(), "substring(CHAR source, INT position)");
+    assertEquals(c3.getO2(), "substring(${1:source}, ${2:position})$0");
   }
 }

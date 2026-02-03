@@ -21,9 +21,12 @@ package eu.rssw.pct.elements;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
+
+import org.prorefactor.core.Pair;
 
 public interface IFunctionDocumentation extends IElementDocumentation {
 
@@ -51,6 +54,25 @@ public interface IFunctionDocumentation extends IElementDocumentation {
       }
     }
     return null;
+  }
+
+  /**
+   * Return all possible completion entries of a function. Left part of the pair is the label, right part
+   * is the insertText (VS Code format)
+   */
+  default List<Pair<String, String>> getCompletionVariants(boolean upperCase) {
+    List<Pair<String, String>> result = new ArrayList<>();
+    for (var variant : getVariants()) {
+      int pos = variant.firstOptionalParameter();
+      if (pos >= 0) {
+           for (int zz = pos; zz <= variant.getParameters().length; zz++) {
+             result.add(getCompletionElement(variant, zz, upperCase));
+           }
+      } else {
+        result.add(getCompletionElement(variant, variant.getParameters().length, upperCase));
+      }
+    }
+    return result;
   }
 
   /**
@@ -146,4 +168,26 @@ public interface IFunctionDocumentation extends IElementDocumentation {
     return coll.toArray(new IFunctionParameterList[0]);
   }
 
+  // Label and insert text of a function variant
+  private Pair<String, String> getCompletionElement(IFunctionParameterList variant, int numParams, boolean upperCase) {
+    var label = new StringBuilder(upperCase ? getName().toUpperCase() : getName().toLowerCase()).append("(");
+    var insertText = new StringBuilder(upperCase ? getName().toUpperCase() : getName().toLowerCase()).append("(");
+
+    for (int pos = 0; pos < numParams; pos++) {
+      if (pos > 0) {
+        label.append(", ");
+        insertText.append(", ");
+      }
+      if (variant.getParameters()[pos].getDataType().getPrimitive() == PrimitiveDataType.CLASS)
+        label.append(variant.getParameters()[pos].getDataType().getClassName());
+      else
+        label.append(variant.getParameters()[pos].getDataType().getPrimitive().getIDESignature());
+      label.append(" ").append(variant.getParameters()[pos].getName());
+      insertText.append("${").append(pos + 1).append(":").append(variant.getParameters()[pos].getName()).append("}");
+    }
+    label.append(")");
+    insertText.append(")$0");
+
+    return Pair.of(label.toString(), insertText.toString());
+  }
 }
