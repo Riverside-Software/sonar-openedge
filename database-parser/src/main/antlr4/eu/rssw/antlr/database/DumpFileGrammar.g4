@@ -64,16 +64,16 @@ addSequenceOption:
   | 'CYCLE-ON-LIMIT' val=('yes' | 'no')  # seqCycleOnLimit
   | 'MIN-VAL' val=('?' | NUMBER)         # seqMinVal
   | 'MAX-VAL' val=('?' | NUMBER)         # seqMaxVal
-  | 'FOREIGN-NAME' UNQUOTED_STRING       # seqForeignName
-  | 'FOREIGN-OWNER' UNQUOTED_STRING      # seqForeignOwner
-  | misc='SEQ-MISC1' val=UNQUOTED_STRING # seqMisc
-  | misc='SEQ-MISC2' val=UNQUOTED_STRING # seqMisc
-  | misc='SEQ-MISC3' val=UNQUOTED_STRING # seqMisc
-  | misc='SEQ-MISC4' val=UNQUOTED_STRING # seqMisc
-  | misc='SEQ-MISC5' val=UNQUOTED_STRING # seqMisc
-  | misc='SEQ-MISC6' val=UNQUOTED_STRING # seqMisc
-  | misc='SEQ-MISC7' val=UNQUOTED_STRING # seqMisc
-  | misc='SEQ-MISC8' val=UNQUOTED_STRING # seqMisc
+  | 'FOREIGN-NAME' (UNQUOTED_STRING | QUOTED_STRING)       # seqForeignName
+  | 'FOREIGN-OWNER' (UNQUOTED_STRING | QUOTED_STRING)      # seqForeignOwner
+  | misc='SEQ-MISC1' val=(UNQUOTED_STRING | QUOTED_STRING | NUMBER) # seqMisc
+  | misc='SEQ-MISC2' val=(UNQUOTED_STRING | QUOTED_STRING | NUMBER) # seqMisc
+  | misc='SEQ-MISC3' val=(UNQUOTED_STRING | QUOTED_STRING | NUMBER) # seqMisc
+  | misc='SEQ-MISC4' val=(UNQUOTED_STRING | QUOTED_STRING | NUMBER) # seqMisc
+  | misc='SEQ-MISC5' val=(UNQUOTED_STRING | QUOTED_STRING | NUMBER) # seqMisc
+  | misc='SEQ-MISC6' val=(UNQUOTED_STRING | QUOTED_STRING | NUMBER) # seqMisc
+  | misc='SEQ-MISC7' val=(UNQUOTED_STRING | QUOTED_STRING | NUMBER) # seqMisc
+  | misc='SEQ-MISC8' val=(UNQUOTED_STRING | QUOTED_STRING | NUMBER) # seqMisc
   ;
 
 addTable:
@@ -312,7 +312,7 @@ ANNOTATION_NAME:
   '@' [a-zA-Z] [a-zA-Z0-9]* ('.' [a-zA-Z] [a-zA-Z0-9]*)*;
 
 UNQUOTED_STRING:
-  ~[ '"\r\n\t()=,]+;
+  ~[ '"\r\n\t()=]+;
   
 QUOTED_STRING: // 
   '"' ('"' '"' | ~'"')* '"' { setText(getText().substring(1, getText().length() - 1)); };

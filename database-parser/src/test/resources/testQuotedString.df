@@ -1,0 +1,44 @@
+ADD DATABASE "test" TYPE MSS 
+  DBNAME "test"
+  PARAMS "-U dba "
+  DB-MISC11 1
+  DB-MISC13 11
+  DRIVER-NAME "msodbcsql18.dll"
+  DRIVER-VERS "18.04.0001"
+  ESCAPE-CHAR " """
+  DRIVER-CHARS "11,13,14,20,23,33,35,36,"
+  DBMS-VERSION "Microsoft SQL Server 16.00.4150"
+  DSRVR-VERSION "03.80.0000"
+  PROGRESS-VERSION "Dictionary Ver #:4.000.000,Client Ver #:125.00,(sh_min=1,sh_max=4);,Server Ver #:125.00,"
+  DSRVR-MISC "Microsoft SQL Server"
+  CODEPAGE-NAME "utf-8"
+  COLLATION-NAME "ICU-UCA"
+
+ADD SEQUENCE "xyz_Id"
+  INITIAL 1
+  INCREMENT 1
+  CYCLE-ON-LIMIT no
+  MIN-VAL 1
+  FOREIGN-NAME "xyz_Id"
+  FOREIGN-OWNER "dba"
+  SEQ-MISC3 test,xyz_Id,@op,@val,dba,
+  SEQ-MISC4 test
+  SEQ-MISC5 19,0
+  SEQ-MISC6 bigint
+  
+ADD SEQUENCE "w_Id"
+  INITIAL 1
+  INCREMENT 1
+  CYCLE-ON-LIMIT no
+  MIN-VAL 1
+  FOREIGN-NAME w_Id
+  FOREIGN-OWNER dbo
+  SEQ-MISC3 test
+  SEQ-MISC4 "test"
+  SEQ-MISC5 19
+  SEQ-MISC6 bigint  
+.
+PSC
+cpstream=UTF-8
+.
+0000060748
