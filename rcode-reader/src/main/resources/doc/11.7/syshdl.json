@@ -2728,6 +2728,103 @@
       ]
     },
     {
+      "name": "RCODE-INFO",
+      "description": "A handle to a specific ABL r-code file.",
+      "attributes": [
+        {
+          "name": "CODEPAGE",
+          "dataType": "CHARACTER",
+          "access": "Read-only",
+          "description": "The code page of specified r-code. Data type:CHARACTER Applies to:RCODE-INFO handle This attribute references the code page of the strings in the text segment. The code page value is written to the r-code file when the file is saved. ABL uses the code page specified by the R-code Out Code Page (-cprcodeout) startup parameter to write the r-code text segment. If -cprcodeout is not specified, ABL uses the value of the Internal Code Page (CPINTERNAL) SESSION handle. For a file that is session compiled, the return value is the Unknown value (?)."
+        },
+        {
+          "name": "CRC-VALUE",
+          "dataType": "INTEGER",
+          "access": "Read-only",
+          "description": "The cyclic redundancy check (CRC) value for either an r-code file, or a database table corresponding to a buffer object. Applies to:Buffer object handle,RCODE-INFO handle When applied to the RCODE-INFO system handle, the r-code CRC is calculated during compilation and stored in the r-code file using the contents of the source files, including included files. When applied to theBuffer object handle, the database CRC is calculated using the metaschema _CRC field value from the _File record for the database record corresponding to the buffer object's table (which can be a standard or temp-table). The CRC for a temp-table is calculated differently than for a standard table. Some differences include: For more information on CRCs, seeOpenEdge Deployment: Managing ABL Applications."
+        },
+        {
+          "name": "DB-REFERENCES",
+          "dataType": "CHARACTER",
+          "access": "Read-only",
+          "description": "A comma-separated list of the databases, (in the form of logical database names) referenced by an r-code file or by a persistent procedure. Returns the Unknown value (?) for a Web service procedure or proxy procedure. Applies to:Procedure object handle,RCODE-INFO handle,SOURCE-PROCEDURE system handle,TARGET-PROCEDURE system handle,THIS-PROCEDURE system handle The following example displays a list of all databases referenced by sample.r in a comma-separated list that is contained in the DB-REFERENCES attribute."
+        },
+        {
+          "name": "DISPLAY-TYPE",
+          "dataType": "CHARACTER",
+          "access": "Read-only",
+          "description": "The type of display for an r-code file or session. Data type:CHARACTER Applies to:RCODE-INFO handle,SESSION system handle With the RCODE-INFO handle, the DISPLAY-TYPE attribute holds a value of \"GUI\" for a graphical display, \"TTY\" for a character-mode display, or a blank string (\"\") for code that does not contain any display-specific statements. Use of this attribute allows developers to determine if the r-code contains statements that make it executable only in the same display environment on which it was compiled. If r-code contains ABL statements that interact with the UI (such as DISPLAY), it can only be executed in the same UI. The same restriction does not apply to r-code that does not contain UI-specific statements. With the SESSION handle, the DISPLAY-TYPE attribute holds a value of \"GUI\" for a graphical display or \"TTY\" for a character-mode display, depending on the display type of the running session."
+        },
+        {
+          "name": "FILE-NAME",
+          "dataType": "CHARACTER",
+          "access": "Readable/Writable",
+          "description": "The name of the file associated with a handle. Returns the empty string for a Web service procedure. The FILE-NAME attribute of the COMPILER handle is maintained only for backward compatibility. Use theGET-FILE-NAME( ) method, instead. Applies to:COMPILER system handle,FILE-INFO system handle,Procedure object handle,RCODE-INFO handle,SOURCE-PROCEDURE system handle,TARGET-PROCEDURE system handle,THIS-PROCEDURE system handle The FILE-NAME attribute of the COMPILER handle is the name of the source file from the preceding compilation. If no error occurred during the preceding compilation, FILE-NAME assumes the Unknown value (?). The FILE-NAME attribute of the FILE-INFO or RCODE-INFO handle is the name of the file used by subsequent references to the handle. You can specify the filename with a.p,.r, or no extension. If you set FILE-NAME to a relative pathname, the AVM searches thePROPATHto find the file. Otherwise, the AVM looks for the file specified by the absolute pathname. When used with FILE-INFO, the filename can contain Unicode characters. When used with RCODE-INFO, the filename cannot contain characters outside of the non-Unicode code page. SeeOpenEdge Development: Internationalizing Applicationsfor more information about Unicode and code pages. The FILE-NAME attribute of a procedure handle is the pathname of the procedure file that contains the procedure associated with the handle. If the procedure file is specified by the Startup Procedure (-p) parameter, the attribute contains the full pathname of the file. Otherwise, it contains the pathname exactly as specified in the RUN statement that invoked it. The procedure can be local or remote. For more information on remote procedures, seeOpenEdge Application Server: Developing AppServer Applications. The FILE-NAME attribute of the COMPILER handle and procedure handles is read only."
+        },
+        {
+          "name": "HANDLE",
+          "dataType": "HANDLE",
+          "access": "Read-only",
+          "description": "A handle to the object. Applies to:Asynchronous request object handle,AUDIT-CONTROL system handle,AUDIT-POLICY system handle,BROWSE widget(browse, column, and cell),Buffer object handle,Buffer-field object handle,BUTTON widget,Call object handle,Client-principal object handle,CLIPBOARD system handle,CODEBASE-LOCATOR system handle,COLOR-TABLE system handle,COMBO-BOX widget,COMPILER system handle,Data-relation object handle,Data-source object handle,DEBUGGER system handle,DIALOG-BOX widget,DSLOG-MANAGER system handle,EDITOR widget,ERROR-STATUS system handle,FIELD-GROUP widget,FILE-INFO system handle,FILL-IN widget,FONT-TABLE system handle,FRAME widget,IMAGE widget,LAST-EVENT system handle,LITERAL widget,LOG-MANAGER system handle,MENU widget,MENU-ITEM widget,Procedure object handle,ProDataSet object handle,Query object handle,RADIO-SET widget,RCODE-INFO handle,RECTANGLE widget,SAX-attributes object handle,SAX-reader object handle,SAX-writer object handle,SECURITY-POLICY system handle,SELECTION-LIST widget,Server object handle,Server socket object handle,SESSION system handle,SLIDER widget,SOAP-fault object handle,SOAP-fault-detail object handle,SOAP-header object handle,SOAP-header-entryref object handle,Socket object handle,Stream object handle,SUB-MENU widget,Temp-table object handle,TEXT widget,TOGGLE-BOX widget,Transaction object handle,WEB-CONTEXT system handle,WINDOW widget,X-document object handle,X-noderef object handle You can store this value in a HANDLE variable. You can also use it to associate one widget with another widget or with a system handle. For example, you can assign the HANDLE value of the menu bar to the MENU-BAR attribute of a window, or you can make the window the current window by assigning its HANDLE value to the CURRENT-WINDOW handle. For query objects, the HANDLE attribute lets you acquire a query object for a static query, as the following fragment demonstrates:"
+        },
+        {
+          "name": "INSTANTIATING-PROCEDURE",
+          "dataType": "HANDLE",
+          "access": "Read-only",
+          "description": "Returns the handle to the procedure in which an object was instantiated. Applies to:ACTIVE-WINDOW system handle,Asynchronous request object handle,AUDIT-CONTROL system handle,AUDIT-POLICY system handle,BROWSE widget(browse and column),Buffer object handle,Buffer-field object handle,BUTTON widget,Call object handle,Client-principal object handle,CLIPBOARD system handle,CODEBASE-LOCATOR system handle,COLOR-TABLE system handle,COMBO-BOX widget,COMPILER system handle,CONTROL-FRAME widget,CURRENT-WINDOW system handle,Data-relation object handle,Data-source object handle,DEBUGGER system handle,DEFAULT-WINDOW system handle,DIALOG-BOX widget,DSLOG-MANAGER system handle,EDITOR widget,ERROR-STATUS system handle,FIELD-GROUP widget,FILE-INFO system handle,FILL-IN widget,FONT-TABLE system handle,FRAME widget,IMAGE widget,LAST-EVENT system handle,LITERAL widget,LOG-MANAGER system handle,MENU widget,MENU-ITEM widget,Procedure object handle,ProDataSet object handle,Query object handle,RADIO-SET widget,RCODE-INFO handle,RECTANGLE widget,SAX-attributes object handle,SAX-reader object handle,SAX-writer object handle,SECURITY-POLICY system handle,SELECTION-LIST widget,SELF system handle,Server object handle,Server socket object handle,SESSION system handle,SLIDER widget,SOAP-fault object handle,SOAP-fault-detail object handle,SOAP-header object handle,SOAP-header-entryref object handle,Socket object handle,SOURCE-PROCEDURE system handle,Stream object handle,SUB-MENU widget,TARGET-PROCEDURE system handle,Temp-table object handle,TEXT widget,THIS-PROCEDURE system handle,TOGGLE-BOX widget,Transaction object handle,WEB-CONTEXT system handle,WINDOW widget,X-document object handle,X-noderef object handle When applied to a widget or object handle, this attribute always returns a handle. This handle is either valid or invalid based on the state of the instantiating procedure. The instantiating procedure for a dynamically created object might no longer be running. In this case, the handle is invalid. In general, INSTANTIATING-PROCEDURE returns the procedure handle for the procedure in which the DEFINE or CREATE statement is executed. Following are the exceptions: Although this attribute applies to all widgets and handles, not all system handles are associated with an instantiating procedure and do not return a procedure handle. For these system handles, this attribute returns the Unknown value (?). The following system handles always return the Unknown value (?):"
+        },
+        {
+          "name": "IS-CLASS",
+          "dataType": "LOGICAL",
+          "access": "Read-only",
+          "description": "Indicates whether an r-code file defines a class or a procedure. Applies to:RCODE-INFO handle The IS-CLASS attribute is TRUE if the currently executing r-code file defines a class that has been instantiated using theNEW function (classes). If the attribute is FALSE, the r-code file defines a procedure."
+        },
+        {
+          "name": "LABELS-HAVE-COLONS",
+          "dataType": "LOGICAL",
+          "access": "Read-only",
+          "description": "Indicates whether the r-code was compiled with the-nocolonstartup parameter in effect. (See theOpenEdge Deployment: Startup Command and Parameter Referencefor more information about-nocolon.) Data type:LOGICAL Applies to:RCODE-INFO handle If the r-code file was compiled with the-nocolonstartup parameter in effect, colons are not appended to side labels for static widgets, and this attribute returns FALSE. If the r-code file was not compiled with the-nocolonstartup parameter in effect, this attribute returns TRUE."
+        },
+        {
+          "name": "LANGUAGES",
+          "dataType": "CHARACTER",
+          "access": "Read-only",
+          "description": "A comma-separated list of all languages compiled into the r-code file specified by the RCODE-INFO:FILE-NAME attribute. Data type:CHARACTER Applies to:RCODE-INFO handle If the r-code file was compiled with only the default language, LANGUAGES returns an empty string."
+        },
+        {
+          "name": "MD5-VALUE",
+          "dataType": "CHARACTER",
+          "access": "Read-only",
+          "description": "Returns the MD5 value stored in an r-code file. Data type:CHARACTER Applies to:RCODE-INFO handle The return value is a 32 character hexadecimal number. Use this attribute to determine if a procedure changed between different versions of your application. If you did not use the GENERATE-MD5 option on the COMPILE statement to compile a procedure or class, the AVM did not store the MD5 value in the r-code file. In this case, this attribute returns the Unknown value (?)."
+        },
+        {
+          "name": "TABLE-CRC-LIST",
+          "dataType": "CHARACTER",
+          "access": "Read-only",
+          "description": "Returns a comma-separated list of the CRC value for each table referenced in the r-code file specified by the RCODE-INFO:FILE-NAME attribute. Applies to:RCODE-INFO handle This list corresponds directly to the list generated by theTABLE-LIST attribute. Use this attribute with the TABLE-LIST attribute to compare the CRC value for all tables referenced in the r-code file with those stored in the database to determine whether or not a procedure file needs to be recompiled after a database change. If the r-code file was compiled without table references, this attribute returns the empty string (\"\")."
+        },
+        {
+          "name": "TABLE-LIST",
+          "dataType": "CHARACTER",
+          "access": "Read-only",
+          "description": "Returns a comma-separated list of all tables referenced in the r-code file specified by the RCODE-INFO:FILE-NAME attribute. Each table reference includes the table name and related database name (for example:SPORTS.CUSTOMER). Data type:CHARACTER Applies to:RCODE-INFO handle This list corresponds directly to the list generated by theTABLE-CRC-LIST attribute. Use this attribute with the TABLE-CRC-LIST attribute to compare the CRC value for all tables referenced in the r-code file with those stored in the database to determine whether or not a procedure file needs to be recompiled after a database change. If the r-code file was compiled without table references, this attribute returns the empty string (\"\")."
+        },
+        {
+          "name": "TYPE",
+          "dataType": "CHARACTER",
+          "access": "Read-only",
+          "description": "The type of a handle. Applies to:Asynchronous request object handle,AUDIT-CONTROL system handle,AUDIT-POLICY system handle,BROWSE widget(browse, column, and cell),Buffer object handle,Buffer-field object handle,BUTTON widget,Call object handle,Client-principal object handle,CLIPBOARD system handle,CODEBASE-LOCATOR system handle,COLOR-TABLE system handle,COMBO-BOX widget,COMPILER system handle,CONTROL-FRAME widget,CURRENT-WINDOW system handle,Data-relation object handle,Data-source object handle,DEBUGGER system handle,DEFAULT-WINDOW system handle,DIALOG-BOX widget,DSLOG-MANAGER system handle,EDITOR widget,ERROR-STATUS system handle,FIELD-GROUP widget,FILE-INFO system handle,FILL-IN widget,FOCUS system handle,FONT-TABLE system handle,FRAME widget,IMAGE widget,LAST-EVENT system handle,LITERAL widget,LOG-MANAGER system handle,MENU widget,MENU-ITEM widget,Procedure object handle,ProDataSet object handle,Query object handle,RADIO-SET widget,RCODE-INFO handle,RECTANGLE widget,SAX-attributes object handle,SAX-reader object handle,SAX-writer object handle,SECURITY-POLICY system handle,SELECTION-LIST widget,SELF system handle,Server object handle,Server socket object handle,SESSION system handle,SLIDER widget,SOAP-fault object handle,SOAP-fault-detail object handle,SOAP-header object handle,SOAP-header-entryref object handle,Socket object handle,SOURCE-PROCEDURE system handle,Stream object handle,SUB-MENU widget,TARGET-PROCEDURE system handle,Temp-table object handle,TEXT widget,THIS-PROCEDURE system handle,TOGGLE-BOX widget,Transaction object handle,WEB-CONTEXT system handle,WINDOW widget,X-document object handle,X-noderef object handle The TYPE attribute returns the widget or handle type. Some examples are\"WINDOW\",\"FRAME\",\"BUTTON\",\"MENU\",\"SAX-ATTRIBUTES\",\"SAX-READER\", and\"SERVER\". For AppServer and Web service handles, the TYPE attribute returns\"SERVER\". If a system handle (such as CURRENT-WINDOW or FOCUS) refers to a user interface widget, the TYPE attribute returns the type of that widget. If a system handle (such as SESSION or CLIPBOARD) refers to an ABL status or system object, the TYPE attribute value is\"PSEUDO-WIDGET\". For procedure handles and system handles that refer to procedures (such as THIS-PROCEDURE), the TYPE attribute returns\"PROCEDURE\". For an asynchronous request handle, the TYPE attribute returns\"ASYNC-REQUEST\". For the ProDataSet, data-relation, and data-source object handles, this attribute returns\"DATASET\",\"DATA-RELATION\", and\"DATA-SOURCE\", respectively. For a server-socket handle, the TYPE attribute returns\"SERVER-SOCKET\", and for a socket handle, it returns\"SOCKET\". For the SOAP-fault and SOAP-fault-detail object handles, this attribute returns\"SOAP-FAULT\"and\"SOAP-FAULT-DETAIL\", respectively. For the SOAP-header and SOAP-header-entryref object handles, this attribute returns\"SOAP-HEADER\"and\"SOAP-HEADER-ENTRYREF\", respectively. For the X-document and X-noderef object handles, the TYPE attribute returns\"X-DOCUMENT\"and\"X-NODEREF\", respectively. For browse columns, the TYPE attribute returns\"COMBO-BOX\",\"FILL-IN\", or\"TOGGLE-BOX\". If you specify the Browse Column Type (-browcoltype) startup parameter, the TYPE attribute for browse columns returns\"BROWSE-COLUMN\"regardless of the actual column type."
+        },
+        {
+          "name": "UNDO-THROW-SCOPE",
+          "dataType": "CHARACTER",
+          "access": "Read-only",
+          "description": "Indicates if UNDO, THROW has been set as the default error handling directive at either the routine level or the block level. Applies to:RCODE-INFO handle TheROUTINE-LEVEL ON ERROR UNDO, THROW statementand theBLOCK-LEVEL ON ERROR UNDO, THROW statementoverride default error handling. The-undothrowstartup parameter can also be used to override default error handling. See theOpenEdge Deployment: Startup Command and Parameter Referencefor more information about-undothrow. This attribute returns\"ROUTINE-LEVEL\", or\"BLOCK-LEVEL\"to indicate which blocks are affected by UNDO, THROW error handling. It returns the empty string (\"\") when default error handling is in effect."
+        }
+      ],
+      "methods": []
+    },
+    {
       "name": "THIS-PROCEDURE",
       "description": "A handle to the procedure object for the currently executing procedure. This object allows you to read and modify the context of the current procedure.",
       "attributes": [

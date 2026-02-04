@@ -2954,6 +2954,103 @@
       ]
     },
     {
+      "name": "RCODE-INFO",
+      "description": "A handle to a specific ABL r-code file.",
+      "attributes": [
+        {
+          "name": "CODEPAGE",
+          "dataType": "CHARACTER",
+          "access": "Read-only",
+          "description": "The code page of specified r-code. This attribute references the code page of the strings in the text segment. The code page value is written to the r-code file when the file is saved. ABL uses the code page specified by the R-code Out Code Page (-cprcodeout) startup parameter to write the r-code text segment. If -cprcodeout is not specified, ABL uses the value of the Internal Code Page (CPINTERNAL) SESSION handle. For a file that is session compiled, the return value is the Unknown value (?)."
+        },
+        {
+          "name": "CRC-VALUE",
+          "dataType": "INTEGER",
+          "access": "Read-only",
+          "description": "The cyclic redundancy check (CRC) value for either an r-code file, or a database table corresponding to a buffer object. When applied to the RCODE-INFO system handle, the r-code CRC is calculated during compilation and stored in the r-code file using the contents of the source files, including included files. When applied to theBuffer object handle, the database CRC is calculated using the metaschema _CRC field value from the _File record for the database record corresponding to the buffer object's table (which can be a standard or temp-table). The CRC for a temp-table is calculated differently than for a standard table. Some differences include: For more information on CRCs, seeManage ABL Applications."
+        },
+        {
+          "name": "DB-REFERENCES",
+          "dataType": "CHARACTER",
+          "access": "Read-only",
+          "description": "A comma-separated list of the databases, (in the form of logical database names) referenced by an r-code file or by a persistent procedure. Returns the Unknown value (?) for a Web service procedure or proxy procedure. The following example displays a list of all databases referenced by sample.r in a comma-separated list that is contained in the DB-REFERENCES attribute."
+        },
+        {
+          "name": "DISPLAY-TYPE",
+          "dataType": "CHARACTER",
+          "access": "Read-only",
+          "description": "The type of display for an r-code file or session. With the RCODE-INFO handle, the DISPLAY-TYPE attribute holds a value of \"GUI\" for a graphical display, \"TTY\" for a character-mode display, or a blank string (\"\") for code that does not contain any display-specific statements. Use of this attribute allows developers to determine if the r-code contains statements that make it executable only in the same display environment on which it was compiled. If r-code contains ABL statements that interact with the UI (such as DISPLAY), it can only be executed in the same UI. The same restriction does not apply to r-code that does not contain UI-specific statements. With the SESSION handle, the DISPLAY-TYPE attribute holds a value of \"GUI\" for a graphical display or \"TTY\" for a character-mode display, depending on the display type of the running session."
+        },
+        {
+          "name": "FILE-NAME",
+          "dataType": "CHARACTER",
+          "access": "Readable/Writable",
+          "description": "The name of the file associated with a handle. Returns the empty string for a Web service procedure. The FILE-NAME attribute of the COMPILER handle is maintained only for backward compatibility. Use theGET-FILE-NAME( ) method, instead. The FILE-NAME attribute of the COMPILER handle is the name of the source file from the preceding compilation. If no error occurred during the preceding compilation, FILE-NAME assumes the unknown value (?). For the PROFILER handle, FILE-NAME is the file into which the profiling data is written after the raw recorded data is analyzed. The file name must be set before data can be stored. The default value is the unknown value (?). The FILE-NAME attribute of the FILE-INFO or RCODE-INFO handle is the name of the file used by subsequent references to the handle. You can specify the filename with a.p,.r, or no extension. If you set FILE-NAME to a relative pathname, then the AVM searches thePROPATHto find the file. Otherwise, the AVM looks for the file specified by the absolute pathname. When used with FILE-INFO, the filename can contain Unicode characters. When used with RCODE-INFO, the filename cannot contain characters outside of the non-Unicode code page. For more information about Unicode and code pages, seeInternationalize ABL Applications. The FILE-NAME attribute of a procedure handle is the pathname of the procedure file that contains the procedure associated with the handle. If the procedure file is specified by the Startup Procedure (-p) parameter, then the attribute contains the full pathname of the file. Otherwise, it contains the pathname exactly as specified in the RUN statement that invoked it. The procedure can be local or remote. The FILE-NAME attribute of the COMPILER handle and procedure handle is read only."
+        },
+        {
+          "name": "HANDLE",
+          "dataType": "HANDLE",
+          "access": "Read-only",
+          "description": "A handle to the object. You can store this value in a HANDLE variable. You can also use it to associate one widget with another widget or with a system handle. For example, you can assign the HANDLE value of the menu bar to the MENU-BAR attribute of a window, or you can make the window the current window by assigning its HANDLE value to the CURRENT-WINDOW handle. For query objects, the HANDLE attribute lets you acquire a query object for a static query, as shown in the following code:"
+        },
+        {
+          "name": "INSTANTIATING-PROCEDURE",
+          "dataType": "HANDLE",
+          "access": "Read-only",
+          "description": "Returns the handle to the procedure in which an object was instantiated. When applied to a widget or an object handle, this attribute returns a handle. This handle is either valid or invalid, based on the state of the instantiating procedure. The instantiating procedure for a dynamically created object might no longer be running. In this case, the handle is invalid. In general, the INSTANTIATING-PROCEDURE attribute returns the procedure handle for the procedure in which the DEFINE or CREATE statement is executed. The following are the exceptions: Although this attribute applies to all widgets and handles, not all system handles are associated with an instantiating procedure and do not return a procedure handle. For these system handles, this attribute returns the unknown value (?). The following system handles always return the unknown value (?):"
+        },
+        {
+          "name": "IS-CLASS",
+          "dataType": "LOGICAL",
+          "access": "Read-only",
+          "description": "Indicates whether an r-code file defines a class, interface, or enumeration or a procedure. TheIS-CLASSattribute returns TRUE if the currently executing r-code file represents a class, interface, or enumeration.IS-CLASSreturns FALSE if the r-code file represents a procedure."
+        },
+        {
+          "name": "LABELS-HAVE-COLONS",
+          "dataType": "LOGICAL",
+          "access": "Read-only",
+          "description": "Indicates whether the r-code was compiled with the-nocolonstartup parameter in effect. (See theStartup Command and Parameter Referencefor more information about-nocolon.) If the r-code file was compiled with the-nocolonstartup parameter in effect, colons are not appended to side labels for static widgets, and this attribute returns FALSE. If the r-code file was not compiled with the-nocolonstartup parameter in effect, this attribute returns TRUE."
+        },
+        {
+          "name": "LANGUAGES",
+          "dataType": "CHARACTER",
+          "access": "Read-only",
+          "description": "A comma-separated list of all languages compiled into the r-code file specified by the RCODE-INFO:FILE-NAME attribute. If the r-code file was compiled with only the default language, LANGUAGES returns an empty string."
+        },
+        {
+          "name": "SIGNATURE-VALUE",
+          "dataType": "CHARACTER",
+          "access": "Read-only",
+          "description": "Returns the signature value stored in an r-code file. The return value is a Base64-encoded value. Use this attribute to determine if a procedure changed between different versions of your application."
+        },
+        {
+          "name": "TABLE-CRC-LIST",
+          "dataType": "CHARACTER",
+          "access": "Read-only",
+          "description": "Returns a comma-separated list of the CRC value for each table referenced in the r-code file specified by the RCODE-INFO:FILE-NAME attribute. This list corresponds directly to the list generated by theTABLE-LIST attribute. Use this attribute with the TABLE-LIST attribute to compare the CRC value for all tables referenced in the r-code file with those stored in the database to determine whether or not a procedure file needs to be recompiled after a database change. If the r-code file was compiled without table references, this attribute returns the empty string (\"\")."
+        },
+        {
+          "name": "TABLE-LIST",
+          "dataType": "CHARACTER",
+          "access": "Read-only",
+          "description": "Returns a comma-separated list of all tables referenced in the r-code file specified by theRCODE-INFO:FILE-NAMEattribute. Each table reference includes the table name and related database name (for example:Sports2020.CUSTOMER). This list corresponds directly to the list generated by theTABLE-CRC-LIST attribute. Use this attribute with theTABLE-CRC-LISTattribute to compare the CRC value for all tables referenced in the r-code file with those stored in the database to determine whether or not a procedure file needs to be recompiled after a database change. If the r-code file was compiled without table references, this attribute returns the empty string (\"\")."
+        },
+        {
+          "name": "TYPE",
+          "dataType": "CHARACTER",
+          "access": "Read-only",
+          "description": "The type of a handle. The TYPE attribute returns the widget or handle type. Some examples are\"WINDOW\",\"FRAME\",\"BUTTON\",\"MENU\",\"SAX-ATTRIBUTES\",\"SAX-READER\", and\"SERVER\". For application server and Web service handles, the TYPE attribute returns\"SERVER\". If a system handle (such as CURRENT-WINDOW or FOCUS) refers to a user interface widget, then the TYPE attribute returns the type of that widget. If a system handle (such as SESSION or CLIPBOARD) refers to an ABL status or system object, then the TYPE attribute value is\"PSEUDO-WIDGET\". For procedure handles and system handles that refer to procedures (such as THIS-PROCEDURE), the TYPE attribute returns\"PROCEDURE\". For an asynchronous request handle, the TYPE attribute returns\"ASYNC-REQUEST\". For the ProDataSet, data-relation, and data-source object handles, this attribute returns\"DATASET\",\"DATA-RELATION\", and\"DATA-SOURCE\", respectively. For a server-socket handle, the TYPE attribute returns\"SERVER-SOCKET\", and for a socket handle, it returns\"SOCKET\". For the SOAP-fault and SOAP-fault-detail object handles, this attribute returns\"SOAP-FAULT\"and\"SOAP-FAULT-DETAIL\", respectively. For the SOAP-header and SOAP-header-entryref object handles, this attribute returns\"SOAP-HEADER\"and\"SOAP-HEADER-ENTRYREF\", respectively. For the X-document and X-noderef object handles, the TYPE attribute returns\"X-DOCUMENT\"and\"X-NODEREF\", respectively. For browse columns, the TYPE attribute returns\"COMBO-BOX\",\"FILL-IN\", or\"TOGGLE-BOX\". If you specify the Browse Column Type (-browcoltype) startup parameter, then the TYPE attribute for browse columns returns\"BROWSE-COLUMN\"regardless of the actual column type."
+        },
+        {
+          "name": "UNDO-THROW-SCOPE",
+          "dataType": "CHARACTER",
+          "access": "Read-only",
+          "description": "Indicates if UNDO, THROW has been set as the default error handling directive at either the routine level or the block level. TheROUTINE-LEVEL ON ERROR UNDO, THROW statementand theBLOCK-LEVEL ON ERROR UNDO, THROW statementoverride default error handling. The-undothrowstartup parameter can also be used to override default error handling. See theStartup Command and Parameter Referencefor more information about-undothrow. This attribute returns\"ROUTINE-LEVEL\", or\"BLOCK-LEVEL\"to indicate which blocks are affected by UNDO, THROW error handling. It returns the empty string (\"\") when default error handling is in effect."
+        }
+      ],
+      "methods": []
+    },
+    {
       "name": "THIS-PROCEDURE",
       "description": "A handle to the procedure object for the currently executing procedure. This object allows you to read and modify the context of the current procedure.",
       "attributes": [

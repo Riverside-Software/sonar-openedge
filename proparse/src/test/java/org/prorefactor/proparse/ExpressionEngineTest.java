@@ -336,7 +336,7 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     testSimpleExpression("message this-procedure:InvalidFunction().", DataType.NOT_COMPUTED);
     testSimpleExpression("message profiler:user-data().", DataType.LOGICAL);
     testSimpleExpression("message profiler:InvalidFunction().", DataType.NOT_COMPUTED);
-    testSimpleExpression("message rcode-info:InvalidFunction().", DataType.UNKNOWN);
+    testSimpleExpression("message rcode-info:InvalidFunction().", DataType.NOT_COMPUTED);
     testSimpleExpression("message security-policy:get-client().", DataType.HANDLE);
     testSimpleExpression("message security-policy:load-domains().", DataType.LOGICAL);
     testSimpleExpression("message security-policy:InvalidFunction().", DataType.NOT_COMPUTED);
