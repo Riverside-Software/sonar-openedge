@@ -66,10 +66,15 @@ public class SystemHandlesMapping {
     public String name;
     @SerializedName(value = "returnType")
     public String returnType;
-    @SerializedName(value = "parameters")
-    public Parameter[] parameters;
+    @SerializedName(value = "variants")
+    public ParameterList[] variants;
     @SerializedName(value = "description")
     public String description;
+  }
+
+  public static class ParameterList {
+    @SerializedName(value = "parameters")
+    public Parameter[] parameters;
   }
 
   public static class Parameter {
@@ -77,7 +82,11 @@ public class SystemHandlesMapping {
     public String name;
     @SerializedName(value = "type")
     public String type;
+    @SerializedName(value = "typeName")
+    public String typeName;
     @SerializedName(value = "description")
     public String description;
+    @SerializedName(value = "optional")
+    public boolean isOptional;
   }
 }

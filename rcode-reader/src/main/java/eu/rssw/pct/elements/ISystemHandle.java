@@ -23,9 +23,11 @@ import java.util.Collection;
 
 public interface ISystemHandle {
   String getName();
+
   String getDescription();
 
-  Collection<IMethodElement> getMethods();
+  Collection<IFunctionDocumentation> getMethods();
+
   Collection<IAttributeElement> getAttributes();
 
   default boolean hasMethod(String name) {
@@ -44,8 +46,8 @@ public interface ISystemHandle {
     return false;
   }
 
-  default IMethodElement getMethod(String method) {
-    var tmp = method; 
+  default IFunctionDocumentation getMethod(String method) {
+    var tmp = method;
     for (var elem : getMethods()) {
       if (tmp.equalsIgnoreCase(elem.getName())) {
         return elem;

@@ -24,14 +24,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import eu.rssw.pct.elements.IMethodElement;
+import eu.rssw.pct.elements.IFunctionDocumentation;
 import eu.rssw.pct.elements.ISystemHandle;
 import eu.rssw.pct.elements.IAttributeElement;
 
 public class SystemHandle implements ISystemHandle {
   private final String name;
   private final String description;
-  private final Collection<IMethodElement> methods = new ArrayList<>();
+  private final Collection<IFunctionDocumentation> methods = new ArrayList<>();
   private final Collection<IAttributeElement> attributes = new ArrayList<>();
   private final Map<String, String> methodDocumentation = new HashMap<>();
 
@@ -40,7 +40,7 @@ public class SystemHandle implements ISystemHandle {
     this.description = description;
   }
 
-  public void addMethod(IMethodElement element) {
+  public void addMethod(IFunctionDocumentation element) {
     methods.add(element);
   }
 
@@ -53,7 +53,7 @@ public class SystemHandle implements ISystemHandle {
   }
 
   @Override
-  public Collection<IMethodElement> getMethods() {
+  public Collection<IFunctionDocumentation> getMethods() {
     return methods;
   }
 

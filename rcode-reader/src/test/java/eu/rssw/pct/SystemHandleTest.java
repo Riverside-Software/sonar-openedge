@@ -32,8 +32,10 @@ import org.testng.annotations.Test;
 
 import eu.rssw.pct.elements.SystemHandles;
 import eu.rssw.pct.mapping.OpenEdgeVersion;
+import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.ISystemHandle;
+import eu.rssw.pct.elements.ITypeInfo;
 
 public class SystemHandleTest {
   private static final Function<OpenEdgeVersion, Function<String, ISystemHandle>> VERSION_SYS_HANDLE_PROVIDER = version -> {
@@ -42,9 +44,15 @@ public class SystemHandleTest {
       .findFirst() //
       .orElse(null);
   };
+  private static final Function<OpenEdgeVersion, Function<String, ITypeInfo>> VERSION_TYPE_INFO_PROVIDER = version -> {
+    return name -> BuiltinClasses.getBuiltinClasses(version).stream() //
+      .filter(it -> it.getTypeName().equals(name)) //
+      .findFirst() //
+      .orElse(null);
+  };
 
   @Test
-  private void testSignatures() {
+  public void testSignatures() {
     // Assert all signatures can be fetched, no unknown datatypes, documentation is available
     for (var version : OpenEdgeVersion.values()) {
       for (var systemHandle : SystemHandles.getSystemHandles(version)) {
@@ -57,15 +65,21 @@ public class SystemHandleTest {
           assertFalse(systemHandle.hasAttribute("unknown"));
         }
         for (var method : systemHandle.getMethods()) {
-          assertNotNull(method.getSignature());
+          assertNotNull(method.getVariants());
+          assertNotNull(method.getIDESignature(VERSION_TYPE_INFO_PROVIDER.apply(OpenEdgeVersion.V128)));
+          assertNotNull(method.getVariants()[0].getParameters());
+          for (var variant : method.getVariants()) {
+            for (var prm : variant.getParameters()) {
+              assertFalse(prm.getName().isBlank());
+              assertNotEquals(prm.getDataType(), DataType.UNKNOWN,
+                  version + " " + systemHandle.getName() + " -- " + method.getName() + " -- " + prm.getName());
+            }
+          }
+
           assertNotEquals(method.getReturnType(), DataType.UNKNOWN,
               version + " " + systemHandle.getName() + " -- " + method.getName() + " return datatype");
           assertNotNull(systemHandle.getMethodDocumentation(method.getName()));
-          for (var prm : method.getParameters()) {
-            assertFalse(prm.getName().isBlank());
-            assertNotEquals(prm.getDataType(), DataType.UNKNOWN,
-                version + " " + systemHandle.getName() + " -- " + method.getName() + " -- " + prm.getName());
-          }
+
           assertTrue(systemHandle.hasMethod(method.getName()));
         }
         assertFalse(systemHandle.hasMethod("unknown"));
@@ -75,8 +89,8 @@ public class SystemHandleTest {
           assertNotNull(attr.getDescription());
           assertNotEquals(attr.getDataType(), DataType.UNKNOWN,
               version + " " + systemHandle.getName() + " -- " + attr.getName());
-          assertFalse(attr.isReadOnly() && attr.isWriteOnly(),version + " " + systemHandle.getName() + " -- " + attr.getName());
-          
+          assertFalse(attr.isReadOnly() && attr.isWriteOnly(),
+              version + " " + systemHandle.getName() + " -- " + attr.getName());
         }
       }
     }
@@ -113,8 +127,17 @@ public class SystemHandleTest {
       assertNotNull(syshdl);
       var val1 = syshdl.getMethod("get-text-height-chars");
       assertNotNull(val1);
-      var list = val1.getParameters();
-      assertEquals(list.length, 1);
+      assertNotNull(val1.getVariants());
+      assertEquals(val1.getVariants().length, 1);
+      for (var variant : val1.getVariants()) {
+        assertEquals(variant.getParameters().length, 1);
+        for (var prm : variant.getParameters()) {
+          assertFalse(prm.getName().isBlank());
+          assertNotEquals(prm.getDataType(), DataType.UNKNOWN,
+              version + " " + syshdl.getName() + " -- " + val1.getName() + " -- " + prm.getName());
+        }
+      }
+
       var list2 = syshdl.getAttributes();
       assertEquals(list2.size(), 4);
       var opt1 = list2.stream().findFirst();
@@ -127,6 +150,51 @@ public class SystemHandleTest {
       assertNotNull(attr);
       assertFalse(attr.isReadOnly());
       assertFalse(attr.isWriteOnly());
+    }
+  }
+
+  @Test
+  public void test04() {
+    for (OpenEdgeVersion version : OpenEdgeVersion.values()) {
+      var syshdl = VERSION_SYS_HANDLE_PROVIDER.apply(version).apply("RCODE-INFO");
+      assertNotNull(syshdl);
+      var list = syshdl.getAttributes();
+      assertEquals(list.size(), version == OpenEdgeVersion.V122 ? 16 : 15);
+      assertEquals(syshdl.getMethods().size(), 0);
+    }
+  }
+
+  @Test
+  public void test05() {
+    for (OpenEdgeVersion version : OpenEdgeVersion.values()) {
+      var syshdl = VERSION_SYS_HANDLE_PROVIDER.apply(version).apply("TEMP-TABLE");
+      assertNotNull(syshdl);
+      var list = syshdl.getAttributes();
+      assertEquals(list.size(), 29);
+      assertEquals(syshdl.getMethods().size(), 18);
+      var val1 = syshdl.getMethod("READ-JSON");
+      assertNotNull(val1);
+      assertNotNull(val1.getVariants());
+      assertEquals(val1.getVariants().length, 6);
+      for (var variant : val1.getVariants()) {
+        assertEquals(variant.getParameters().length, 3);
+      }
+    }
+  }
+
+  @Test
+  public void test06() {
+    for (OpenEdgeVersion version : OpenEdgeVersion.values()) {
+      var syshdl = VERSION_SYS_HANDLE_PROVIDER.apply(version).apply("SESSION");
+      assertNotNull(syshdl);
+      assertEquals(syshdl.getMethods().size(), 7);
+      var val1 = syshdl.getMethod("ADD-SUPER-PROCEDURE");
+      assertNotNull(val1);
+      assertNotNull(val1.getVariants());
+      assertEquals(val1.getVariants().length, 1);
+      for (var variant : val1.getVariants()) {
+        assertEquals(variant.getParameters().length, 2);
+      }
     }
   }
 
