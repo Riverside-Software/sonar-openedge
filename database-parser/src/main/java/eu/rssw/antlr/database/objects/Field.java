@@ -2,7 +2,7 @@
  * OpenEdge plugin for SonarQube
  * Copyright (c) 2015-2026 Riverside Software
  * contact AT riverside DASH software DOT fr
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,143 +21,123 @@ package eu.rssw.antlr.database.objects;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Field {
   private final String name;
   private final String dataType;
-  private Integer order;
-  private Integer position;
-  private Integer extent = 0;
-  private String description;
-  private String label;
-  private String columnLabel;
-  private String lobArea;
-  private String format;
-  private String initial;
-  private Integer maxWidth;
-  private Boolean isMandatory;
-  private Collection<Trigger> triggers = new ArrayList<>();
+  private final Integer order;
+  private final Integer position;
+  private final Integer extent;
+  private final String description;
+  private final String label;
+  private final String columnLabel;
+  private final String lobArea;
+  private final String format;
+  private final String initial;
+  private final Integer maxWidth;
+  private final boolean mandatory;
+  private final Collection<Trigger> triggers;
+  private final int firstLine;
+  private final int lastLine;
 
-  private int firstLine;
-  private int lastLine;
-
-  public Field(String name, String dataType) {
-    this.name = name;
-    this.dataType = dataType;
+  private Field(Builder builder) {
+    this.name = Objects.requireNonNull(builder.name);
+    this.dataType = Objects.requireNonNull(builder.dataType);
+    this.order = builder.order;
+    this.position = builder.position;
+    this.extent = builder.extent;
+    this.description = builder.description;
+    this.label = builder.label;
+    this.columnLabel = builder.columnLabel;
+    this.lobArea = builder.lobArea;
+    this.format = builder.format;
+    this.initial = builder.initial;
+    this.maxWidth = builder.maxWidth;
+    this.mandatory = builder.mandatory;
+    this.triggers = Collections.unmodifiableList(new ArrayList<>(builder.triggers));
+    this.firstLine = builder.firstLine;
+    this.lastLine = builder.lastLine;
   }
 
+  @Nonnull
   public String getDataType() {
     return dataType;
   }
 
+  @Nullable
   public String getDescription() {
     return description;
   }
 
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
+  @Nullable
   public String getLabel() {
     return label;
   }
 
-  public void setLabel(String label) {
-    this.label = label;
-  }
-
+  @Nullable
   public String getColumnLabel() {
     return columnLabel;
   }
 
-  public void setColumnLabel(String columnLabel) {
-    this.columnLabel = columnLabel;
-  }
-
+  @Nullable
   public Integer getOrder() {
     return order;
   }
 
-  public void setOrder(Integer order) {
-    this.order = order;
-  }
-
+  @Nullable
   public Integer getPosition() {
     return position;
   }
 
-  public void setPosition(Integer position) {
-    this.position = position;
-  }
-
+  @Nullable
   public String getLobArea() {
     return lobArea;
   }
 
-  public void setLobArea(String lobArea) {
-    this.lobArea = lobArea;
-  }
-
+  @Nullable
   public String getFormat() {
     return format;
   }
 
-  public void setFormat(String format) {
-    this.format = format;
-  }
-
+  @Nullable
   public String getInitial() {
     return initial;
   }
 
-  public void setInitial(String initial) {
-    this.initial = initial;
-  }
-
+  @Nullable
   public Integer getExtent() {
     return extent;
   }
 
-  public void setExtent(Integer extent) {
-    this.extent = extent;
-  }
-
+  @Nullable
   public Integer getMaxWidth() {
     return maxWidth;
-  }
-
-  public void setMaxWidth(Integer maxWidth) {
-    this.maxWidth = maxWidth;
   }
 
   public int getFirstLine() {
     return firstLine;
   }
 
-  public void setFirstLine(int firstLine) {
-    this.firstLine = firstLine;
-  }
-
   public int getLastLine() {
     return lastLine;
   }
 
-  public void setLastLine(int lastLine) {
-    this.lastLine = lastLine;
+  public boolean isMandatory() {
+    return mandatory;
   }
 
-  public Boolean isMandatory() {
-    return Boolean.TRUE.equals(isMandatory);
-  }
-
-  public void setIsMandatory(Boolean isMandatory) {
-    this.isMandatory = isMandatory;
-  }
-
+  @Nonnull
   public String getName() {
     return name;
   }
 
+  @Nullable
   public Trigger getTrigger(TriggerType type) {
     for (Trigger trig : triggers) {
       if (trig.getType() == type)
@@ -170,12 +150,106 @@ public class Field {
     return triggers;
   }
 
-  public void addTrigger(Trigger trigger) {
-    triggers.add(trigger);
-  }
-
   @Override
   public String toString() {
     return name + " [" + dataType + "]" + " -- " + firstLine + ":" + lastLine;
+  }
+
+  public static class Builder {
+    private final String name;
+    private final String dataType;
+    private Integer order;
+    private Integer position;
+    private Integer extent = 0;
+    private String description;
+    private String label;
+    private String columnLabel;
+    private String lobArea;
+    private String format;
+    private String initial;
+    private Integer maxWidth;
+    private boolean mandatory;
+    private List<Trigger> triggers = new ArrayList<>();
+    private int firstLine;
+    private int lastLine;
+
+    public Builder(@Nonnull String name, @Nonnull String dataType) {
+      this.name = name;
+      this.dataType = dataType;
+    }
+
+    public Builder setOrder(Integer order) {
+      this.order = order;
+      return this;
+    }
+
+    public Builder setPosition(Integer position) {
+      this.position = position;
+      return this;
+    }
+
+    public Builder setExtent(Integer extent) {
+      this.extent = extent;
+      return this;
+    }
+
+    public Builder setDescription(String description) {
+      this.description = description;
+      return this;
+    }
+
+    public Builder setLabel(String label) {
+      this.label = label;
+      return this;
+    }
+
+    public Builder setColumnLabel(String columnLabel) {
+      this.columnLabel = columnLabel;
+      return this;
+    }
+
+    public Builder setLobArea(String lobArea) {
+      this.lobArea = lobArea;
+      return this;
+    }
+
+    public Builder setFormat(String format) {
+      this.format = format;
+      return this;
+    }
+
+    public Builder setInitial(String initial) {
+      this.initial = initial;
+      return this;
+    }
+
+    public Builder setMaxWidth(Integer maxWidth) {
+      this.maxWidth = maxWidth;
+      return this;
+    }
+
+    public Builder setMandatory(boolean mandatory) {
+      this.mandatory = mandatory;
+      return this;
+    }
+
+    public Builder setFirstLine(int firstLine) {
+      this.firstLine = firstLine;
+      return this;
+    }
+
+    public Builder setLastLine(int lastLine) {
+      this.lastLine = lastLine;
+      return this;
+    }
+
+    public Builder addTrigger(Trigger trigger) {
+      this.triggers.add(trigger);
+      return this;
+    }
+
+    public Field build() {
+      return new Field(this);
+    }
   }
 }

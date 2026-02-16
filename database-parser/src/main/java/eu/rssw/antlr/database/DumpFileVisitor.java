@@ -2,7 +2,7 @@
  * OpenEdge plugin for SonarQube
  * Copyright (c) 2015-2026 Riverside Software
  * contact AT riverside DASH software DOT fr
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,6 +21,8 @@ package eu.rssw.antlr.database;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,18 +71,26 @@ import eu.rssw.antlr.database.objects.TriggerType;
 public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
   private static final Logger LOG = LoggerFactory.getLogger(DumpFileVisitor.class);
 
-  private DatabaseDescription db;
+  private final String dbName;
 
-  private Deque<Table> tables = new ArrayDeque<>();
-  private Deque<Field> fields = new ArrayDeque<>();
-  private Deque<Sequence> sequences = new ArrayDeque<>();
-  private Deque<Index> indexes = new ArrayDeque<>();
+  private Map<String, Table.Builder> tableBuilders = new LinkedHashMap<>();
+  private Deque<Table.Builder> tables = new ArrayDeque<>();
+  private Deque<Field.Builder> fields = new ArrayDeque<>();
+  private Deque<Sequence.Builder> sequences = new ArrayDeque<>();
+  private Deque<Index.Builder> indexes = new ArrayDeque<>();
 
   public DumpFileVisitor(String dbName) {
-    this.db = new DatabaseDescription(dbName);
+    this.dbName = dbName;
   }
 
   public DatabaseDescription getDatabase() {
+    DatabaseDescription db = new DatabaseDescription(dbName);
+    for (Sequence.Builder seqBuilder : sequences) {
+      db.addSequence(seqBuilder.build());
+    }
+    for (Table.Builder tblBuilder : tableBuilders.values()) {
+      db.addTable(tblBuilder.build());
+    }
     return db;
   }
 
@@ -90,24 +100,24 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
 
   @Override
   public Void visitAddField(AddFieldContext ctx) {
-    Field field = new Field(ctx.field.getText(), ctx.dataType.getText());
-    field.setFirstLine(ctx.getStart().getLine());
-    field.setLastLine(ctx.getStop().getLine());
-    fields.push(field);
+    Field.Builder fieldBuilder = new Field.Builder(ctx.field.getText(), ctx.dataType.getText())
+        .setFirstLine(ctx.getStart().getLine())
+        .setLastLine(ctx.getStop().getLine());
+    fields.push(fieldBuilder);
 
-    // Search for Table object for this field
-    Table table = null;
-    for (Table t : tables) {
-      if (t.getName().equalsIgnoreCase(ctx.table.getText()))
-        table = t;
-    }
-    if (table != null) {
-      table.addField(field);
-    } else {
-      // Log error
+    // Visit children to populate field properties
+    visitChildren(ctx);
+
+    // Build the field and add to parent table
+    Field field = fields.pop().build();
+    for (Table.Builder t : tables) {
+      if (t.getName().equalsIgnoreCase(ctx.table.getText())) {
+        t.addField(field);
+        break;
+      }
     }
 
-    return visitChildren(ctx);
+    return null;
   }
 
   @Override
@@ -137,11 +147,11 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
   @Override
   public Void visitFieldMandatory(DumpFileGrammarParser.FieldMandatoryContext ctx) {
     if (!fields.isEmpty() && ctx != null)
-      fields.peek().setIsMandatory(!ctx.isEmpty());
+      fields.peek().setMandatory(!ctx.isEmpty());
 
     return null;
   }
-	
+
   @Override
   public Void visitFieldInitial(FieldInitialContext ctx) {
     if (!fields.isEmpty()) {
@@ -208,13 +218,13 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
       LOG.error("'{}' FIELD-TRIGGER found at line {}", ctx.type.getText(), ctx.type.getLine());
       return null;
     }
-    Trigger trigger = new Trigger(TriggerType.ASSIGN, ctx.triggerProcedure.getText());
+    Trigger.Builder triggerBuilder = new Trigger.Builder(TriggerType.ASSIGN, ctx.triggerProcedure.getText());
     if (ctx.crc != null) {
-      trigger.setCrc(ctx.crc.getText());
+      triggerBuilder.setCrc(ctx.crc.getText());
     }
     if (ctx.noOverride != null)
-      trigger.setNoOverride(true);
-    fields.peek().addTrigger(trigger);
+      triggerBuilder.setNoOverride(true);
+    fields.peek().addTrigger(triggerBuilder.build());
 
     return null;
   }
@@ -233,11 +243,11 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
 
   @Override
   public Void visitAddTable(AddTableContext ctx) {
-    Table table = new Table(ctx.table.getText());
-    table.setFirstLine(ctx.getStart().getLine());
-    table.setLastLine(ctx.getStop().getLine());
-    tables.push(table);
-    db.addTable(table);
+    Table.Builder tableBuilder = new Table.Builder(ctx.table.getText())
+        .setFirstLine(ctx.getStart().getLine())
+        .setLastLine(ctx.getStop().getLine());
+    tables.push(tableBuilder);
+    tableBuilders.put(ctx.table.getText(), tableBuilder);
 
     return visitChildren(ctx);
   }
@@ -278,13 +288,13 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
   public Void visitTableTrigger(TableTriggerContext ctx) {
     if (tables.isEmpty())
       return null;
-    Trigger trigger = new Trigger(TriggerType.getTriggerType(ctx.type.getText()), ctx.triggerProcedure.getText());
+    Trigger.Builder triggerBuilder = new Trigger.Builder(TriggerType.getTriggerType(ctx.type.getText()), ctx.triggerProcedure.getText());
     if (ctx.crc != null) {
-      trigger.setCrc(ctx.crc.getText());
+      triggerBuilder.setCrc(ctx.crc.getText());
     }
     if (ctx.noOverride != null)
-      trigger.setNoOverride(true);
-    tables.peek().addTrigger(trigger);
+      triggerBuilder.setNoOverride(true);
+    tables.peek().addTrigger(triggerBuilder.build());
 
     return null;
   }
@@ -303,27 +313,27 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
 
   @Override
   public Void visitAddIndex(AddIndexContext ctx) {
-    Index index = new Index(ctx.index.getText());
-    index.setFirstLine(ctx.getStart().getLine());
-    index.setLastLine(ctx.getStop().getLine());
-    indexes.push(index);
+    Index.Builder indexBuilder = new Index.Builder(ctx.index.getText())
+        .setFirstLine(ctx.getStart().getLine())
+        .setLastLine(ctx.getStop().getLine());
+    indexes.push(indexBuilder);
 
     if (ctx.uniq != null)
-      index.setUnique(true);
+      indexBuilder.setUnique(true);
 
-    // Search for Table object for this field
-    Table table = null;
-    for (Table t : tables) {
-      if (t.getName().equalsIgnoreCase(ctx.table.getText()))
-        table = t;
-    }
-    if (table != null) {
-      table.addIndex(index);
-    } else {
-      // Log error ?
+    // Visit children to populate index properties
+    visitChildren(ctx);
+
+    // Build the index and add to parent table
+    Index index = indexes.pop().build();
+    for (Table.Builder t : tables) {
+      if (t.getName().equalsIgnoreCase(ctx.table.getText())) {
+        t.addIndex(index);
+        break;
+      }
     }
 
-    return visitChildren(ctx);
+    return null;
   }
 
   @Override
@@ -362,15 +372,15 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
   public Void visitIndexField(IndexFieldContext ctx) {
     if (indexes.isEmpty())
       return null;
-    // Search for Table object for this index
+    // Search for Table builder for this index
     String tableName = ((AddIndexContext) ctx.parent).table.getText();
-    Table table = null;
-    for (Table t : tables) {
+    Table.Builder tableBuilder = null;
+    for (Table.Builder t : tables) {
       if (t.getName().equalsIgnoreCase(tableName))
-        table = t;
+        tableBuilder = t;
     }
-    if (table != null) {
-      IndexField idxFld = new IndexField(table.getField(ctx.field.getText()),
+    if (tableBuilder != null) {
+      IndexField idxFld = new IndexField(tableBuilder.getField(ctx.field.getText()),
           ((ctx.order == null) || "ascending".equalsIgnoreCase(ctx.order.getText())));
       indexes.peek().addField(idxFld);
     } else {
@@ -384,12 +394,9 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
   public Void visitUpdateIndexBP(UpdateIndexBPContext ctx) {
     String tableName = ctx.table.getText();
     String indexName = ctx.index.getText();
-    Table table = db.getTable(tableName);
-    if (table != null) {
-      Index index = table.getIndex(indexName);
-      if (index != null) {
-        index.setBufferPool(ctx.value.getText());
-      }
+    Table.Builder tableBuilder = tableBuilders.get(tableName);
+    if (tableBuilder != null) {
+      tableBuilder.updateIndexBufferPool(indexName, ctx.value.getText());
     }
 
     return null;
@@ -401,11 +408,10 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
 
   @Override
   public Void visitAddSequence(AddSequenceContext ctx) {
-    Sequence seq = new Sequence(ctx.sequence.getText());
-    seq.setFirstLine(ctx.getStart().getLine());
-    seq.setLastLine(ctx.getStop().getLine());
-    sequences.push(seq);
-    db.addSequence(seq);
+    Sequence.Builder seqBuilder = new Sequence.Builder(ctx.sequence.getText())
+        .setFirstLine(ctx.getStart().getLine())
+        .setLastLine(ctx.getStop().getLine());
+    sequences.push(seqBuilder);
 
     return visitChildren(ctx);
   }
