@@ -1,0 +1,13 @@
+src\main\abl\xref07.p src\main\abl\xref07.p 1 COMPILE xref07.p
+src\main\abl\xref07.p src\main\abl\xref07.p 1 CPINTERNAL utf-8
+src\main\abl\xref07.p src\main\abl\xref07.p 1 CPSTREAM UTF-8
+src\main\abl\xref07.p src\main\abl\xref07.p 3 STRING "bWarehouse" 10 NONE UNTRANSLATABLE 
+src\main\abl\xref07.p src\main\abl\xref07.p 3 STRING "Warehouse" 9 NONE UNTRANSLATABLE 
+src\main\abl\xref07.p src\main\abl\xref07.p 3 REFERENCE sports2000.Warehouse 
+src\main\abl\xref07.p src\main\abl\xref07.p 4 ACCESS unknownAlias.Warehouse Address2 
+src\main\abl\xref07.p src\main\abl\xref07.p 4 SEARCH unknownAlias.Warehouse warehousenum WHOLE-INDEX
+src\main\abl\xref07.p src\main\abl\xref07.p 9 STRING "b2Cust" 6 NONE UNTRANSLATABLE 
+src\main\abl\xref07.p src\main\abl\xref07.p 9 STRING "xyz" 8 NONE UNTRANSLATABLE 
+src\main\abl\xref07.p src\main\abl\xref07.p 9 REFERENCE sports2000.xyz 
+src\main\abl\xref07.p src\main\abl\xref07.p 10 ACCESS foo.xyz Address2 
+src\main\abl\xref07.p src\main\abl\xref07.p 10 SEARCH foo.xyz CustNum WHOLE-INDEX

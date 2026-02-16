@@ -1,0 +1,18 @@
+src\main\abl\xref06.p src\main\abl\xref06.p 1 COMPILE xref06.p
+src\main\abl\xref06.p src\main\abl\xref06.p 1 CPINTERNAL utf-8
+src\main\abl\xref06.p src\main\abl\xref06.p 1 CPSTREAM UTF-8
+src\main\abl\xref06.p src\main\abl\xref06.p 1 STRING "bWarehouse" 10 NONE UNTRANSLATABLE 
+src\main\abl\xref06.p src\main\abl\xref06.p 1 STRING "Warehouse" 9 NONE UNTRANSLATABLE 
+src\main\abl\xref06.p src\main\abl\xref06.p 1 REFERENCE sports2000.Warehouse 
+src\main\abl\xref06.p src\main\abl\xref06.p 3 ACCESS sports2000.Warehouse Address2 
+src\main\abl\xref06.p src\main\abl\xref06.p 3 SEARCH sports2000.Warehouse warehousenum WHOLE-INDEX
+src\main\abl\xref06.p src\main\abl\xref06.p 7 STRING "b2Warehouse" 11 NONE UNTRANSLATABLE 
+src\main\abl\xref06.p src\main\abl\xref06.p 7 STRING "Warehouse" 9 NONE UNTRANSLATABLE 
+src\main\abl\xref06.p src\main\abl\xref06.p 7 REFERENCE sports2000.Warehouse 
+src\main\abl\xref06.p src\main\abl\xref06.p 9 ACCESS foo.Warehouse Address2 
+src\main\abl\xref06.p src\main\abl\xref06.p 9 SEARCH foo.Warehouse warehousenum WHOLE-INDEX
+src\main\abl\xref06.p src\main\abl\xref06.p 13 STRING "b3Warehouse" 11 NONE UNTRANSLATABLE 
+src\main\abl\xref06.p src\main\abl\xref06.p 13 STRING "Warehouse" 9 NONE UNTRANSLATABLE 
+src\main\abl\xref06.p src\main\abl\xref06.p 13 REFERENCE sports2000.Warehouse 
+src\main\abl\xref06.p src\main\abl\xref06.p 14 ACCESS sports2000.Warehouse Address2 
+src\main\abl\xref06.p src\main\abl\xref06.p 14 SEARCH sports2000.Warehouse warehousenum WHOLE-INDEX
