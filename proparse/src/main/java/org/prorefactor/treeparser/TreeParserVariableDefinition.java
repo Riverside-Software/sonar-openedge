@@ -372,6 +372,12 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   @Override
+  public void exitFunctionParamStandardDataset(FunctionParamStandardDatasetContext ctx) {
+    var dataset = (Dataset) currentScope.lookupSymbol(ABLNodeType.DATASET.getType(), ctx.identifier().getText());
+    wipParameters.getFirst().setSymbol(dataset);
+  }
+
+  @Override
   public void enterFunctionParamStandardDatasetHandle(FunctionParamStandardDatasetHandleContext ctx) {
     Variable v = defineVariable(ctx, support.getNode(ctx), ctx.hn2.getText(), DataType.DATASET_HANDLE,
         Variable.Type.PARAMETER);

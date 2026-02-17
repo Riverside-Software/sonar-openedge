@@ -23,12 +23,14 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.proparse.antlr4.Proparse.CatchStatementContext;
+import org.prorefactor.proparse.antlr4.Proparse.DefineParameterStatementSub2DatasetContext;
 import org.prorefactor.proparse.antlr4.Proparse.ExprTermAttributeContext;
 import org.prorefactor.proparse.antlr4.Proparse.ExprTermMethodCallContext;
 import org.prorefactor.proparse.antlr4.Proparse.ExprTermOtherContext;
 import org.prorefactor.proparse.antlr4.Proparse.ExprTermWidgetContext;
 import org.prorefactor.proparse.antlr4.Proparse.Exprt2FieldContext;
 import org.prorefactor.proparse.antlr4.Proparse.FieldContext;
+import org.prorefactor.proparse.antlr4.Proparse.FunctionParamStandardDatasetContext;
 import org.prorefactor.proparse.antlr4.Proparse.ParameterArgDatasetContext;
 import org.prorefactor.proparse.antlr4.Proparse.ParameterArgDatasetHandleContext;
 import org.prorefactor.proparse.antlr4.Proparse.ParameterArgTableHandleContext;
@@ -77,6 +79,38 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
       if (dataset != null) {
         dataset.noteReference(support.getNode(ctx), ContextQualifier.REF);
         support.getNode(ctx).setSymbol(dataset);
+      }
+    }
+  }
+
+  @Override
+  public void exitDefineParameterStatementSub2Dataset(DefineParameterStatementSub2DatasetContext ctx) {
+    noteReference(support.getNode(ctx), contextQualifiers.get(ctx));
+  }
+
+  @Override
+  public void enterDefineParameterStatementSub2Dataset(DefineParameterStatementSub2DatasetContext ctx) {
+    if (ctx.identifier() != null) {
+      var dataset = (Dataset) currentScope.lookupSymbol(ABLNodeType.DATASET.getType(), ctx.identifier().getText());
+      if (dataset != null) {
+        dataset.noteReference(support.getNode(ctx), ContextQualifier.REF);
+        support.getNode(ctx).setSymbol(dataset);
+      }
+    }
+  }
+
+  @Override
+  public void exitFunctionParamStandardDataset(FunctionParamStandardDatasetContext ctx) {
+    noteReference(support.getNode(ctx.identifier()), contextQualifiers.get(ctx));
+  }
+
+  @Override
+  public void enterFunctionParamStandardDataset(FunctionParamStandardDatasetContext ctx) {
+    if (ctx.identifier() != null) {
+      var dataset = (Dataset) currentScope.lookupSymbol(ABLNodeType.DATASET.getType(), ctx.identifier().getText());
+      if (dataset != null) {
+        dataset.noteReference(support.getNode(ctx.identifier()), ContextQualifier.REF);
+        support.getNode(ctx.identifier()).setSymbol(dataset);
       }
     }
   }
@@ -177,6 +211,8 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
   }
 
   private void noteReference(JPNode node, ContextQualifier cq) {
+    if (node == null)
+      return;
     if ((node.getSymbol() != null)
         && ((cq == ContextQualifier.UPDATING) || (cq == ContextQualifier.REFUP) || (cq == ContextQualifier.OUTPUT))) {
       node.getSymbol().noteReference(node, cq);

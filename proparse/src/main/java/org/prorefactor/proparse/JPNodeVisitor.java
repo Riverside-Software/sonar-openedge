@@ -1295,6 +1295,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitDefineParameterStatementSub2Dataset(DefineParameterStatementSub2DatasetContext ctx) {
+    return createTree(ctx, ABLNodeType.WIDGET_REF).setRuleNode(ctx);
+  }
+
+  @Override
   public Builder visitDefineParamVar(DefineParamVarContext ctx) {
     Builder retVal = visitChildren(ctx).moveRightToDown();
     if (retVal.getDown().getNodeType() == ABLNodeType.CLASS)
@@ -1869,9 +1874,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitFunctionParamStandardDataset(FunctionParamStandardDatasetContext ctx) {
-    Builder builder = visitChildren(ctx).setRuleNode(ctx);
-    flagSiblingAsRuleNode(builder, ABLNodeType.ID, ctx.identifier());
-    return builder;
+    return createTree(ctx, ABLNodeType.WIDGET_REF).setRuleNode(ctx.identifier());
   }
 
   @Override

@@ -240,8 +240,8 @@ public class TreeParser03Test extends AbstractProparseTest {
     Routine f6 = lst6.get(0);
     assertEquals(f6.getSignature(), "f6(MD)");
     assertEquals(f6.getIDESignature(), "f6(⇅DS) : INT");
-    assertEquals(f6.getIDEInsertElement(true), "f6(INPUT-OUTPUT ${1:arg1})$0");
-    assertEquals(f6.getIDEInsertElement(false), "f6(input-output ${1:arg1})$0");
+    assertEquals(f6.getIDEInsertElement(true), "f6(INPUT-OUTPUT ${1:ds1})$0");
+    assertEquals(f6.getIDEInsertElement(false), "f6(input-output ${1:ds1})$0");
     assertEquals(f6.getParameters().size(), 1);
 
     List<Routine> lst7 = unit.getRootScope().lookupRoutines("f7");
@@ -269,8 +269,8 @@ public class TreeParser03Test extends AbstractProparseTest {
     var f9 = lst9.get(0);
     assertEquals(f9.getSignature(), "f9(II,IT,OTH,ID,IDH)");
     assertEquals(f9.getIDESignature(), "f9(↑INT, ↑TBL, ↓TBL-HDL, ↑DS, ↑DS-HDL) : INT");
-    assertEquals(f9.getIDEInsertElement(true), "f9(${1:prm1}, ${2:ttCustomer}, OUTPUT ${3:h1}, ${4:arg4}, ${5:h2})$0");
-    assertEquals(f9.getIDEInsertElement(false), "f9(${1:prm1}, ${2:ttCustomer}, output ${3:h1}, ${4:arg4}, ${5:h2})$0");
+    assertEquals(f9.getIDEInsertElement(true), "f9(${1:prm1}, ${2:ttCustomer}, OUTPUT ${3:h1}, ${4:ds1}, ${5:h2})$0");
+    assertEquals(f9.getIDEInsertElement(false), "f9(${1:prm1}, ${2:ttCustomer}, output ${3:h1}, ${4:ds1}, ${5:h2})$0");
     assertEquals(f9.getParameters().size(), 5);
 
     // Test TreeParserSymbolScope#getTokenSymbolScope()
@@ -1526,9 +1526,9 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertEquals(f2prm4.getDefinitionNode().getNodeType(), ABLNodeType.ID);
     assertEquals(f2prm4.getDefinitionNode().getLine(), 16);
     assertEquals(f2prm4.getDefinitionNode().getColumn(), 17);
-    assertEquals(f2prm5.getDefinitionNode().getNodeType(), ABLNodeType.ID);
-    assertEquals(f2prm5.getDefinitionNode().getLine(), 17);
-    assertEquals(f2prm5.getDefinitionNode().getColumn(), 12);
+    assertEquals(f2prm5.getDefinitionNode().getNodeType(), ABLNodeType.WIDGET_REF);
+    assertEquals(f2prm5.getDefinitionNode().getFirstChild().getLine(), 17);
+    assertEquals(f2prm5.getDefinitionNode().getFirstChild().getColumn(), 4);
     assertEquals(f2prm6.getDefinitionNode().getNodeType(), ABLNodeType.ID);
     assertEquals(f2prm6.getDefinitionNode().getLine(), 18);
     assertEquals(f2prm6.getDefinitionNode().getColumn(), 19);
@@ -1946,6 +1946,104 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertEquals(rels.get(0).getName(), "");
     assertEquals(rels.get(0).getParentBuffer().getName(), "tt1");
     assertEquals(rels.get(0).getChildBuffer().getName(), "tt2");
+  }
+  
+  @Test
+  public void testDataset07() {
+    var code = """
+        define temp-table tt1 field fld1 as character.
+        define dataset ds1 for tt1.
+        procedure p1:
+          define input parameter dataset for ds1.
+        end procedure.
+        function f1 returns character (input dataset ds1):
+          return ''.
+        end function.
+        """;
+
+    var unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 6);
+    var datasets = unit.getRootScope().getAllSymbols(Dataset.class);
+    assertNotNull(datasets);
+    assertEquals(datasets.size(), 1);
+    assertEquals(datasets.get(0).getName(), "ds1");
+    assertEquals(datasets.get(0).getAllRefsCount(), 2);
+    assertEquals(datasets.get(0).getDefineNode().getLine(), 2);
+
+    var stmts = unit.getTopNode().queryStateHead();
+    var define = stmts.get(3);
+    assertNotNull(define);
+    var dataset2 = define.query(ABLNodeType.WIDGET_REF).get(0).getSymbol();
+    assertNotNull(dataset2);
+    assertEquals(dataset2.getDefineNode().getLine(), 2);
+
+    var function = stmts.get(4);
+    assertNotNull(function);
+    var param = function.query(ABLNodeType.PARAMETER_ITEM);
+    assertNotNull(param);
+    assertEquals(param.size(), 1);
+    var dataset3 = param.get(0).getDirectChildren(ABLNodeType.WIDGET_REF).get(0).getSymbol();
+    assertNotNull(dataset3);
+    assertEquals(dataset3.getDefineNode().getLine(), 2);
+  }
+
+  @Test
+  public void testDataset08() {
+    var code = """
+        define temp-table tt1 field fld1 as character.
+        define temp-table tt2 field fld2 as character.
+        define dataset ds1 for tt1.
+        define dataset ds2 for tt2.
+        define variable c1 as character no-undo.
+        procedure p1:
+          define input parameter dataset for ds1.
+          define input parameter dataset for ds2.
+        end procedure.
+        function f1 returns character (input dataset ds1,INPUT c1 AS CHARACTER, input dataset ds2):
+          return ''.
+        end function.
+        """;
+
+    var unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 10);
+    var datasets = unit.getRootScope().getAllSymbols(Dataset.class);
+    assertNotNull(datasets);
+    assertEquals(datasets.size(), 2);
+    assertEquals(datasets.get(0).getName(), "ds1");
+    assertEquals(datasets.get(0).getAllRefsCount(), 2);
+    assertEquals(datasets.get(0).getDefineNode().getLine(), 3);
+    assertEquals(datasets.get(1).getName(), "ds2");
+    assertEquals(datasets.get(1).getAllRefsCount(), 2);
+    assertEquals(datasets.get(1).getDefineNode().getLine(), 4);
+
+    var stmts = unit.getTopNode().queryStateHead();
+    var define = stmts.get(6);
+    assertNotNull(define);
+    var dataset2 = define.query(ABLNodeType.WIDGET_REF).get(0).getSymbol();
+    assertNotNull(dataset2);
+    assertEquals(dataset2.getDefineNode().getLine(), 3);
+
+    var define2 = stmts.get(7);
+    assertNotNull(define2);
+    var dataset3 = define2.query(ABLNodeType.WIDGET_REF).get(0).getSymbol();
+    assertNotNull(dataset3);
+    assertEquals(dataset3.getDefineNode().getLine(), 4);
+
+    var function = stmts.get(8);
+    assertNotNull(function);
+    var param = function.query(ABLNodeType.PARAMETER_ITEM);
+    assertNotNull(param);
+    assertEquals(param.size(), 3);
+    var dataset4 = param.get(0).getDirectChildren(ABLNodeType.WIDGET_REF).get(0).getSymbol();
+    assertNotNull(dataset4);
+    assertEquals(dataset4.getDefineNode().getLine(), 3);
+    var dataset5 = param.get(2).getDirectChildren(ABLNodeType.WIDGET_REF).get(0).getSymbol();
+    assertNotNull(dataset5);
+    assertEquals(dataset5.getDefineNode().getLine(), 4);
   }
 
   @Test
