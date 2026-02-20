@@ -125,7 +125,7 @@ public class TableBuffer extends Symbol {
    */
   @Override
   public String getName() {
-    if (super.getName().isEmpty()) {
+    if (super.getName().isEmpty() && table != null) {
       return table.getName();
     }
 

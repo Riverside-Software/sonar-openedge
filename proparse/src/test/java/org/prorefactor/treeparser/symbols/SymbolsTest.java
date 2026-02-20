@@ -89,4 +89,14 @@ public class SymbolsTest {
     assertEquals(strm2.getName(), "strm1");
     assertEquals(strm2.getScope(), rootScope2);
   }
+
+  @Test
+  public void testSymbols2() {
+    var rootScope1 = new TreeParserRootSymbolScope(session);
+
+    var tblBuf1 = new TableBuffer("", rootScope1, null);
+    assertEquals(tblBuf1.getScope(), rootScope1);
+    assertEquals(tblBuf1.getName(), "");
+  }
+
 }
