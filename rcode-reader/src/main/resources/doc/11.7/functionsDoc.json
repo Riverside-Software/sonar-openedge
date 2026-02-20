@@ -3,7 +3,7 @@
     "title": "OpenEdge 11.7.19.00 ABL Functions Reference",
     "description": "Complete reference of all ABL built-in functions for OpenEdge 11.7.19.00",
     "version": "11.7.19.00",
-    "totalFunctions": 227
+    "totalFunctions": 226
   },
   "functions": [
     {
@@ -1326,23 +1326,6 @@
               "type": "CHARACTER",
               "description": "An optional CHARACTER expression that evaluates to the name of the symmetric cryptographic algorithm originally used to encrypt the specified data instance. If you specify the Unknown value (?), the current value of the SYMMETRIC-ENCRYPTION-ALGORITHM attribute is used. For a list the supported cryptographic algorithms, see the SYMMETRIC-SUPPORT attribute reference entry.",
               "optional": true
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "DEFINED preprocessor",
-      "description": "Returns the status of a preprocessor name or include file argument name as an INTEGER value. You can use the DEFINED function only within a preprocessor &IF expression.",
-      "returnType": "INTEGER",
-      "variants": [
-        {
-          "parameters": [
-            {
-              "name": "name",
-              "type": "CHARACTER",
-              "description": "Preprocessor name or include file argument name whose status you want to check. You do not specify name as a preprocessor name reference or include file argument reference. That is, it is not quoted and does not appear in the reference form, {&name}. For example if you had a preprocessor name MAX-EXPENSE, the argument would appear as follows: DEFINED(MAX-EXPENSE)",
-              "optional": false
             }
           ]
         }
