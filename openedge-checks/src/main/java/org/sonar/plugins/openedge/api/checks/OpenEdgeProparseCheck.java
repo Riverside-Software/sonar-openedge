@@ -296,7 +296,7 @@ public abstract class OpenEdgeProparseCheck extends OpenEdgeCheck<ParseUnit> {
     return false;
   }
 
-  private boolean skipIssue(JPNode node) {
+  protected boolean skipIssue(JPNode node) {
     // Look on node itself
     if (node.hasProparseDirective(getNoSonarKeyword()))
       return true;
