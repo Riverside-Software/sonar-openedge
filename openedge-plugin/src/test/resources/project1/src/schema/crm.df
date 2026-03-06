@@ -1,0 +1,336 @@
+ADD TABLE "Customer"
+  AREA "Schema Area"
+  DESCRIPTION "Customer master record"
+  DUMP-NAME "customer"
+
+ADD FIELD "CustNum" OF "Customer" AS integer
+  DESCRIPTION "Unique customer identifier"
+  FORMAT ">>>>9"
+  INITIAL "0"
+  ORDER 10
+
+ADD FIELD "Name" OF "Customer" AS character
+  DESCRIPTION "Customer name"
+  FORMAT "x(40)"
+  INITIAL ""
+  ORDER 20
+
+ADD FIELD "Address" OF "Customer" AS character
+  DESCRIPTION "Street address"
+  FORMAT "x(60)"
+  INITIAL ""
+  ORDER 30
+
+ADD FIELD "City" OF "Customer" AS character
+  FORMAT "x(30)"
+  INITIAL ""
+  ORDER 40
+
+ADD FIELD "State" OF "Customer" AS character
+  FORMAT "x(20)"
+  INITIAL ""
+  ORDER 50
+
+ADD FIELD "PostalCode" OF "Customer" AS character
+  FORMAT "x(10)"
+  INITIAL ""
+  ORDER 60
+
+ADD FIELD "Country" OF "Customer" AS character
+  FORMAT "x(30)"
+  INITIAL "USA"
+  ORDER 70
+
+ADD FIELD "Phone" OF "Customer" AS character
+  FORMAT "x(20)"
+  INITIAL ""
+  ORDER 80
+
+ADD FIELD "Email" OF "Customer" AS character
+  FORMAT "x(80)"
+  INITIAL ""
+  ORDER 90
+
+ADD FIELD "Status" OF "Customer" AS character
+  DESCRIPTION "Active, Inactive, Prospect"
+  FORMAT "x(10)"
+  INITIAL "Prospect"
+  ORDER 100
+
+ADD FIELD "CreditLimit" OF "Customer" AS decimal
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  DECIMALS 2
+  ORDER 110
+
+ADD FIELD "CreatedDate" OF "Customer" AS date
+  FORMAT "99/99/9999"
+  INITIAL "TODAY"
+  ORDER 120
+
+ADD FIELD "Notes" OF "Customer" AS character
+  FORMAT "x(250)"
+  INITIAL ""
+  ORDER 130
+
+ADD INDEX "pkCustomer" ON "Customer"
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CustNum" ASCENDING
+
+ADD INDEX "idxName" ON "Customer"
+  AREA "Schema Area"
+  INDEX-FIELD "Name" ASCENDING
+
+ADD INDEX "idxStatus" ON "Customer"
+  AREA "Schema Area"
+  INDEX-FIELD "Status" ASCENDING
+
+ADD TABLE "Contact"
+  AREA "Schema Area"
+  DESCRIPTION "Contact persons linked to a customer"
+  DUMP-NAME "contact"
+
+ADD FIELD "ContactId" OF "Contact" AS integer
+  DESCRIPTION "Unique contact identifier"
+  FORMAT ">>>>9"
+  INITIAL "0"
+  ORDER 10
+
+ADD FIELD "CustNum" OF "Contact" AS integer
+  DESCRIPTION "Foreign key to Customer"
+  FORMAT ">>>>9"
+  INITIAL "0"
+  ORDER 20
+
+ADD FIELD "FirstName" OF "Contact" AS character
+  FORMAT "x(30)"
+  INITIAL ""
+  ORDER 30
+
+ADD FIELD "LastName" OF "Contact" AS character
+  FORMAT "x(30)"
+  INITIAL ""
+  ORDER 40
+
+ADD FIELD "Title" OF "Contact" AS character
+  DESCRIPTION "Job title"
+  FORMAT "x(40)"
+  INITIAL ""
+  ORDER 50
+
+ADD FIELD "Phone" OF "Contact" AS character
+  FORMAT "x(20)"
+  INITIAL ""
+  ORDER 60
+
+ADD FIELD "Mobile" OF "Contact" AS character
+  FORMAT "x(20)"
+  INITIAL ""
+  ORDER 70
+
+ADD FIELD "Email" OF "Contact" AS character
+  FORMAT "x(80)"
+  INITIAL ""
+  ORDER 80
+
+ADD FIELD "IsPrimary" OF "Contact" AS logical
+  DESCRIPTION "Is this the primary contact?"
+  FORMAT "yes/no"
+  INITIAL "no"
+  ORDER 90
+
+ADD INDEX "pkContact" ON "Contact"
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "ContactId" ASCENDING
+
+ADD INDEX "idxCustNum" ON "Contact"
+  AREA "Schema Area"
+  INDEX-FIELD "CustNum" ASCENDING
+
+ADD INDEX "idxLastName" ON "Contact"
+  AREA "Schema Area"
+  INDEX-FIELD "LastName" ASCENDING
+
+ADD TABLE "Opportunity"
+  AREA "Schema Area"
+  DESCRIPTION "Sales opportunities"
+  DUMP-NAME "opportun"
+
+ADD FIELD "OpportunityId" OF "Opportunity" AS integer
+  DESCRIPTION "Unique opportunity identifier"
+  FORMAT ">>>>9"
+  INITIAL "0"
+  ORDER 10
+
+ADD FIELD "CustNum" OF "Opportunity" AS integer
+  DESCRIPTION "Foreign key to Customer"
+  FORMAT ">>>>9"
+  INITIAL "0"
+  ORDER 20
+
+ADD FIELD "Description" OF "Opportunity" AS character
+  FORMAT "x(100)"
+  INITIAL ""
+  ORDER 30
+
+ADD FIELD "Amount" OF "Opportunity" AS decimal
+  DESCRIPTION "Estimated deal value"
+  FORMAT "->>>,>>>,>>9.99"
+  INITIAL "0"
+  DECIMALS 2
+  ORDER 40
+
+ADD FIELD "Stage" OF "Opportunity" AS character
+  DESCRIPTION "Lead, Qualification, Proposal, Negotiation, Closed-Won, Closed-Lost"
+  FORMAT "x(20)"
+  INITIAL "Lead"
+  ORDER 50
+
+ADD FIELD "Probability" OF "Opportunity" AS integer
+  DESCRIPTION "Win probability percentage"
+  FORMAT ">>9"
+  INITIAL "0"
+  ORDER 60
+
+ADD FIELD "OpenDate" OF "Opportunity" AS date
+  FORMAT "99/99/9999"
+  INITIAL "TODAY"
+  ORDER 70
+
+ADD FIELD "CloseDate" OF "Opportunity" AS date
+  DESCRIPTION "Expected or actual close date"
+  FORMAT "99/99/9999"
+  INITIAL ?
+  ORDER 80
+
+ADD FIELD "AssignedTo" OF "Opportunity" AS character
+  DESCRIPTION "Sales rep name"
+  FORMAT "x(30)"
+  INITIAL ""
+  ORDER 90
+
+ADD INDEX "pkOpportunity" ON "Opportunity"
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "OpportunityId" ASCENDING
+
+ADD INDEX "idxCustNum" ON "Opportunity"
+  AREA "Schema Area"
+  INDEX-FIELD "CustNum" ASCENDING
+
+ADD INDEX "idxStage" ON "Opportunity"
+  AREA "Schema Area"
+  INDEX-FIELD "Stage" ASCENDING
+
+ADD TABLE "Activity"
+  AREA "Schema Area"
+  DESCRIPTION "CRM activities such as calls, emails, meetings"
+  DUMP-NAME "activity"
+
+ADD FIELD "ActivityId" OF "Activity" AS integer
+  FORMAT ">>>>9"
+  INITIAL "0"
+  ORDER 10
+
+ADD FIELD "CustNum" OF "Activity" AS integer
+  DESCRIPTION "Foreign key to Customer"
+  FORMAT ">>>>9"
+  INITIAL "0"
+  ORDER 20
+
+ADD FIELD "ContactId" OF "Activity" AS integer
+  DESCRIPTION "Foreign key to Contact (optional)"
+  FORMAT ">>>>9"
+  INITIAL "0"
+  ORDER 30
+
+ADD FIELD "OpportunityId" OF "Activity" AS integer
+  DESCRIPTION "Foreign key to Opportunity (optional)"
+  FORMAT ">>>>9"
+  INITIAL "0"
+  ORDER 40
+
+ADD FIELD "ActivityType" OF "Activity" AS character
+  DESCRIPTION "Call, Email, Meeting, Task, Note"
+  FORMAT "x(15)"
+  INITIAL "Note"
+  ORDER 50
+
+ADD FIELD "Subject" OF "Activity" AS character
+  FORMAT "x(80)"
+  INITIAL ""
+  ORDER 60
+
+ADD FIELD "Details" OF "Activity" AS character
+  FORMAT "x(500)"
+  INITIAL ""
+  ORDER 70
+
+ADD FIELD "ActivityDate" OF "Activity" AS date
+  FORMAT "99/99/9999"
+  INITIAL "TODAY"
+  ORDER 80
+
+ADD FIELD "DueDate" OF "Activity" AS date
+  FORMAT "99/99/9999"
+  INITIAL ?
+  ORDER 90
+
+ADD FIELD "Completed" OF "Activity" AS logical
+  FORMAT "yes/no"
+  INITIAL "no"
+  ORDER 100
+
+ADD FIELD "AssignedTo" OF "Activity" AS character
+  FORMAT "x(30)"
+  INITIAL ""
+  ORDER 110
+
+ADD INDEX "pkActivity" ON "Activity"
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "ActivityId" ASCENDING
+
+ADD INDEX "idxCustNum" ON "Activity"
+  AREA "Schema Area"
+  INDEX-FIELD "CustNum" ASCENDING
+
+ADD INDEX "idxActivityDate" ON "Activity"
+  AREA "Schema Area"
+  INDEX-FIELD "ActivityDate" ASCENDING
+
+ADD INDEX "idxType" ON "Activity"
+  AREA "Schema Area"
+  INDEX-FIELD "ActivityType" ASCENDING
+
+ADD SEQUENCE "SeqCustNum"
+  INITIAL 0
+  INCREMENT 1
+  CYCLE-ON-LIMIT no
+
+ADD SEQUENCE "SeqContactId"
+  INITIAL 0
+  INCREMENT 1
+  CYCLE-ON-LIMIT no
+
+ADD SEQUENCE "SeqOpportunityId"
+  INITIAL 0
+  INCREMENT 1
+  CYCLE-ON-LIMIT no
+
+ADD SEQUENCE "SeqActivityId"
+  INITIAL 0
+  INCREMENT 1
+  CYCLE-ON-LIMIT no
+
+.
+PSC
+cpstream=UTF-8
+.
+0000000085

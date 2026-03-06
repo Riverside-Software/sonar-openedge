@@ -94,6 +94,7 @@ import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.fixed.TypeInfoKryoProxy;
 import eu.rssw.pct.elements.fixed.TypeInfoPLProxy;
 import eu.rssw.pct.elements.fixed.TypeInfoRCodeProxy;
+import eu.rssw.pct.mapping.OpenEdgeVersion;
 
 @ScannerSide
 @SonarLintSide
@@ -1032,7 +1033,7 @@ public class OpenEdgeSettings {
         }
       }
       if (desc != null) {
-        dbs.add(new DatabaseWrapper(desc));
+        dbs.add(new DatabaseWrapper(desc, OpenEdgeVersion.V128));
       }
     }
 
