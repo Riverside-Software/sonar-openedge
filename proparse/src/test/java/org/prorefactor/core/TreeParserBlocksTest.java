@@ -23,6 +23,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.prorefactor.core.nodetypes.IStatement;
@@ -650,9 +651,103 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     assertEquals(thenStmt.getParentStatement(), currStmt);
   }
 
+  @Test
+  public void testFinally01() {
+    var unit = getParseUnit(new File("src/test/resources/treeparser05/test10.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    var p1 = unit.getRootScope().getRoutines().get(1);
+    assertEquals(p1.getName(), "foo");
+    var g1 = p1.getExecutionGraph();
+    assertEquals(g1.getVertices().size(), 6);
+
+    var currStmt = p1.getExecutionGraph().getVertices().get(0).asIStatement();
+    assertEquals(currStmt.getNodeType(), ABLNodeType.FUNCTION);
+    assertTrue(currStmt.asJPNode().isIStatementBlock());
+    currStmt = ((IStatementBlock) currStmt).getFirstStatement();
+    assertEquals(currStmt.getNodeType(), ABLNodeType.DEFINE);
+    currStmt = currStmt.getNextStatement();
+    assertEquals(currStmt.getNodeType(), ABLNodeType.CREATE);
+    currStmt = currStmt.getNextStatement();
+    assertEquals(currStmt.getNodeType(), ABLNodeType.RETURN);
+    currStmt = currStmt.getNextStatement();
+    assertEquals(currStmt.getNodeType(), ABLNodeType.FINALLY);
+    assertTrue(currStmt.asJPNode().isIStatementBlock());
+    currStmt = ((IStatementBlock) currStmt).getFirstStatement();
+    assertEquals(currStmt.getNodeType(), ABLNodeType.DELETE);
+    currStmt = currStmt.getNextStatement();
+    assertNull(currStmt);
+
+    var p2 = unit.getRootScope().getRoutines().get(2);
+    assertEquals(p2.getName(), "foo2");
+    var g2 = p2.getExecutionGraph();
+    assertEquals(g2.getVertices().size(), 7);
+    assertEquals(g2.getVertices().get(4).getNodeType(), ABLNodeType.RETURN);
+    assertEquals(g2.getVertices().get(5).getNodeType(), ABLNodeType.FINALLY);
+    assertEquals(g2.getEdges(g2.getVertices().get(4)), List.of(5));
+  }
+
+  @Test
+  public void testFinally02() {
+    var unit = getParseUnit(new File("src/test/resources/treeparser05/test11.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    var p1 = unit.getRootScope().getRoutines().get(1);
+    assertEquals(p1.getName(), "foo");
+    var g1 = p1.getExecutionGraph();
+    assertEquals(g1.getVertices().size(), 4);
+
+    var currStmt = p1.getExecutionGraph().getVertices().get(0).asIStatement();
+    assertEquals(currStmt.getNodeType(), ABLNodeType.FUNCTION);
+    assertTrue(currStmt.asJPNode().isIStatementBlock());
+    currStmt = ((IStatementBlock) currStmt).getFirstStatement();
+    assertEquals(currStmt.getNodeType(), ABLNodeType.DEFINE);
+    currStmt = currStmt.getNextStatement();
+    assertEquals(currStmt.getNodeType(), ABLNodeType.CREATE);
+    currStmt = currStmt.getNextStatement();
+    assertEquals(currStmt.getNodeType(), ABLNodeType.QUIT);
+    currStmt = currStmt.getNextStatement();
+    assertNull(currStmt);
+  }
+
+  @Test
+  public void testReturnNoFinally01() {
+    // Return without FINALLY
+    var unit = getParseUnit(new File("src/test/resources/treeparser05/test12.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    var p1 = unit.getRootScope().getRoutines().get(1);
+    assertEquals(p1.getName(), "foo");
+    var g1 = p1.getExecutionGraph();
+    assertEquals(g1.getVertices().size(), 4);
+    var currStmt = p1.getExecutionGraph().getVertices().get(0).asIStatement();
+    assertEquals(currStmt.getNodeType(), ABLNodeType.FUNCTION);
+    assertTrue(currStmt.asJPNode().isIStatementBlock());
+    currStmt = ((IStatementBlock) currStmt).getFirstStatement();
+    assertEquals(currStmt.getNodeType(), ABLNodeType.DEFINE);
+    currStmt = currStmt.getNextStatement();
+    assertEquals(currStmt.getNodeType(), ABLNodeType.CREATE);
+    currStmt = currStmt.getNextStatement();
+    assertEquals(currStmt.getNodeType(), ABLNodeType.RETURN);
+    currStmt = currStmt.getNextStatement();
+    assertNull(currStmt);
+  }
+
   // ExecutionGraph tests
   private static JPNode getIndex(ExecutionGraph graph, ABLNodeType nodeType, int line) {
-    for (var n: graph.getVertices()) {
+    for (var n : graph.getVertices()) {
       if ((n.getNodeType() == nodeType) && (n.getLine() == line))
         return n;
     }
