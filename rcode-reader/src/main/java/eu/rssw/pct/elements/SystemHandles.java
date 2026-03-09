@@ -102,10 +102,10 @@ public class SystemHandles {
                 variants[xx - 1] = variant;
                 xx++;
               }
-              var functionDocumentation = new FunctionDocumentation(methodEntry.name, methodEntry.description,
-                  methodEntry.returnType.equalsIgnoreCase("None") ? DataType.NOT_COMPUTED.toString()
-                      : DataType.get(methodEntry.returnType).toString(),
-                  variants);
+              var functionDocumentation = new FunctionDocumentation(
+                  methodEntry.name, methodEntry.description, methodEntry.returnType.equalsIgnoreCase("None")
+                      ? DataType.NOT_COMPUTED.toString() : DataType.get(methodEntry.returnType).toString(),
+                  "yes", variants);
 
               systemHandle.addMethod(functionDocumentation);
               systemHandle.addMethodDocumentation(methodEntry.name, methodEntry.description);

@@ -27,12 +27,15 @@ public class FunctionDocumentation implements IFunctionDocumentation {
   private final String name;
   private final String description;
   private final DataType returnType;
+  private final Parentheses parentheses;
   private final IFunctionParameterList[] variants;
 
-  public FunctionDocumentation(String name, String description, String returnType, IFunctionParameterList... variants) {
+  public FunctionDocumentation(String name, String description, String returnType, String parentheses,
+      IFunctionParameterList... variants) {
     this.name = name;
     this.description = description;
     this.returnType = DataType.get(returnType);
+    this.parentheses = Parentheses.fromString(parentheses);
     this.variants = variants;
   }
 
@@ -54,6 +57,11 @@ public class FunctionDocumentation implements IFunctionDocumentation {
   @Override
   public DataType getReturnType() {
     return returnType;
+  }
+
+  @Override
+  public Parentheses getParentheses() {
+    return parentheses;
   }
 
   @Override

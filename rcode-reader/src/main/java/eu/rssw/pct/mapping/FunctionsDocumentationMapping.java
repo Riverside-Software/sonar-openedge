@@ -44,6 +44,8 @@ public class FunctionsDocumentationMapping {
     public String description;
     @SerializedName(value = "returnType")
     public String returnType;
+    @SerializedName(value = "parentheses")
+    public String parentheses;
     @SerializedName(value = "variants")
     public ParameterList[] variants;
   }

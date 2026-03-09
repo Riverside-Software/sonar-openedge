@@ -66,7 +66,7 @@ public class SystemHandleTest {
         }
         for (var method : systemHandle.getMethods()) {
           assertNotNull(method.getVariants());
-          assertNotNull(method.getIDESignature(VERSION_TYPE_INFO_PROVIDER.apply(OpenEdgeVersion.V128)));
+          assertNotNull(method.getIDESignature(VERSION_TYPE_INFO_PROVIDER.apply(OpenEdgeVersion.V128), true));
           assertNotNull(method.getVariants()[0].getParameters());
           assertTrue(method.getVariants().length > 0);
           for (var variant : method.getVariants()) {
