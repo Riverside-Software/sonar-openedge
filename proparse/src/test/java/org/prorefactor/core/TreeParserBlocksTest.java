@@ -531,6 +531,20 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     assertEquals(getEdges(graph0, ABLNodeType.DO, 2), "MESSAGE:3");
     assertEquals(getEdges(graph0, ABLNodeType.MESSAGE, 3), "");
 
+    var expectedMermaidString = """
+        flowchart TD
+        Node0[PROGRAM_ROOT 0:0]
+        Node1[IF 1:0]
+        Node2[IF 2:2]
+        Node3[DO 2:15]
+        Node4[MESSAGE 3:4]
+        Node0 --> Node1
+        Node1 --> Node2
+        Node2 --> Node3
+        Node3 --> Node4
+        """;
+    assertEquals(graph0.toMermaidString(), expectedMermaidString);
+
     assertEquals(getReverseEdges(graph0, ABLNodeType.PROGRAM_ROOT, 0), "");
     assertEquals(getReverseEdges(graph0, ABLNodeType.IF, 1), "PROGRAM_ROOT:0");
     assertEquals(getReverseEdges(graph0, ABLNodeType.IF, 2), "IF:1");

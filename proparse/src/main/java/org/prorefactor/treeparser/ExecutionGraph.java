@@ -74,4 +74,30 @@ public class ExecutionGraph {
     return idx == -1 ? List.of() : revEdges.get(idx); 
   }
 
+  /**
+   * Generate Mermaid input (https://mermaid.js.org)
+   */
+  public String toMermaidString() {
+    var sb = new StringBuilder("flowchart TD\n");
+    // Write all nodes first
+    for (int zz = 0; zz < vertices.size(); zz++) {
+      sb.append("Node").append(zz) //
+        .append('[') //
+        .append(vertices.get(zz).getNodeType().toString()) //
+        .append(' ').append(vertices.get(zz).getLine()).append(':').append(vertices.get(zz).getColumn()) //
+        .append(']') //
+        .append('\n');
+    }
+    // Then the paths between nodes
+    for (int zz = 0; zz < edges.size(); zz++) {
+      for (var targetNode : edges.get(zz)) {
+        sb.append("Node").append(zz) //
+          .append(" --> Node").append(targetNode) //
+          .append('\n');
+      }
+    }
+
+    return sb.toString();
+  }
+
 }
