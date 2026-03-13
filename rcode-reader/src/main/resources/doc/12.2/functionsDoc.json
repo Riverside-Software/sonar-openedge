@@ -3,7 +3,7 @@
     "title": "OpenEdge 12.2.15.00 ABL Functions Reference",
     "description": "Complete reference of all ABL built-in functions for OpenEdge 12.2.15.00",
     "version": "12.2.15.00",
-    "totalFunctions": 226
+    "totalFunctions": 225
   },
   "functions": [
     {
@@ -2613,36 +2613,6 @@
               "name": "expression",
               "type": "RAW",
               "description": "A RAW expression containing the value you want to convert. If the expression is the Unknown value (?), the result is the Unknown value (?). If the expression is a zero-length value, the result is a zero-length value.",
-              "optional": false
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "IF...THEN...ELSE",
-      "description": "Evaluates and returns one of two expressions, depending on the value of a specified condition.",
-      "returnType": "CHARACTER",
-      "parentheses": "yes",
-      "variants": [
-        {
-          "parameters": [
-            {
-              "name": "condition",
-              "type": "LOGICAL",
-              "description": "An expression whose value is logical (TRUE or FALSE).",
-              "optional": false
-            },
-            {
-              "name": "expression1",
-              "type": "CHARACTER",
-              "description": "A constant, field name, variable name, or expression. If the condition is TRUE, then the function returns this value.",
-              "optional": false
-            },
-            {
-              "name": "expression2",
-              "type": "CHARACTER",
-              "description": "A constant, field name, variable name, or expression whose value is of a data type that is compatible with the data type of expression1. If the condition is FALSE or the Unknown value (?), then the function returns this value.",
               "optional": false
             }
           ]
