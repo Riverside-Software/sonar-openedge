@@ -193,19 +193,19 @@ public class Schema implements ISchema {
     if (!it.hasNext())
       return null;
     var table = it.next();
-    while (table.getName().toLowerCase().compareTo(lname) < 0) {
+    while (table.getLCName().compareTo(lname) < 0) {
       if (it.hasNext())
         table = it.next();
       else
         return null;
     }
     // test that we got a match
-    if (!table.getName().toLowerCase().startsWith(lname))
+    if (!table.getLCName().startsWith(lname))
       return null;
     // test that we got a unique match
     if (lname.length() < table.getName().length() && it.hasNext()) {
       ITable next = it.next();
-      if (next.getName().toLowerCase().startsWith(lname))
+      if (next.getLCName().startsWith(lname))
         return null;
     }
     return table;

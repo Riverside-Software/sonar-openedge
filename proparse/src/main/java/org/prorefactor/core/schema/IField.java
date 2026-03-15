@@ -19,6 +19,7 @@ import org.prorefactor.treeparser.Primitive;
 
 public interface IField extends Primitive {
   String getName();
+  String getLCName();
   ITable getTable();
   void setTable(ITable table);
 }

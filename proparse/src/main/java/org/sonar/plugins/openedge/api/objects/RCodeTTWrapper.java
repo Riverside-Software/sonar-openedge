@@ -29,6 +29,7 @@ import eu.rssw.pct.elements.IVariableElement;
 
 public class RCodeTTWrapper implements ITable {
   private final ITableElement table;
+  private final String lcName;
 
   private final List<IField> fields = new ArrayList<>();
   private final List<IIndex> indexes = new ArrayList<>();
@@ -36,6 +37,7 @@ public class RCodeTTWrapper implements ITable {
 
   public RCodeTTWrapper(ITableElement t) {
     this.table = t;
+    this.lcName = t.getName().toLowerCase();
 
     for (IVariableElement fld : table.getFields()) {
       IField iFld = new RCodeTTFieldWrapper(this, fld);
@@ -63,6 +65,11 @@ public class RCodeTTWrapper implements ITable {
   }
 
   @Override
+  public String getLCName() {
+    return lcName;
+  }
+
+  @Override
   public void add(IField field) {
     throw new UnsupportedOperationException();
   }
@@ -74,8 +81,9 @@ public class RCodeTTWrapper implements ITable {
 
   @Override
   public IField lookupField(String lookupName) {
+    var lc = lookupName.toLowerCase();
     for (IField fld : fields) {
-      if (fld.getName().toLowerCase().startsWith(lookupName.toLowerCase()))
+      if (fld.getLCName().startsWith(lc))
         return fld;
     }
     return null;
