@@ -25,6 +25,7 @@ import eu.rssw.pct.elements.DataType;
  */
 public class Field implements IField {
   private final String name;
+  private final String lcName;
   private int extent;
   private DataType dataType;
   private ITable table;
@@ -36,6 +37,7 @@ public class Field implements IField {
    */
   public Field(String inName, ITable table) {
     this.name = inName;
+    this.lcName = inName.toLowerCase();
     this.table = table;
     if (table != null)
       table.add(this);
@@ -44,6 +46,7 @@ public class Field implements IField {
   /** Constructor for temporary "lookup" fields. "Package" visibility. */
   Field(String inName) {
     this.name = inName;
+    this.lcName = inName.toLowerCase();
     this.table = Constants.nullTable;
   }
 
@@ -66,6 +69,11 @@ public class Field implements IField {
   @Override
   public String getName() {
     return name;
+  }
+
+  @Override
+  public String getLCName() {
+    return lcName;
   }
 
   @Override

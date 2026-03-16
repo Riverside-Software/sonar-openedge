@@ -42,6 +42,7 @@ import eu.rssw.antlr.database.objects.Table;
 public class TableWrapper implements ITable {
   private final IDatabase db;
   private final Table table;
+  private final String lcName;
 
   private final List<IField> fields = new ArrayList<>();
   private final List<IIndex> indexes = new ArrayList<>();
@@ -50,6 +51,7 @@ public class TableWrapper implements ITable {
   public TableWrapper(IDatabase db, Table t) {
     this.db = db;
     this.table = t;
+    this.lcName = t.getName().toLowerCase();
 
     for (Field fld : table.getFields()) {
       IField iFld = new FieldWrapper(this, fld);
@@ -77,6 +79,11 @@ public class TableWrapper implements ITable {
   }
 
   @Override
+  public String getLCName() {
+    return lcName;
+  }
+
+  @Override
   public void add(IField field) {
     throw new UnsupportedOperationException();
   }
@@ -90,7 +97,7 @@ public class TableWrapper implements ITable {
   public IField lookupField(String lookupName) {
     String s1 = lookupName.toLowerCase();
     for (IField fld : sortedFields) {
-      String s2 = fld.getName().toLowerCase();
+      String s2 = fld.getLCName();
       if (s2.startsWith(s1)) {
         return fld;
       }

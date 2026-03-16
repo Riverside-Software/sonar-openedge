@@ -31,12 +31,14 @@ import eu.rssw.pct.elements.DataType;
 public class FieldWrapper implements IField {
   private final ITable table;
   private final Field field;
+  private final String lcName;
 
   public FieldWrapper(ITable table, Field field) {
     Preconditions.checkNotNull(table);
     Preconditions.checkNotNull(field);
     this.table = table;
     this.field = field;
+    this.lcName = field.getName().toLowerCase();
   }
 
   public Field getBackingObject() {
@@ -46,6 +48,11 @@ public class FieldWrapper implements IField {
   @Override
   public String getName() {
     return field.getName();
+  }
+
+  @Override
+  public String getLCName() {
+    return lcName;
   }
 
   @Override

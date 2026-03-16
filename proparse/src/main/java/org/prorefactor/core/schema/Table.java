@@ -27,6 +27,7 @@ import java.util.TreeSet;
 public class Table implements ITable {
   private final IDatabase database;
   private final String name;
+  private final String lcName;
   private final TableType type;
   private boolean parentNoUndo = false;
   private boolean undo = false;
@@ -39,6 +40,7 @@ public class Table implements ITable {
   /** Constructor for schema */
   public Table(String name, IDatabase database) {
     this.name = name;
+    this.lcName = name.toLowerCase();
     this.database = database;
     this.type = TableType.DB_TABLE;
   }
@@ -46,6 +48,7 @@ public class Table implements ITable {
   /** Constructor for temp / work tables */
   public Table(String name, TableType type) {
     this.name = name;
+    this.lcName = name.toLowerCase();
     this.type = type;
     this.database = Constants.nullDatabase;
   }
@@ -53,6 +56,7 @@ public class Table implements ITable {
   /** Constructor for temporary "comparator" objects. */
   public Table(String name) {
     this.name = name;
+    this.lcName = name.toLowerCase();
     this.type = TableType.DB_TABLE;
     this.database = Constants.nullDatabase;
   }
@@ -103,6 +107,11 @@ public class Table implements ITable {
   }
 
   @Override
+  public String getLCName() {
+    return lcName;
+  }
+
+  @Override
   public TableType getTableType() {
     return type;
   }
@@ -135,7 +144,7 @@ public class Table implements ITable {
     if (fieldTailSet.isEmpty())
       return null;
     IField field = fieldTailSet.first();
-    if (field == null || !field.getName().toLowerCase().startsWith(lookupName.toLowerCase()))
+    if (field == null || !field.getLCName().startsWith(lookupName.toLowerCase()))
       return null;
     return field;
   }

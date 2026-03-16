@@ -31,6 +31,8 @@ public interface ITable {
    */
   String getName();
 
+  String getLCName();
+
   TableType getTableType();
 
   /**
@@ -53,8 +55,9 @@ public interface ITable {
    * Same as lookupField, except field names can't be abbreviated
    */
   default IField lookupFullNameField(String name) {
+    var lc = name.toLowerCase();
     for (IField fld : getFieldSet()) {
-      if (fld.getName().equalsIgnoreCase(name))
+      if (fld.getLCName().equals(lc))
         return fld;
     }
     return null;

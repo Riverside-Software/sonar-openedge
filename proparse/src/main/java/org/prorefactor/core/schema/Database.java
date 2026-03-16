@@ -15,6 +15,8 @@
  ********************************************************************************/
 package org.prorefactor.core.schema;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -32,6 +34,8 @@ import eu.rssw.pct.mapping.OpenEdgeVersion;
 public class Database implements IDatabase {
   private final String name;
   private final Set<ITable> tableSet = new HashSet<>();
+  private final List<ITable> tblList = new ArrayList<>();
+
 
   /**
    * New Database object
@@ -57,7 +61,12 @@ public class Database implements IDatabase {
   @Override
   @Nonnull
   public List<ITable> getTableSet() {
-    return tableSet.stream().sorted(Constants.TABLE_NAME_ORDER).toList();
+    if (tableSet.isEmpty())
+      return List.of();
+    if (tblList.isEmpty()) {
+      tblList.addAll(tableSet.stream().sorted(Constants.TABLE_NAME_ORDER).toList());
+    }
+    return Collections.unmodifiableList(tblList);
   }
 
   @Override
@@ -66,6 +75,7 @@ public class Database implements IDatabase {
   }
 
   public void add(ITable table) {
+    tblList.clear();
     tableSet.add(table);
   }
 

@@ -37,7 +37,7 @@ import eu.rssw.pct.mapping.OpenEdgeVersion;
 
 public class DatabaseWrapper implements IDatabase {
   private final DatabaseDescription dbDesc;
-  private final Set<ITable> tableSet = new HashSet<>();
+  private final List<ITable> tblList;
 
   public DatabaseWrapper(DatabaseDescription dbDesc) {
     this(dbDesc, null);
@@ -45,12 +45,14 @@ public class DatabaseWrapper implements IDatabase {
 
   public DatabaseWrapper(@Nonnull DatabaseDescription dbDesc, @Nullable OpenEdgeVersion metaschema) {
     this.dbDesc = Objects.requireNonNull(dbDesc);
+    Set<ITable> set = new HashSet<>();
     for (var tbl : dbDesc.getTables()) {
-      tableSet.add(new TableWrapper(this, tbl));
+      set.add(new TableWrapper(this, tbl));
     }
     if (metaschema != null) {
-      tableSet.addAll(MetaSchemaProvider.getMetaSchema(this, metaschema));
+      set.addAll(MetaSchemaProvider.getMetaSchema(this, metaschema));
     }
+    this.tblList = set.stream().sorted(Constants.TABLE_NAME_ORDER).toList();
   }
 
   @Nonnull
@@ -65,9 +67,7 @@ public class DatabaseWrapper implements IDatabase {
 
   @Override
   public List<ITable> getTableSet() {
-    return tableSet.stream() //
-      .sorted(Constants.TABLE_NAME_ORDER) //
-      .toList();
+    return tblList;
   }
 
 }
