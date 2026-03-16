@@ -1895,7 +1895,7 @@
               "name": "frame",
               "type": "CHARACTER",
               "description": "The name of the frame whose column position you are trying to determine. If you do not supply a frame name, the FRAME-COL function uses the default frame for the block it is in. If the FRAME-COL function is in a DO block, the function uses the default frame scoped to the block containing the DO block.",
-              "optional": false
+              "optional": true
             }
           ]
         }
@@ -1924,7 +1924,7 @@
               "name": "frame",
               "type": "CHARACTER",
               "description": "The name of the frame whose number down you are trying to determine. If you do not supply a frame name, the FRAME-DOWN function uses the default frame for the block it is in. If the FRAME-DOWN function is in a DO block, the function uses the default frame scoped to the block containing the DO block.",
-              "optional": false
+              "optional": true
             }
           ]
         }
@@ -1975,7 +1975,7 @@
               "name": "frame",
               "type": "CHARACTER",
               "description": "The frame name that you are trying to determine a line number for. If you do not supply a frame name, the FRAME-LINE function uses the default frame for the block that contains the FRAME-LINE function. If the FRAME-LINE function is in a DO block, the function uses the default frame scoped to the block that contains the DO block.",
-              "optional": false
+              "optional": true
             }
           ]
         }
@@ -2004,7 +2004,7 @@
               "name": "frame",
               "type": "CHARACTER",
               "description": "The name of the frame whose row position you are trying to determine. If you do not supply a frame name, the FRAME-ROW function uses the default frame for the block that contains the FRAME-ROW function. If the FRAME-ROW function is in a DO block, the function uses the default frame scoped to the block that contains the DO block.",
-              "optional": false
+              "optional": true
             }
           ]
         }
@@ -3584,7 +3584,7 @@
       "name": "NEW (record buffers)",
       "description": "Checks a record buffer and returns a TRUE value if the record in that buffer is newly created. If the record was read from the database, NEW returns a FALSE value.",
       "returnType": "LOGICAL",
-      "parentheses": "yes",
+      "parentheses": "both",
       "variants": [
         {
           "parameters": [
