@@ -198,6 +198,8 @@ public class DataType {
         return SINGLE_CHARACTER;
       case "RUNTYPE":
         return RUNTYPE;
+      case "UNKNOWN2":
+        return NOT_COMPUTED;
       default:
         return UNKNOWN;
     }

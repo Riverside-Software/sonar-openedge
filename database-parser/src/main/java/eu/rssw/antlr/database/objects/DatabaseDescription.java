@@ -37,7 +37,7 @@ public class DatabaseDescription {
   private Map<String, Table> tables = new HashMap<>();
 
   public DatabaseDescription() {
-    this.dbName = "empty";
+    this("empty");
   }
 
   public DatabaseDescription(String dbName) {

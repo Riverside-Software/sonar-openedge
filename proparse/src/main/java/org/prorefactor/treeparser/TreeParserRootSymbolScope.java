@@ -21,11 +21,11 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import org.prorefactor.core.IConstants;
 import org.prorefactor.core.schema.Field;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Table;
+import org.prorefactor.core.schema.TableType;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
@@ -84,7 +84,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
    * @param type IConstants.ST_TTABLE or IConstants.ST_WTABLE.
    * @return A newly created BufferSymbol for this temp/work table.
    */
-  public TableBuffer defineTable(String name, int type, boolean noUndo, boolean undo) {
+  public TableBuffer defineTable(String name, TableType type, boolean noUndo, boolean undo) {
     Table table = new Table(name, type);
     table.setNoUndo(noUndo);
     table.setUndo(undo);
@@ -235,7 +235,7 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
         }
         if (tbl == null) {
           // Defaults to fake temp-table
-          tbl = new Table(name, IConstants.ST_TTABLE);
+          tbl = new Table(name, TableType.TEMP_TABLE);
         }
         return new TableBuffer(name, this, tbl);
       }

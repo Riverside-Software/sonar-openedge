@@ -138,7 +138,54 @@ public class OpenEdgeSettingsTest {
     assertNotNull(ppSess.getSchema().lookupTable("sp2k", "item"));
     assertNull(ppSess.getSchema().lookupTable("sp3k", "item"));
 
+    // Unknown table
     assertNull(ppSess.getSchema().lookupTable("abcdef"));
+
+    // Metaschema
+    assertNotNull(ppSess.getSchema().lookupTable("_File"));
+    assertNotNull(ppSess.getSchema().lookupTable("dictdb", "_Field"));
+    assertNull(ppSess.getSchema().lookupTable("nosuchalias", "_Field"));
+  }
+
+  @Test
+  public void testTwoSonarDatabasesFromSonarQube() {
+    // Simple sports2000 database schema + another schema
+    var settings = new MapSettings();
+    settings.setProperty(Constants.DATABASES, "src/schema/sp2k.df,src/schema/crm.df");
+    settings.setProperty("sonar.sources", "src");
+
+    var context = SensorContextTester.create(new File(TestProjectSensorContext.BASEDIR));
+    context.setSettings(settings);
+
+    var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    var ppSess = oeSettings.getProparseSessions().getDefaultSession();
+    assertNotNull(ppSess);
+    assertNotNull(ppSess.getSchema());
+    assertNotNull(ppSess.getSchema().lookupDatabase("sp2k"));
+    assertNotNull(ppSess.getSchema().lookupDatabase("crm"));
+    assertNull(ppSess.getSchema().lookupDatabase("sp3k"));
+
+    assertNotNull(ppSess.getSchema().lookupTable("customer"));
+    assertEquals(ppSess.getSchema().lookupTable("customer").getDatabase().getName(), "crm");
+    assertNotNull(ppSess.getSchema().lookupTable("sp2k", "customer"));
+    assertNotNull(ppSess.getSchema().lookupTable("crm", "customer"));
+    assertNull(ppSess.getSchema().lookupTable("sp2k", "activity"));
+    assertNotNull(ppSess.getSchema().lookupTable("crm", "activity"));
+    assertNotNull(ppSess.getSchema().lookupTable("item"));
+    assertNotNull(ppSess.getSchema().lookupTable("sp2k", "item"));
+    assertNull(ppSess.getSchema().lookupTable("sp3k", "item"));
+    assertNull(ppSess.getSchema().lookupTable("crm", "item"));
+
+    // Unknown table
+    assertNull(ppSess.getSchema().lookupTable("abcdef"));
+
+    // Metaschema
+    assertNotNull(ppSess.getSchema().lookupTable("_File"));
+    assertNotNull(ppSess.getSchema().lookupTable("dictdb", "_Field"));
+    assertEquals(ppSess.getSchema().lookupTable("dictdb", "_Field").getDatabase().getName(), "sp2k");
+    assertNotNull(ppSess.getSchema().lookupTable("sp2k", "_Field"));
+    assertNotNull(ppSess.getSchema().lookupTable("crm", "_Field"));
+    assertNull(ppSess.getSchema().lookupTable("nosuchalias", "_Field"));
   }
 
   @Test

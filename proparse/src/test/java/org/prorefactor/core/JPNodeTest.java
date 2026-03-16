@@ -26,11 +26,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.xml.bind.JAXBException;
 
 import org.prorefactor.core.nodetypes.RecordNameNode;
 import org.prorefactor.core.util.SportsSchema;
@@ -118,7 +117,7 @@ public class JPNodeTest extends AbstractProparseTest {
         ABLNodeType.RIGHTPAREN, ABLNodeType.COMMA, ABLNodeType.PERIOD, ABLNodeType.LEXCOLON, ABLNodeType.OBJCOLON,
         ABLNodeType.THEN, ABLNodeType.END);
     nodeLister.print();
-
+    
     jsonNames.add(file);
     jsonOut.add(writer.toString());
 
@@ -381,7 +380,7 @@ public class JPNodeTest extends AbstractProparseTest {
   }
 
   @Test
-  public void testXref01() throws JAXBException, IOException {
+  public void testXref01() {
     CrossReference xref = CrossReferenceUtils.parseXREF(Paths.get(SRC_DIR + "/xref01.p.xref"));
     ParseUnit unit = genericTest("xref01.p", xref);
     unit.treeParser01();
@@ -411,7 +410,7 @@ public class JPNodeTest extends AbstractProparseTest {
   }
 
   @Test
-  public void testXref02() throws JAXBException, IOException {
+  public void testXref02() {
     CrossReference xref = CrossReferenceUtils.parseXREF(Paths.get(SRC_DIR + "/xref02.cls.xref"));
     ParseUnit unit = genericTest("xref02.cls", xref);
     unit.treeParser01();
@@ -429,7 +428,7 @@ public class JPNodeTest extends AbstractProparseTest {
   }
 
   @Test
-  public void testXref03() throws JAXBException, IOException {
+  public void testXref03() {
     CrossReference xref = CrossReferenceUtils.parseXREF(Paths.get(SRC_DIR + "/xref03.p.xref"));
     ParseUnit unit = genericTest("xref03.p", xref);
     unit.treeParser01();
@@ -467,7 +466,7 @@ public class JPNodeTest extends AbstractProparseTest {
   }
 
   @Test
-  public void testXref04() throws JAXBException, IOException {
+  public void testXref04() {
     CrossReference xref = CrossReferenceUtils.parseXREF(Paths.get(SRC_DIR + "/xref04.p.xref"));
     ParseUnit unit = genericTest("xref04.p", xref);
     unit.treeParser01();
@@ -499,7 +498,7 @@ public class JPNodeTest extends AbstractProparseTest {
   }
 
   @Test
-  public void testXref05() throws JAXBException, IOException {
+  public void testXref05() {
     CrossReference xref = CrossReferenceUtils.parseXREF(Paths.get(SRC_DIR + "/xref05.p.xref"));
     ParseUnit unit = genericTest("xref05.p", xref);
     unit.treeParser01();
@@ -520,5 +519,51 @@ public class JPNodeTest extends AbstractProparseTest {
     assertTrue(recNode0.getSortAccess().contains("Name"));
     assertTrue(recNode0.getSortAccess().contains("Country"));
     assertTrue(recNode0.getSortAccess().contains("PostalCode"));
+  }
+
+  @Test
+  public void testXref06() {
+    var xref = CrossReferenceUtils.parseXREF(Path.of(SRC_DIR + "/xref06.p.xref"));
+    var unit = genericTest("xref06.p", xref);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+
+    var recNodes = unit.getTopNode().query2(node -> (node.getNodeType() == ABLNodeType.RECORD_NAME)
+        && (node.getParent().getNodeType() == ABLNodeType.RECORD_SEARCH));
+
+    assertEquals(recNodes.size(), 3);
+    var recNode0 = (RecordNameNode) recNodes.get(0);
+    var recNode1 = (RecordNameNode) recNodes.get(1);
+    var recNode2 = (RecordNameNode) recNodes.get(2);
+
+    assertEquals(recNode0.getSearchIndexes().size(), 1);
+    assertEquals(recNode0.getSearchIndexes().get(0).getO1(), "Warehouse.warehousenum");
+    assertTrue(recNode0.getSearchIndexes().get(0).getO2());
+
+    assertEquals(recNode1.getSearchIndexes().size(), 1);
+    assertEquals(recNode1.getSearchIndexes().get(0).getO1(), "Warehouse.warehousenum");
+    assertTrue(recNode1.getSearchIndexes().get(0).getO2());
+
+    assertEquals(recNode2.getSearchIndexes().size(), 1);
+    assertEquals(recNode2.getSearchIndexes().get(0).getO1(), "Warehouse.warehousenum");
+    assertTrue(recNode2.getSearchIndexes().get(0).getO2());
+  }
+
+  @Test
+  public void testXref07() {
+    var xref = CrossReferenceUtils.parseXREF(Path.of(SRC_DIR + "/xref07.p.xref"));
+    var unit = genericTest("xref07.p", xref);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+
+    var recNodes = unit.getTopNode().query2(node -> (node.getNodeType() == ABLNodeType.RECORD_NAME)
+        && (node.getParent().getNodeType() == ABLNodeType.RECORD_SEARCH));
+    assertEquals(recNodes.size(), 2);
+    var recNode0 = (RecordNameNode) recNodes.get(0);
+    var recNode1 = (RecordNameNode) recNodes.get(1);
+
+    assertEquals(recNode0.getSearchIndexes().size(), 0);
+
+    assertEquals(recNode1.getSearchIndexes().size(), 0);
   }
 }

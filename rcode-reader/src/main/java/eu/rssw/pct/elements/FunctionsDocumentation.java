@@ -86,8 +86,8 @@ public class FunctionsDocumentation {
             variants[xx - 1] = variant;
             xx++;
           }
-
-          var functionDocumentation = new FunctionDocumentation(hdl.name, hdl.description, hdl.returnType, variants);
+          var functionDocumentation = new FunctionDocumentation(hdl.name, hdl.description, hdl.returnType, hdl.parentheses,
+              variants);
           list.add(functionDocumentation);
         }
       }

@@ -413,7 +413,7 @@ public class ParserTest extends AbstractProparseTest {
   }
 
   private IDatabase createWidgetPoolDB() {
-    IDatabase retVal = new Database("mydb");
+    var retVal = new Database("mydb");
     retVal.add(new Table("widget-pool", retVal));
 
     return retVal;

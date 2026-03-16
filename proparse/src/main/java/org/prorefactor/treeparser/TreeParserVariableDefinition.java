@@ -14,6 +14,7 @@
  ********************************************************************************/
 package org.prorefactor.treeparser;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -34,9 +35,12 @@ import org.prorefactor.core.schema.IIndex;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Index;
 import org.prorefactor.core.schema.Table;
+import org.prorefactor.core.schema.TableType;
 import org.prorefactor.proparse.antlr4.Proparse.*;
 import org.prorefactor.proparse.support.IProparseEnvironment;
 import org.prorefactor.proparse.support.ParserSupport;
+import org.prorefactor.treeparser.symbols.DataRelation;
+import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.Event;
 import org.prorefactor.treeparser.symbols.FieldBuffer;
 import org.prorefactor.treeparser.symbols.ISymbol;
@@ -118,7 +122,14 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterRecord(RecordContext ctx) {
     ContextQualifier qual = contextQualifiers.removeFrom(ctx);
     if (qual != null) {
-      recordNameNode((RecordNameNode) support.getNode(ctx), qual);
+      RecordNameNode recordNode = (RecordNameNode) support.getNode(ctx);
+      recordNameNode(recordNode, qual);
+
+      // If we're defining a dataset, add the buffer to it
+      if (!stack.isEmpty() && (stack.peek() instanceof Dataset ds) && (recordNode.getTableBuffer() != null)
+          && !ds.hasBuffer(recordNode.getTableBuffer())) {
+        ds.addBuffer(recordNode.getTableBuffer());
+      }
     }
   }
 
@@ -217,6 +228,11 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   @Override
+  public void enterParameterArgDataset(ParameterArgDatasetContext ctx) {
+    setContextQualifier(ctx.identifier(), ContextQualifier.INIT);
+  }
+
+  @Override
   public void enterParameterArgExpression(ParameterArgExpressionContext ctx) {
     setContextQualifier(ctx.expression(), contextQualifiers.removeFrom(ctx));
   }
@@ -283,17 +299,17 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   private JPNode getDefinitionNodeFromParam(FunctionParamStdContext ctx) {
-    if (ctx instanceof FunctionParamStandardTableContext)
-      return support.getNode(((FunctionParamStandardTableContext) ctx).record());
-    else if (ctx instanceof FunctionParamStandardTableHandleContext)
-      return support.getNode(((FunctionParamStandardTableHandleContext) ctx).hn);
-    else if (ctx instanceof FunctionParamStandardDatasetContext)
-      return support.getNode(((FunctionParamStandardDatasetContext) ctx).identifier());
-    else if (ctx instanceof FunctionParamStandardDatasetHandleContext)
-      return support.getNode(((FunctionParamStandardDatasetHandleContext) ctx).hn2);
+    if (ctx instanceof FunctionParamStandardTableContext ctx2)
+      return support.getNode(ctx2.record());
+    else if (ctx instanceof FunctionParamStandardTableHandleContext ctx2)
+      return support.getNode(ctx2.hn);
+    else if (ctx instanceof FunctionParamStandardDatasetContext ctx2)
+      return support.getNode(ctx2.identifier());
+    else if (ctx instanceof FunctionParamStandardDatasetHandleContext ctx2)
+      return support.getNode(ctx2.hn2);
     return support.getNode(ctx);
   }
-  
+
   @Override
   public void exitFunctionParamStandard(FunctionParamStandardContext ctx) {
     wipParameters.removeFirst();
@@ -353,6 +369,12 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   @Override
   public void enterFunctionParamStandardDataset(FunctionParamStandardDatasetContext ctx) {
     wipParameters.getFirst().setProgressType(ABLNodeType.DATASET);
+  }
+
+  @Override
+  public void exitFunctionParamStandardDataset(FunctionParamStandardDatasetContext ctx) {
+    var dataset = (Dataset) currentScope.lookupSymbol(ABLNodeType.DATASET.getType(), ctx.identifier().getText());
+    wipParameters.getFirst().setSymbol(dataset);
   }
 
   @Override
@@ -898,6 +920,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     for (RecordContext rec : ctx.record()) {
       setContextQualifier(rec, ContextQualifier.INIT);
     }
+    for (DataRelationContext rel : ctx.dataRelation()) {
+      setContextQualifier(rel, ContextQualifier.INIT);
+    }
   }
 
   @Override
@@ -907,8 +932,14 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   @Override
   public void enterDataRelation(DataRelationContext ctx) {
+    ArrayList<TableBuffer> buffer = new ArrayList<>();
     for (RecordContext rec : ctx.record()) {
       setContextQualifier(rec, ContextQualifier.INIT);
+      buffer.add(currentScope.lookupTableOrBufferSymbol(rec.getText()));
+    }
+    if (!stack.isEmpty() && (stack.peek() instanceof Dataset ds) && buffer.size() == 2) {
+      ds.addRelation(new DataRelation((ctx.identifier() != null ? ctx.identifier().getText() : ""), currentScope,
+          buffer.get(0), buffer.get(1)));
     }
   }
 
@@ -929,6 +960,17 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       nameResolution.put(ctx.fieldExpr().get(zz).field(), TableNameResolution.PREVIOUS);
       setContextQualifier(ctx.fieldExpr().get(zz + 1), ContextQualifier.SYMBOL);
       nameResolution.put(ctx.fieldExpr().get(zz + 1).field(), TableNameResolution.LAST);
+
+      var relName = ctx.fieldExpr().get(zz + 1).getParent().getParent().getChild(1).getText();
+      if (!stack.isEmpty() && (stack.peek() instanceof Dataset ds) && !relName.isEmpty() && ds.hasRelation(relName)) {
+        var rel = ds.getRelation(relName);
+        var parentField = currentScope.lookupBuffer(rel.getParentBuffer().getName()).getFieldBufferByName(
+            ctx.fieldExpr().get(zz).field().getText());
+        var childField = currentScope.lookupBuffer(rel.getChildBuffer().getName()).getFieldBufferByName(
+            ctx.fieldExpr().get(zz + 1).field().getText());
+        if (parentField != null && childField != null)
+          rel.addRelationFields(parentField, childField);
+      }
     }
   }
 
@@ -1076,13 +1118,13 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterDefineParamVar(DefineParamVarContext ctx) {
     if (ctx.datatypeVar() != null) {
       // AS HANDLE TO datatype
-      if (currSymbol instanceof Primitive)
-        ((Primitive) currSymbol).setDataType(DataType.HANDLE);
+      if (currSymbol instanceof Primitive p)
+        p.setDataType(DataType.HANDLE);
     } else {
       defAs(ctx.datatype());
     }
-    if ((currSymbol instanceof Variable) && (ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
-      defineInitialValue((Variable) currSymbol, ctx.initialConstant(0).varStatementInitialValue());
+    if ((currSymbol instanceof Variable v) && (ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
+      defineInitialValue(v, ctx.initialConstant(0).varStatementInitialValue());
     }
   }
 
@@ -1101,8 +1143,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     } else {
       defLike(support.getNode(ctx.fieldExpr().field()));
     }
-    if ((currSymbol instanceof Variable) && (ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
-      defineInitialValue((Variable) currSymbol, ctx.initialConstant(0).varStatementInitialValue());
+    if ((currSymbol instanceof Variable v) && (ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
+      defineInitialValue(v, ctx.initialConstant(0).varStatementInitialValue());
     }
   }
 
@@ -1113,10 +1155,10 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     } else if (ctx.LIKE() != null) {
       defLike(support.getNode(ctx.fieldExpr().field()));
     } else {
-      // Use same datatype as new variable 
+      // Use same datatype as new variable
     }
-    if ((currSymbol instanceof Variable) && (ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
-      defineInitialValue((Variable) currSymbol, ctx.initialConstant(0).varStatementInitialValue());
+    if ((currSymbol instanceof Variable v) && (ctx.initialConstant() != null) && !ctx.initialConstant().isEmpty()) {
+      defineInitialValue(v, ctx.initialConstant(0).varStatementInitialValue());
     }
   }
 
@@ -1458,9 +1500,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       defAs(ctx.datatype());
     } else if (ctx.LIKE() != null) {
       setContextQualifier(ctx.fieldExpr(), ContextQualifier.SYMBOL);
-    } else if ((ctx.initialConstant() != null) && (currSymbol instanceof Variable)) {
+    } else if ((ctx.initialConstant() != null) && (currSymbol instanceof Variable v)) {
       // Initial value only set for variables, not for TT fields
-      defineInitialValue((Variable) currSymbol, ctx.initialConstant().varStatementInitialValue());
+      defineInitialValue(v, ctx.initialConstant().varStatementInitialValue());
     }
   }
 
@@ -2099,7 +2141,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
     // For an unnamed buffer, determine if it's abbreviated.
     // Note that named buffers, temp and work table names cannot be abbreviated.
-    if (buffer.isDefault() && table.getStoretype() == IConstants.ST_DBTABLE) {
+    if (buffer.isDefault() && table.getTableType() == TableType.DB_TABLE) {
       String[] nameParts = nodeText.split("\\.");
       int tableNameLen = nameParts[nameParts.length - 1].length();
       if (table.getName().length() > tableNameLen)
@@ -2180,21 +2222,21 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   private void defAs(DatatypeContext ctx) {
-    if (currSymbol instanceof Primitive)
-      defAs((Primitive) currSymbol, ctx);
+    if (currSymbol instanceof Primitive p)
+      defAs(p, ctx);
     else {
       LOG.error("Unable to find 'AS' datatype in '{}' at position {}:{}:{}", ctx.getText(),
-          ctx.start instanceof ProToken ? ((ProToken) ctx.start).getFileName() : "<unknown_file>", ctx.start.getLine(),
+          ctx.start instanceof ProToken tok ? tok.getFileName() : "<unknown_file>", ctx.start.getLine(),
           ctx.start.getCharPositionInLine());
     }
   }
 
   private void defAs(ClassTypeNameContext ctx) {
-    if (currSymbol instanceof Primitive)
-      defAs((Primitive) currSymbol, ctx);
+    if (currSymbol instanceof Primitive p)
+      defAs(p, ctx);
     else {
       LOG.error("Unable to find 'AS' datatype in '{}' at position {}:{}:{}", ctx.getText(),
-          ctx.start instanceof ProToken ? ((ProToken) ctx.start).getFileName() : "<unknown_file>", ctx.start.getLine(),
+          ctx.start instanceof ProToken tok ? tok.getFileName() : "<unknown_file>", ctx.start.getLine(),
           ctx.start.getCharPositionInLine());
     }
   }
@@ -2259,7 +2301,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Variable extent '{}'", indent(), text);
 
-    Primitive primitive = currSymbol instanceof Primitive ? (Primitive) currSymbol : null;
+    Primitive primitive = currSymbol instanceof Primitive p ? p : null;
     if (primitive == null)
       return;
     try {
@@ -2271,16 +2313,17 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
 
   private void defLike(JPNode likeNode) {
     LOG.trace("Entering defLike {}", likeNode);
-    Primitive likePrim = likeNode.getSymbol() instanceof Primitive ? (Primitive) likeNode.getSymbol() : null;
-    Primitive newPrim = currSymbol instanceof Primitive ? (Primitive) currSymbol : null;
+    Primitive likePrim = likeNode.getSymbol() instanceof Primitive p ? p : null;
+    Primitive newPrim = currSymbol instanceof Primitive p ? p : null;
     if ((likePrim != null) && (newPrim != null)) {
       newPrim.assignAttributesLike(likePrim);
       currSymbol.setLikeSymbol(likeNode.getSymbol());
     } else {
       JPNode naturalNode = likeNode.firstNaturalChild();
       if (naturalNode != null) {
-        LOG.error("Failed to find LIKE datatype '{}' at {}:{} for symbol '{}'", naturalNode.getText(), naturalNode.getFileName(), naturalNode.getLine(), 
-          currSymbol == null ? "<undefined>" : currSymbol.getName() );
+        LOG.error("Failed to find LIKE datatype '{}' at {}:{} for symbol '{}'", naturalNode.getText(),
+            naturalNode.getFileName(), naturalNode.getLine(),
+            currSymbol == null ? "<undefined>" : currSymbol.getName());
       }
     }
   }
@@ -2382,12 +2425,13 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       currDefIndex.addField(fld);
   }
 
-  private void defineTable(JPNode defNode, String name, int storeType) {
+  private void defineTable(JPNode defNode, String name, TableType storeType) {
     if (LOG.isTraceEnabled())
       LOG.trace("{}> Table definition {} {}", indent(), defNode, storeType);
 
     TableBuffer buffer = rootScope.defineTable(name, storeType,
-        !defNode.queryCurrentStatement(ABLNodeType.NOUNDO).isEmpty(), !defNode.queryCurrentStatement(ABLNodeType.UNDO).isEmpty());
+        !defNode.queryCurrentStatement(ABLNodeType.NOUNDO).isEmpty(),
+        !defNode.queryCurrentStatement(ABLNodeType.UNDO).isEmpty());
     currSymbol = buffer;
     currSymbol.setDefinitionNode(defNode.getIdNode());
     currDefTable = buffer;
@@ -2420,7 +2464,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   private void defineTempTable(JPNode defAST, String name) {
-    defineTable(defAST, name, IConstants.ST_TTABLE);
+    defineTable(defAST, name, TableType.TEMP_TABLE);
   }
 
   /** Get the Table symbol linked from a RECORD_NAME AST. */
@@ -2468,7 +2512,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   private void defineWorktable(JPNode defAST, String name) {
-    defineTable(defAST, name, IConstants.ST_WTABLE);
+    defineTable(defAST, name, TableType.WORK_TABLE);
   }
 
   private void frameRef(JPNode idAST) {
@@ -2490,7 +2534,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     // Check if this is a FieldRef being "inline defined". If so, we define it right now.
     // refNode.isInlineVar returns true for all variable references, not only in the definition node
     if (refNode.isInlineVar() && (currentScope.getVariable(name) == null)) {
-        addToSymbolScope(defineVariable(ctx, refNode, name, Variable.Type.VARIABLE));
+      addToSymbolScope(defineVariable(ctx, refNode, name, Variable.Type.VARIABLE));
     }
     if (cq == ContextQualifier.STATIC) {
       ITypeInfo info = refSession.getTypeInfoCI(support.lookupClassName(refNode.getIdNode().getText()));
@@ -2551,12 +2595,11 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     }
 
     refNode.setSymbol((Symbol) result.getSymbol());
-    if (result.getSymbol() instanceof FieldBuffer) {
-      FieldBuffer fb = (FieldBuffer) result.getSymbol();
+    if (result.getSymbol() instanceof FieldBuffer fb) {
       if ((fb.getField() == null) || (fb.getField().getTable() == null))
         refNode.setStoreType(IConstants.ST_TTABLE);
       else
-        refNode.setStoreType(fb.getField().getTable().getStoretype());
+        refNode.setStoreType(fb.getField().getTable().getTableType().getStoreType());
     } else {
       refNode.setStoreType(IConstants.ST_VAR);
     }

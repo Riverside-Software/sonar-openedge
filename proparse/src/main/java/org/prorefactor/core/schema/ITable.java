@@ -31,11 +31,19 @@ public interface ITable {
    */
   String getName();
 
+  String getLCName();
+
+  TableType getTableType();
+
   /**
    * @return {@link IConstants#ST_DBTABLE} for DB table, {@link IConstants#ST_TTABLE} for temp-tables or
    *         {@link IConstants#ST_WTABLE} for work-tables
+   * @deprecated Use getTableType()
    */
-  int getStoretype();
+  @Deprecated(since = "3.7")
+  default int getStoretype() {
+    return getTableType().getStoreType();
+  }
 
   /**
    * Lookup a field by name. We do not test for uniqueness. We leave that job to the compiler. This function expects an
@@ -47,8 +55,9 @@ public interface ITable {
    * Same as lookupField, except field names can't be abbreviated
    */
   default IField lookupFullNameField(String name) {
+    var lc = name.toLowerCase();
     for (IField fld : getFieldSet()) {
-      if (fld.getName().equalsIgnoreCase(name))
+      if (fld.getLCName().equals(lc))
         return fld;
     }
     return null;

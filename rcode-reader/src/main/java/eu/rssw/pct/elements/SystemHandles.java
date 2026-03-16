@@ -35,10 +35,11 @@ import javax.annotation.processing.Generated;
 
 import com.google.gson.GsonBuilder;
 
-import eu.rssw.pct.elements.fixed.MethodElement;
-import eu.rssw.pct.elements.fixed.Parameter;
+import eu.rssw.pct.elements.fixed.ParamDocumentation;
 import eu.rssw.pct.elements.fixed.SystemHandle;
 import eu.rssw.pct.elements.fixed.AttributeElement;
+import eu.rssw.pct.elements.fixed.FunctionDocumentation;
+import eu.rssw.pct.elements.fixed.FunctionParameterList;
 import eu.rssw.pct.mapping.OpenEdgeVersion;
 import eu.rssw.pct.mapping.SystemHandlesMapping;
 
@@ -46,7 +47,8 @@ import eu.rssw.pct.mapping.SystemHandlesMapping;
 public class SystemHandles {
   private static final Map<OpenEdgeVersion, Collection<ISystemHandle>> SYS_HANDLES = new HashMap<>();
   public static final Function<OpenEdgeVersion, Function<String, ISystemHandle>> SYSTEM_HANDLE_PROVIDER = version -> {
-    return name -> getSystemHandles(version).stream().filter(it -> it.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+    return name -> getSystemHandles(version).stream().filter(
+        it -> it.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
   };
 
   private SystemHandles() {
@@ -71,29 +73,43 @@ public class SystemHandles {
 
         if (hdl.attributes != null) {
           for (var attrEntry : hdl.attributes) {
-
-            var attr = new AttributeElement(attrEntry.name, attrEntry.dataType.equals("OBJECT")
-                ? new DataType(attrEntry.dataTypeName) : DataType.get(attrEntry.dataType), attrEntry.access,
-                attrEntry.description);
+            var attr = new AttributeElement(attrEntry.name,
+                attrEntry.dataType == null ? DataType.NOT_COMPUTED : (attrEntry.dataType.equalsIgnoreCase("OBJECT")
+                    ? new DataType(attrEntry.dataTypeName) : DataType.get(attrEntry.dataType)),
+                attrEntry.access, attrEntry.description);
             systemHandle.addAttribute(attr);
           }
         }
 
         if (hdl.methods != null) {
           for (var methodEntry : hdl.methods) {
-            var params = new Parameter[methodEntry.parameters == null ? 0 : methodEntry.parameters.length];
-            if (methodEntry.parameters != null) {
-              var number = 1;
-              for (var paramEntry : methodEntry.parameters) {
-                // TODO Check if parameters can be OUTPUT or INPUT-OUTPUT
-                var prm = new Parameter(number, paramEntry.name, 0, ParameterMode.INPUT, DataType.get(paramEntry.type));
-                params[number - 1] = prm;
-                number++;
+            if (methodEntry.variants != null) {
+              var xx = 1;
+              var variants = new FunctionParameterList[methodEntry.variants == null ? 0 : methodEntry.variants.length];
+              for (var varianEntry : methodEntry.variants) {
+                var params = new ParamDocumentation[varianEntry.parameters == null ? 0 : varianEntry.parameters.length];
+                if (varianEntry.parameters != null) {
+                  var number = 1;
+                  for (var paramEntry : varianEntry.parameters) {
+                    var prm = new ParamDocumentation(paramEntry.name, paramEntry.description, paramEntry.isOptional,
+                        paramEntry.type.equals("Object") ? new DataType(paramEntry.typeName)
+                            : DataType.get(paramEntry.type));
+                    params[number - 1] = prm;
+                    number++;
+                  }
+                }
+                var variant = new FunctionParameterList(params);
+                variants[xx - 1] = variant;
+                xx++;
               }
+              var functionDocumentation = new FunctionDocumentation(
+                  methodEntry.name, methodEntry.description, methodEntry.returnType.equalsIgnoreCase("None")
+                      ? DataType.NOT_COMPUTED.toString() : DataType.get(methodEntry.returnType).toString(),
+                  "yes", variants);
+
+              systemHandle.addMethod(functionDocumentation);
+              systemHandle.addMethodDocumentation(methodEntry.name, methodEntry.description);
             }
-            var method = new MethodElement(methodEntry.name, false, DataType.get(methodEntry.returnType), params);
-            systemHandle.addMethod(method);
-            systemHandle.addMethodDocumentation(methodEntry.name, methodEntry.description);
           }
         }
 
@@ -105,5 +121,4 @@ public class SystemHandles {
     return Collections.unmodifiableList(list);
   }
 
- 
 }

@@ -15,6 +15,7 @@
 package org.prorefactor.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -205,7 +206,7 @@ public class JPNode {
 
   @Nonnull
   private List<JPNode> getChildren() {
-    return children == null ? new ArrayList<>() : children;
+    return children == null ? List.of() : Collections.unmodifiableList(children);
   }
 
   public int getNumberOfChildren() {
@@ -226,7 +227,7 @@ public class JPNode {
 
   public ProgramRootNode getTopLevelParent() {
     if (parent == null)
-      return this instanceof ProgramRootNode ? (ProgramRootNode) this : null;
+      return this instanceof ProgramRootNode rootNode ? rootNode : null;
     else
       return parent.getTopLevelParent();
   }
@@ -342,8 +343,8 @@ public class JPNode {
    */
   public List<JPNode> getDirectChildren(ABLNodeType type, ABLNodeType... types) {
     if (children == null)
-      return new ArrayList<>();
-    EnumSet<ABLNodeType> filter = EnumSet.of(type, types);
+      return List.of();
+    var filter = EnumSet.of(type, types);
     return children.stream().filter(node -> filter.contains(node.getNodeType())).toList();
   }
 
@@ -356,7 +357,7 @@ public class JPNode {
   public boolean hasDirectChildOfType(ABLNodeType type, ABLNodeType... types) {
     if (children == null)
       return false;
-    EnumSet<ABLNodeType> filter = EnumSet.of(type, types);
+    var filter = EnumSet.of(type, types);
     return children.stream().anyMatch(node -> filter.contains(node.getNodeType()));
   }
 

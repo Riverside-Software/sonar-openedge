@@ -706,10 +706,32 @@ public class ABLLexerTest {
 
     lexer = new ABLLexer(session, "FILE-INFO.".getBytes(), "file.txt");
     tok = (ProToken) lexer.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.FILEINFO);
+    assertFalse(tok.isAbbreviated());
+
+    lexer = new ABLLexer(session, "FILE-INFOR.".getBytes(), "file.txt");
+    tok = (ProToken) lexer.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.FILEINFORMATION);
     assertTrue(tok.isAbbreviated());
 
     lexer = new ABLLexer(session, "FILE-INFORMATION.".getBytes(), "file.txt");
     tok = (ProToken) lexer.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.FILEINFORMATION);
+    assertFalse(tok.isAbbreviated());
+
+    lexer = new ABLLexer(session, "RCODE-INFO.".getBytes(), "file.txt");
+    tok = (ProToken) lexer.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.RCODEINFO);
+    assertFalse(tok.isAbbreviated());
+
+    lexer = new ABLLexer(session, "RCODE-INFOR.".getBytes(), "file.txt");
+    tok = (ProToken) lexer.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.RCODEINFORMATION);
+    assertTrue(tok.isAbbreviated());
+
+    lexer = new ABLLexer(session, "RCODE-INFORMATION.".getBytes(), "file.txt");
+    tok = (ProToken) lexer.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.RCODEINFORMATION);
     assertFalse(tok.isAbbreviated());
 
     lexer = new ABLLexer(session, "SUBST('').".getBytes(), "file.txt");

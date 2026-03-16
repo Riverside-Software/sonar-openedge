@@ -485,7 +485,7 @@ public class OpenEdgeProparseSensor implements Sensor {
   }
 
   private void generateProparseDebugFile(SensorContext context, InputFile file, ParseUnit unit) {
-    var fName = file.toString().replace('/', '_').replace('.', '_');
+    var fName = InputFileUtils.getRelativePath(file, context.fileSystem()).replace('/', '_').replace('.', '_');
     var fileName = ".proparse/files/" + fName + ".json";
     var dbgPath = context.fileSystem().baseDir().toPath().resolve(fileName);
 

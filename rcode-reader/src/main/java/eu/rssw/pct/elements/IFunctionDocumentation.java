@@ -21,13 +21,18 @@ package eu.rssw.pct.elements;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
 
+import org.prorefactor.core.Pair;
+
 public interface IFunctionDocumentation extends IElementDocumentation {
 
   IFunctionParameterList[] getVariants();
+
+  Parentheses getParentheses();
 
   DataType getReturnType();
 
@@ -54,20 +59,39 @@ public interface IFunctionDocumentation extends IElementDocumentation {
   }
 
   /**
+   * Return all possible completion entries of a function. Left part of the pair is the label, right part is the
+   * insertText (VS Code format)
+   */
+  default List<Pair<String, String>> getCompletionVariants(boolean upperCase, boolean useParentheses) {
+    List<Pair<String, String>> result = new ArrayList<>();
+    for (var variant : getVariants()) {
+      int pos = variant.firstOptionalParameter();
+      if (pos >= 0) {
+        for (int zz = pos; zz <= variant.getParameters().length; zz++) {
+          result.add(getCompletionElement(variant, zz, upperCase, useParentheses));
+        }
+      } else {
+        result.add(getCompletionElement(variant, variant.getParameters().length, upperCase, useParentheses));
+      }
+    }
+    return result;
+  }
+
+  /**
    * @return First signature available for this function
    */
-  default String getIDESignature(Function<String, ITypeInfo> provider) {
-    return getIDESignatures(provider)[0];
+  default String getIDESignature(Function<String, ITypeInfo> provider, boolean useParentheses) {
+    return getIDESignatures(provider, useParentheses)[0];
   }
 
   /**
    * @return All signatures available for this function
    */
-  default String[] getIDESignatures(Function<String, ITypeInfo> provider) {
+  default String[] getIDESignatures(Function<String, ITypeInfo> provider, boolean useParentheses) {
     var retVal = new String[getVariants().length];
     var offset = 0;
     for (var variant : getVariants()) {
-      retVal[offset++] = getSignature(variant);
+      retVal[offset++] = getSignature(variant, useParentheses);
     }
 
     return retVal;
@@ -76,22 +100,26 @@ public interface IFunctionDocumentation extends IElementDocumentation {
   /**
    * @return All signatures matching the parameter datatypes
    */
-  default String[] getIDESignatures(@Nonnull DataType[] datatypes, Function<String, ITypeInfo> provider) {
+  default String[] getIDESignatures(@Nonnull DataType[] datatypes, Function<String, ITypeInfo> provider,
+      boolean useParentheses) {
     var variants = getVariants(datatypes, provider);
 
     var retVal = new String[variants.length];
     var offset = 0;
     for (var variant : variants) {
-      retVal[offset++] = getSignature(variant);
+      retVal[offset++] = getSignature(variant, useParentheses);
     }
 
     return retVal;
   }
 
-  private String getSignature(IFunctionParameterList variant) {
+  private String getSignature(IFunctionParameterList variant, boolean useParentheses) {
     StringBuilder sb = new StringBuilder(getName());
-    if (variant.getParameters().length > 0)
+    if (useParentheses(useParentheses, variant.getParameters().length))
       sb.append('(');
+    else
+      sb.append(' ');
+
     boolean first = true;
     int openBrackets = 0;
     for (var p : variant.getParameters()) {
@@ -115,10 +143,23 @@ public interface IFunctionDocumentation extends IElementDocumentation {
     while (openBrackets-- > 0) {
       sb.append("]");
     }
-    if (variant.getParameters().length > 0)
+    if (useParentheses(useParentheses, variant.getParameters().length))
       sb.append(')');
 
-    return sb.toString();
+    return sb.toString().trim();
+  }
+
+  private boolean useParentheses(boolean useParentheses, int numParams) {
+    switch (getParentheses()) {
+      case NO:
+        return numParams > 0;
+      case YES:
+        return true;
+      case BOTH:
+        return useParentheses;
+      default:
+        return false;
+    }
   }
 
   private IFunctionParameterList[] getVariants(@Nonnull DataType[] datatypes, Function<String, ITypeInfo> provider) {
@@ -132,7 +173,8 @@ public interface IFunctionDocumentation extends IElementDocumentation {
       var addVariant = true;
       var prm = variant.getParameters();
       for (var datatype : datatypes) {
-        if (prm.length <= offset || offset >= datatypes.length || !prm[offset].getDataType().isCompatible(datatype, provider)) {
+        if (prm.length <= offset || offset >= datatypes.length
+            || !prm[offset].getDataType().isCompatible(datatype, provider)) {
           addVariant = false;
         }
         offset++;
@@ -146,4 +188,58 @@ public interface IFunctionDocumentation extends IElementDocumentation {
     return coll.toArray(new IFunctionParameterList[0]);
   }
 
+  // Label and insert text of a function variant
+  private Pair<String, String> getCompletionElement(IFunctionParameterList variant, int numParams, boolean upperCase,
+      boolean useParentheses) {
+    var label = new StringBuilder(upperCase ? getName().toUpperCase() : getName().toLowerCase());
+    var insertText = new StringBuilder(upperCase ? getName().toUpperCase() : getName().toLowerCase());
+
+    if (useParentheses(useParentheses, numParams)) {
+      label.append("(");
+      insertText.append("(");
+    } else {
+      label.append(" ");
+      insertText.append(" ");
+    }
+
+    for (int pos = 0; pos < numParams; pos++) {
+      if (pos > 0) {
+        label.append(", ");
+        insertText.append(", ");
+      }
+      if (variant.getParameters()[pos].getDataType().getPrimitive() == PrimitiveDataType.CLASS)
+        label.append(variant.getParameters()[pos].getDataType().getClassName());
+      else
+        label.append(variant.getParameters()[pos].getDataType().getPrimitive().getIDESignature());
+      label.append(" ").append(variant.getParameters()[pos].getName());
+      insertText.append("${").append(pos + 1).append(":").append(variant.getParameters()[pos].getName()).append("}");
+    }
+    if (useParentheses(useParentheses, numParams)) {
+      label.append(")");
+      insertText.append(")$0");
+    } else
+      insertText.append("$0");
+
+    return Pair.of(label.toString().trim(), insertText.toString());
+  }
+
+  /**
+   * YES: parentheses required
+   * NO: no parentheses
+   * BOTH: both styles accepted by the compiler 
+   */
+  public enum Parentheses {
+    YES,
+    NO,
+    BOTH;
+
+    public static Parentheses fromString(String str) {
+      if ("no".equalsIgnoreCase(str))
+        return NO;
+      else if ("both".equalsIgnoreCase(str))
+        return BOTH;
+      else
+        return YES;
+    }
+  }
 }

@@ -94,6 +94,7 @@ import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.fixed.TypeInfoKryoProxy;
 import eu.rssw.pct.elements.fixed.TypeInfoPLProxy;
 import eu.rssw.pct.elements.fixed.TypeInfoRCodeProxy;
+import eu.rssw.pct.mapping.OpenEdgeVersion;
 
 @ScannerSide
 @SonarLintSide
@@ -1032,7 +1033,7 @@ public class OpenEdgeSettings {
         }
       }
       if (desc != null) {
-        dbs.add(new DatabaseWrapper(desc));
+        dbs.add(new DatabaseWrapper(desc, OpenEdgeVersion.V128));
       }
     }
 
@@ -1108,9 +1109,6 @@ public class OpenEdgeSettings {
     }
 
     Schema sch = new Schema(dbs.toArray(new IDatabase[] {}));
-    if (!sch.getDbSet().isEmpty()) {
-      sch.createAlias("dictdb", sch.getDbSet().first().getName());
-    }
     for (String str : Splitter.on(';').trimResults().omitEmptyStrings().split(aliasPropValue)) {
       List<String> lst = Splitter.on(',').trimResults().splitToList(str);
       for (String alias : lst.subList(1, lst.size())) {

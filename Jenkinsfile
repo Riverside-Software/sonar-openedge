@@ -49,17 +49,28 @@ pipeline {
           withEnv(["PATH+MVN=${tool name: 'Maven 3', type: 'maven'}/bin", "JAVA_HOME=${tool name: 'JDK17', type: 'jdk'}"]) {
             withSonarQubeEnv(credentialsId: 'SQToken', installationName: 'RSSW') {
               if (("main" == env.BRANCH_NAME) || ("develop" == env.BRANCH_NAME)) {
-                sh "mvn -Dsonar.organization=rssw -Dsonar.branch.name=${env.BRANCH_NAME} sonar:sonar"
+                sh "mvn -Dsonar.branch.name=${env.BRANCH_NAME} sonar:sonar"
               } else if (env.BRANCH_NAME.startsWith("hotfix")) {
-                sh "mvn -Dsonar.organization=rssw -Dsonar.branch.name=${env.BRANCH_NAME} -Dsonar.branch.target=main sonar:sonar"
+                sh "mvn -Dsonar.branch.name=${env.BRANCH_NAME} -Dsonar.newCode.referenceBranch=main -Dsonar.branch.target=main sonar:sonar"
               } else {
-                sh "mvn -Dsonar.organization=rssw -Dsonar.branch.name=${env.BRANCH_NAME} -Dsonar.branch.target=develop sonar:sonar"
+                sh "mvn -Dsonar.branch.name=${env.BRANCH_NAME} -Dsonar.newCode.referenceBranch=develop -Dsonar.branch.target=develop sonar:sonar"
               }
             }
           }
         }
       }
     }
+
+    stage('🦺 Quality Gate') {
+      steps {
+        timeout(time: 5, unit: 'MINUTES') {
+          warnError('Failed quality gate') {
+            waitForQualityGate abortPipeline: true
+          }
+        }
+      }
+    }
+
   }
 
   post {

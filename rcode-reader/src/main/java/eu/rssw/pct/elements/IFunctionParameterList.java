@@ -23,4 +23,14 @@ public interface IFunctionParameterList {
 
   IFunctionParameter[] getParameters();
 
+  default int firstOptionalParameter() {
+    int pos = 0;
+    for (var p : getParameters()) {
+      if (p.isOptional())
+        return pos;
+      pos++;
+    }
+    return -1;
+  }
+
 }

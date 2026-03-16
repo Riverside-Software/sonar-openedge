@@ -633,7 +633,8 @@ public enum ABLNodeType {
   FILEACCESSTIME(Proparse.FILEACCESSTIME, "file-access-time", 13, NodeTypesOption.KEYWORD),
   FILECREATEDATE(Proparse.FILECREATEDATE, "file-create-date", 13, NodeTypesOption.KEYWORD),
   FILECREATETIME(Proparse.FILECREATETIME, "file-create-time", 13, NodeTypesOption.KEYWORD),
-  FILEINFORMATION(Proparse.FILEINFORMATION, "file-information", 9, NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
+  FILEINFO(Proparse.FILEINFO, "file-info",NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
+  FILEINFORMATION(Proparse.FILEINFORMATION, "file-information", 10, NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   FILEMODDATE(Proparse.FILEMODDATE, "file-mod-date", 10, NodeTypesOption.KEYWORD),
   FILEMODTIME(Proparse.FILEMODTIME, "file-mod-time", 10, NodeTypesOption.KEYWORD),
   FILEOFFSET(Proparse.FILEOFFSET, "file-offset", 8, NodeTypesOption.KEYWORD),
@@ -1166,7 +1167,8 @@ public enum ABLNodeType {
   RANDOM(Proparse.RANDOM, "random", NodeTypesOption.KEYWORD),
   RAW(Proparse.RAW, "raw", NodeTypesOption.KEYWORD),
   RAWTRANSFER(Proparse.RAWTRANSFER, "raw-transfer", NodeTypesOption.KEYWORD),
-  RCODEINFORMATION(Proparse.RCODEINFORMATION, "rcode-information", 10, NodeTypesOption.KEYWORD,
+  RCODEINFO(Proparse.RCODEINFO, "rcode-info", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
+  RCODEINFORMATION(Proparse.RCODEINFORMATION, "rcode-information", 11, NodeTypesOption.KEYWORD,
       NodeTypesOption.RESERVED),
   READAVAILABLE(Proparse.READAVAILABLE, "read-available", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   READEXACTNUM(Proparse.READEXACTNUM, "read-exact-num", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
@@ -1804,6 +1806,7 @@ public enum ABLNodeType {
       DEBUGGER, //
       DEFAULTWINDOW, //
       ERRORSTATUS, //
+      FILEINFO, //
       FILEINFORMATION, //
       FOCUS, //
       FONTTABLE, //
@@ -1811,6 +1814,7 @@ public enum ABLNodeType {
       LOGMANAGER, //
       MOUSE, //
       PROFILER, //
+      RCODEINFO, //
       RCODEINFORMATION, //
       SECURITYPOLICY, //
       SELF, //

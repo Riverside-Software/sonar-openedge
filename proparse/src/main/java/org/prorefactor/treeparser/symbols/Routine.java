@@ -17,9 +17,9 @@ package org.prorefactor.treeparser.symbols;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.JPNode;
 import org.prorefactor.core.nodetypes.IStatement;
 import org.prorefactor.core.nodetypes.IStatementBlock;
 import org.prorefactor.core.nodetypes.IfStatementNode;
@@ -36,6 +36,10 @@ import eu.rssw.pct.elements.PrimitiveDataType;
  * Program_root, PROCEDURE, FUNCTION, or METHOD.
  */
 public class Routine extends Symbol {
+  private static final Predicate<IStatement> IS_BLOCK = it -> (it.getNodeType() == ABLNodeType.FUNCTION)
+      || (it.getNodeType() == ABLNodeType.PROCEDURE) || (it.getNodeType() == ABLNodeType.METHOD)
+      || (it.getNodeType() == ABLNodeType.ON);
+
   private final TreeParserSymbolScope routineScope;
   private final List<Parameter> parameters = new ArrayList<>();
   private DataType returnDatatypeNode = null;
@@ -224,35 +228,42 @@ public class Routine extends Symbol {
   }
   
   private ExecutionGraph createExecutionGraph() {
-    ExecutionGraph g2 = new ExecutionGraph();
+    var g2 = new ExecutionGraph();
     if (routineScope.getRootBlock().getNode().isIStatementBlock()) {
-      addVerticesAndEdges(g2, routineScope.getRootBlock().getNode().asIStatementBlock());
+      addVerticesAndEdges(g2, routineScope.getRootBlock().getNode().asIStatementBlock(), null);
     }
 
     return g2;
   }
 
-  private void addVerticesAndEdges(ExecutionGraph graph, IStatementBlock block) {
+  private IStatement getNextNonRoutineStatement(IStatement stmt) {
+    var currStmt = stmt.getNextStatement();
+    while ((currStmt != null) && IS_BLOCK.test(currStmt)) {
+      currStmt = currStmt.getNextStatement();
+    }
+    return currStmt;
+  }
+
+  private void addVerticesAndEdges(ExecutionGraph graph, IStatementBlock block, IStatement exitStmt) {
     // Init navigation
-    IStatement currStmt = block.getFirstStatement();
-    JPNode prevStmt = block.asJPNode();
+    var currStmt = block.getFirstStatement();
+    var prevStmt = block.asJPNode();
 
     // Add block vertex
     graph.addVertex(block.asJPNode());
 
     while (currStmt != null) {
-      if ((currStmt.getNodeType() == ABLNodeType.FUNCTION)
-          || (currStmt.getNodeType() == ABLNodeType.PROCEDURE)
-          || (currStmt.getNodeType() == ABLNodeType.METHOD)
-          || (currStmt.getNodeType() == ABLNodeType.ON)) {
+      if (IS_BLOCK.test(currStmt)) {
         currStmt = currStmt.getNextStatement();
         continue;
       }
 
-      if (currStmt instanceof IfStatementNode) {
-        addVertices(graph, (IfStatementNode) currStmt);
-      } else if (currStmt instanceof IStatementBlock) {
-        addVerticesAndEdges(graph, (IStatementBlock) currStmt);
+      if (currStmt instanceof IfStatementNode ifStmt) {
+        var tmp = getNextNonRoutineStatement(currStmt);
+        addVertices(graph, ifStmt, tmp == null ? exitStmt : tmp);
+      } else if (currStmt instanceof IStatementBlock stmtBlock) {
+        var tmp = getNextNonRoutineStatement(currStmt);
+        addVerticesAndEdges(graph, stmtBlock, tmp == null ? exitStmt : tmp);
       } else {
         graph.addVertex(currStmt.asJPNode());
       }
@@ -261,29 +272,47 @@ public class Routine extends Symbol {
       prevStmt = currStmt.asJPNode();
       currStmt = currStmt.getNextStatement();
     }
+    if ((exitStmt != null) && (prevStmt != null)) {
+      graph.addVertex(exitStmt.asJPNode());
+      graph.addEdge(prevStmt, exitStmt.asJPNode());
+    }
   }
 
-  private void addVertices(ExecutionGraph graph, IfStatementNode ifNode) {
+  private void addVertices(ExecutionGraph graph, IfStatementNode ifNode, IStatement exitStmt) {
     graph.addVertex(ifNode.asJPNode());
 
-    if (ifNode.getThenBlockOrNode() instanceof IfStatementNode)
-      addVertices(graph, (IfStatementNode) ifNode.getThenBlockOrNode());
-    else if (ifNode.getThenBlockOrNode() instanceof IStatementBlock) {
-      addVerticesAndEdges(graph, (IStatementBlock) ifNode.getThenBlockOrNode());
+    if (ifNode.getThenBlockOrNode() instanceof IfStatementNode ifNode2)
+      addVertices(graph, ifNode2, exitStmt);
+    else if (ifNode.getThenBlockOrNode() instanceof IStatementBlock stmtBlock) {
+      addVerticesAndEdges(graph, stmtBlock, exitStmt);
     } else {
       graph.addVertex(ifNode.getThenBlockOrNode().asJPNode());
+      if (exitStmt != null) {
+        graph.addVertex(exitStmt.asJPNode());
+        graph.addEdge(ifNode.getThenBlockOrNode().asJPNode(), exitStmt.asJPNode());
+      }
     }
     graph.addEdge(ifNode.asJPNode(), ifNode.getThenBlockOrNode().asJPNode());
 
     if (ifNode.getElseBlockOrNode() != null) {
-      if (ifNode.getElseBlockOrNode() instanceof IfStatementNode)
-        addVertices(graph, (IfStatementNode) ifNode.getElseBlockOrNode());
-      else if (ifNode.getElseBlockOrNode() instanceof IStatementBlock)
-        addVerticesAndEdges(graph, (IStatementBlock) ifNode.getElseBlockOrNode());
-      else if (ifNode.getElseBlockOrNode() instanceof IStatement)
+      if (ifNode.getElseBlockOrNode() instanceof IfStatementNode ifNode2)
+        addVertices(graph, ifNode2, exitStmt);
+      else if (ifNode.getElseBlockOrNode() instanceof IStatementBlock stmtBlock)
+        addVerticesAndEdges(graph, stmtBlock, exitStmt);
+      else {
         graph.addVertex(ifNode.getElseBlockOrNode().asJPNode());
+        if (exitStmt != null) {
+          graph.addVertex(exitStmt.asJPNode());
+          graph.addEdge(ifNode.getElseBlockOrNode().asJPNode(), exitStmt.asJPNode());
+        }
+      }
 
       graph.addEdge(ifNode.asJPNode(), ifNode.getElseBlockOrNode().asJPNode());
+    }
+
+    if (exitStmt != null) {
+      graph.addVertex(exitStmt.asJPNode());
+      graph.addEdge(ifNode.asJPNode(), exitStmt.asJPNode());
     }
   }
 

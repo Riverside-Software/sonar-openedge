@@ -15,11 +15,12 @@
 package org.prorefactor.core.util;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 import org.prorefactor.core.schema.Schema;
 
 public class SportsSchema extends Schema {
   public SportsSchema() throws IOException {
-    super("src/test/resources/projects/sports2000/sports2000.cache", true);
+    super(Path.of("src/test/resources/schema/sports2000.cache"), true);
   }
 }

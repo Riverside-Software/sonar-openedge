@@ -19,31 +19,43 @@
  */
 package org.sonar.plugins.openedge.api.objects;
 
-import java.util.Collections;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.prorefactor.core.schema.Constants;
 import org.prorefactor.core.schema.IDatabase;
 import org.prorefactor.core.schema.ITable;
+import org.prorefactor.core.schema.MetaSchemaProvider;
 
 import eu.rssw.antlr.database.objects.DatabaseDescription;
-import eu.rssw.antlr.database.objects.Table;
+import eu.rssw.pct.mapping.OpenEdgeVersion;
 
 public class DatabaseWrapper implements IDatabase {
   private final DatabaseDescription dbDesc;
-
-  private final SortedSet<ITable> sortedTables = new TreeSet<>(Constants.TABLE_NAME_ORDER);
+  private final List<ITable> tblList;
 
   public DatabaseWrapper(DatabaseDescription dbDesc) {
-    this.dbDesc = dbDesc;
-
-    for (Table fld : dbDesc.getTables()) {
-      ITable iFld = new TableWrapper(this, fld);
-      sortedTables.add(iFld);
-    }
+    this(dbDesc, null);
   }
 
+  public DatabaseWrapper(@Nonnull DatabaseDescription dbDesc, @Nullable OpenEdgeVersion metaschema) {
+    this.dbDesc = Objects.requireNonNull(dbDesc);
+    Set<ITable> set = new HashSet<>();
+    for (var tbl : dbDesc.getTables()) {
+      set.add(new TableWrapper(this, tbl));
+    }
+    if (metaschema != null) {
+      set.addAll(MetaSchemaProvider.getMetaSchema(this, metaschema));
+    }
+    this.tblList = set.stream().sorted(Constants.TABLE_NAME_ORDER).toList();
+  }
+
+  @Nonnull
   public DatabaseDescription getDbDesc() {
     return dbDesc;
   }
@@ -54,17 +66,8 @@ public class DatabaseWrapper implements IDatabase {
   }
 
   @Override
-  public SortedSet<ITable> getTableSet() {
-    return Collections.unmodifiableSortedSet(sortedTables);
-  }
-
-  @Override
-  public void add(ITable table) {
-    if (table.getName().startsWith("_") || table.getName().startsWith("SYS")) {
-      sortedTables.add(table);
-    } else {
-      throw new UnsupportedOperationException("Unable to add table " + table.getName());
-    }
+  public List<ITable> getTableSet() {
+    return tblList;
   }
 
 }

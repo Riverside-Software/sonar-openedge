@@ -22,12 +22,14 @@ import eu.rssw.pct.elements.IVariableElement;
 public class RCodeTTFieldWrapper implements IField {
   private final ITable table;
   private final IVariableElement field;
+  private final String lcName;
 
   public RCodeTTFieldWrapper(ITable table, IVariableElement field) {
     Preconditions.checkNotNull(table);
     Preconditions.checkNotNull(field);
     this.table = table;
     this.field = field;
+    this.lcName = field.getName().toLowerCase();
   }
 
   public IVariableElement getBackingObject() {
@@ -37,6 +39,11 @@ public class RCodeTTFieldWrapper implements IField {
   @Override
   public String getName() {
     return field.getName();
+  }
+
+  @Override
+  public String getLCName() {
+    return lcName;
   }
 
   @Override
@@ -52,11 +59,6 @@ public class RCodeTTFieldWrapper implements IField {
   @Override
   public ITable getTable() {
     return table;
-  }
-
-  @Override
-  public IField copyBare(ITable toTable) {
-    return new RCodeTTFieldWrapper(toTable, field);
   }
 
   @Override

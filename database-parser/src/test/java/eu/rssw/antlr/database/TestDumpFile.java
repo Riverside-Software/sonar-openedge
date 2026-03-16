@@ -235,5 +235,11 @@ public class TestDumpFile {
 
     var wordIndex = db.getTable("Customer").getIndex("Comments");
     assertTrue(wordIndex.isWord());
-}
+  }
+
+  @Test
+  public void testQuotedString() throws IOException {
+    var db = DumpFileUtils.getDatabaseDescription(Paths.get("src/test/resources/testQuotedString.df"));
+    assertEquals(db.getSequences().size(), 2);
+  }
 }

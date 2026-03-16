@@ -20,9 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.IConstants;
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
+import org.prorefactor.core.schema.TableType;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 /**
@@ -52,7 +52,7 @@ public class TableBuffer extends Symbol {
    * @return Fully qualified table name (with DB) of the table buffer is pointing to
    */
   public String getTargetFullName() {
-    if (table.getStoretype() == IConstants.ST_DBTABLE)
+    if (table.getTableType() == TableType.DB_TABLE)
       return new StringBuilder(table.getDatabase().getName()).append(".").append(table.getName()).toString();
     else
       return table.getName();
@@ -65,7 +65,7 @@ public class TableBuffer extends Symbol {
   public String fullName() {
     if (table == null)
       return "<notable>";
-    if (table.getStoretype() != IConstants.ST_DBTABLE)
+    if (table.getTableType() != TableType.DB_TABLE)
       return getName();
 
     return new StringBuilder(table.getDatabase().getName()).append(".").append(getName()).toString();
@@ -80,7 +80,7 @@ public class TableBuffer extends Symbol {
    * Always returns BUFFER, whether this is a named buffer or a default buffer.
    * 
    * @see org.prorefactor.treeparser.symbols.Symbol#getProgressType()
-   * @see org.prorefactor.core.schema.ITable#getStoretype()
+   * @see org.prorefactor.core.schema.ITable#getTableType()
    */
   @Override
   public ABLNodeType getNodeType() {
@@ -102,12 +102,30 @@ public class TableBuffer extends Symbol {
     return ret;
   }
 
+  /** Get a FieldBuffer by its name. */
+  public FieldBuffer getFieldBufferByName(String name) {
+    for (FieldBuffer field : fieldBuffers.values()) {
+      if (field.getName().equals(name))
+        return field;
+    }
+    return null;
+  }
+
+  /** Get a FieldBuffer by its name. */
+  public boolean hasFieldBuffer(String name) {
+    for (FieldBuffer field : fieldBuffers.values()) {
+      if (field.getName().equals(name))
+        return true;
+    }
+    return false;
+  }
+
   /**
    * @return The name of the buffer, or the name of the table for default (unnamed) buffers
    */
   @Override
   public String getName() {
-    if (super.getName().isEmpty()) {
+    if (super.getName().isEmpty() && table != null) {
       return table.getName();
     }
 
@@ -129,7 +147,7 @@ public class TableBuffer extends Symbol {
    * @return True if this a default (unnamed) buffer for a schema table
    */
   public boolean isDefaultSchema() {
-    return isDefault && table.getStoretype() == IConstants.ST_DBTABLE;
+    return isDefault && table.getTableType() == TableType.DB_TABLE;
   }
 
   @Override

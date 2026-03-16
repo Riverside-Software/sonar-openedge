@@ -1,5 +1,6 @@
 package org.sonar.plugins.openedge.api.objects;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.prorefactor.core.schema.IDatabase;
@@ -31,7 +32,13 @@ public class KryoSerializers {
       for (IDatabase db : object.getDatabases())  {
         kryo.writeClassAndObject(output, db);
       }
-      kryo.writeClassAndObject(output, object.getAliases());
+      // It was a bad idea to serialize the entire Map object...
+      // Switching to UnmodifiableMap for getAliases() broke the serialization, so we have to rely on this workaround
+      Map<String, String> tmp = new HashMap<>();
+      for (var entry : object.getAliases().entrySet()) {
+        tmp.put(entry.getKey(), entry.getValue());
+      }
+      kryo.writeClassAndObject(output, tmp);
     }
 
     @Override

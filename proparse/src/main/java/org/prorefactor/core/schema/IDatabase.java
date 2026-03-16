@@ -15,24 +15,22 @@
  ********************************************************************************/
 package org.prorefactor.core.schema;
 
-import java.util.SortedSet;
+import java.util.List;
+
+import javax.annotation.Nonnull;
 
 /**
  * Database definition
  */
 public interface IDatabase {
-  /**
-   * Adds table definition
-   */
-  public void add(ITable table);
 
-  /**
-   * @return Database name
-   */
+  @Nonnull
   public String getName();
 
   /**
-   * @return Sorted (by table name) list of tables
+   * Returns list of tables, ordered alphabetically (case-insensitive)
    */
-  public SortedSet<ITable> getTableSet();
+  @Nonnull
+  // TODO Rename
+  public List<ITable> getTableSet();
 }

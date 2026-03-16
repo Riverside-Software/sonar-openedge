@@ -15,11 +15,12 @@
 package org.prorefactor.core.util;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 import org.prorefactor.core.schema.Schema;
 
 public class SP2KSchema extends Schema {
   public SP2KSchema() throws IOException {
-    super("src/test/resources/projects/sports2000/SP2K.cache", true);
+    super(Path.of("src/test/resources/schema/SP2K.cache"), true);
   }
 }

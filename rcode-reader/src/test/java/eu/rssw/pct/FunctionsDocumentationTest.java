@@ -62,7 +62,8 @@ public class FunctionsDocumentationTest {
         assertNotEquals(functionDocumentation.getReturnType(), null,
             version + " " + functionDocumentation.getName() + " -- " + "returndatatype");
         assertNotNull(functionDocumentation.getVariants());
-        assertNotNull(functionDocumentation.getIDESignature(VERSION_TYPE_INFO_PROVIDER.apply(OpenEdgeVersion.V128)));
+        assertNotNull(
+            functionDocumentation.getIDESignature(VERSION_TYPE_INFO_PROVIDER.apply(OpenEdgeVersion.V128), true));
         assertNotNull(functionDocumentation.getVariants()[0].getParameters());
         for (var variant : functionDocumentation.getVariants()) {
           for (var param : variant.getParameters()) {
@@ -75,6 +76,12 @@ public class FunctionsDocumentationTest {
         }
         assertFalse(functionDocumentation.hasParameters("unknown"));
         assertNull(functionDocumentation.getParameter("unknown"));
+        var completion1 = functionDocumentation.getCompletionVariants(true, true);
+        assertNotNull(completion1);
+        assertFalse(completion1.isEmpty());
+        var completion2 = functionDocumentation.getCompletionVariants(false, true);
+        assertNotNull(completion2);
+        assertFalse(completion2.isEmpty());
       }
     }
   }
@@ -95,35 +102,37 @@ public class FunctionsDocumentationTest {
     var provider = VERSION_TYPE_INFO_PROVIDER.apply(OpenEdgeVersion.V128);
     var lookupFunc1 = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V117).apply("LOOKUP");
     assertNotNull(lookupFunc1);
-    assertEquals(lookupFunc1.getIDESignature(provider), "LOOKUP(CHAR expression, CHAR list [, CHAR character])");
+    assertEquals(lookupFunc1.getIDESignature(provider, true), "LOOKUP(CHAR expression, CHAR list [, CHAR character])");
 
     var lookupFunc2 = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("LOOKUP");
     assertNotNull(lookupFunc2);
-    assertEquals(lookupFunc2.getIDESignature(provider), "LOOKUP(CHAR expression, CHAR list [, CHAR delimiter])");
+    assertEquals(lookupFunc2.getIDESignature(provider, true), "LOOKUP(CHAR expression, CHAR list [, CHAR delimiter])");
 
     var substringFunc = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("SUBSTRING");
     assertNotNull(substringFunc);
-    assertEquals(substringFunc.getIDESignature(provider),
+    assertEquals(substringFunc.getIDESignature(provider, true),
         "SUBSTRING(CHAR source, INT position [, INT length [, CHAR type]])");
 
     var lineCounterFunc = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("LINE-COUNTER");
     assertNotNull(lineCounterFunc);
-    assertEquals(lineCounterFunc.getIDESignature(provider), "LINE-COUNTER([CHAR stream [, HDL handle]])");
+    assertEquals(lineCounterFunc.getIDESignature(provider, true), "LINE-COUNTER([CHAR stream [, HDL handle]])");
 
     var connectedFunc = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("CONNECTED");
     assertNotNull(connectedFunc);
-    assertEquals(connectedFunc.getIDESignatures(provider).length, 2);
-    assertEquals(connectedFunc.getIDESignatures(provider)[0], "CONNECTED(CHAR logical-name)");
-    assertEquals(connectedFunc.getIDESignatures(provider)[1], "CONNECTED(CHAR alias)");
+    assertEquals(connectedFunc.getIDESignatures(provider, true).length, 2);
+    assertEquals(connectedFunc.getIDESignatures(provider, true)[0], "CONNECTED(CHAR logical-name)");
+    assertEquals(connectedFunc.getIDESignatures(provider, true)[1], "CONNECTED(CHAR alias)");
 
     var validObjectFunc = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("VALID-OBJECT");
     assertNotNull(validObjectFunc);
-    assertEquals(validObjectFunc.getIDESignatures(provider).length, 2);
-    assertEquals(validObjectFunc.getIDESignatures(provider)[0], "VALID-OBJECT(HDL handle)");
-    assertEquals(validObjectFunc.getIDESignatures(provider)[1], "VALID-OBJECT(Progress.Lang.Object object-reference)");
-    assertEquals(validObjectFunc.getIDESignatures(new DataType[] {DataType.HANDLE}, provider)[0],
+    assertEquals(validObjectFunc.getIDESignatures(provider, true).length, 2);
+    assertEquals(validObjectFunc.getIDESignatures(provider, true)[0], "VALID-OBJECT(HDL handle)");
+    assertEquals(validObjectFunc.getIDESignatures(provider, true)[1],
+        "VALID-OBJECT(Progress.Lang.Object object-reference)");
+    assertEquals(validObjectFunc.getIDESignatures(new DataType[] {DataType.HANDLE}, provider, true)[0],
         "VALID-OBJECT(HDL handle)");
-    assertEquals(validObjectFunc.getIDESignatures(new DataType[] {new DataType("Progress.Lang.AppError")}, provider)[0],
+    assertEquals(
+        validObjectFunc.getIDESignatures(new DataType[] {new DataType("Progress.Lang.AppError")}, provider, true)[0],
         "VALID-OBJECT(Progress.Lang.Object object-reference)");
   }
 
@@ -198,4 +207,36 @@ public class FunctionsDocumentationTest {
     var prm4 = ascDocumentation.getParameter("unknown");
     assertNull(prm4);
   }
+
+  @Test
+  public void testCompletionElement() {
+    var substringFunc = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("SUBSTRING");
+    var list = substringFunc.getCompletionVariants(true, true);
+    assertEquals(list.size(), 3);
+    var c1 = list.get(0);
+    assertEquals(c1.getO1(), "SUBSTRING(CHAR source, INT position)");
+    assertEquals(c1.getO2(), "SUBSTRING(${1:source}, ${2:position})$0");
+    var c2 = list.get(1);
+    assertEquals(c2.getO1(), "SUBSTRING(CHAR source, INT position, INT length)");
+    assertEquals(c2.getO2(), "SUBSTRING(${1:source}, ${2:position}, ${3:length})$0");
+    var list2 = substringFunc.getCompletionVariants(false, true);
+    var c3 = list2.get(0);
+    assertEquals(c3.getO1(), "substring(CHAR source, INT position)");
+    assertEquals(c3.getO2(), "substring(${1:source}, ${2:position})$0");
+  }
+
+  @Test
+  public void testOptionalParentheses() {
+    // TODO A corriger, le type en entrée n'est pas CHARACTER
+    var provider = VERSION_TYPE_INFO_PROVIDER.apply(OpenEdgeVersion.V128);
+    var availableFunc = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("AVAILABLE");
+    assertNotNull(availableFunc);
+    assertEquals(availableFunc.getIDESignature(provider, true), "AVAILABLE(CHAR record)");
+    assertEquals(availableFunc.getIDESignature(provider, false), "AVAILABLE CHAR record");
+    var ambiguousFunc = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("AMBIGUOUS");
+    assertNotNull(ambiguousFunc);
+    assertEquals(ambiguousFunc.getIDESignature(provider, true), "AMBIGUOUS(CHAR record)");
+    assertEquals(ambiguousFunc.getIDESignature(provider, false), "AMBIGUOUS CHAR record");
+  }
+
 }

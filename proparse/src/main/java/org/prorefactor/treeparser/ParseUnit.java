@@ -513,9 +513,9 @@ public class ParseUnit {
   }
 
   private void handleSearchNode(Source src, Reference ref, List<RecordNameNode> recordNodes) {
-    String tableName = ref.getObjectIdentifier();
-    boolean tempTable = "T".equalsIgnoreCase(ref.getTempRef());
-    int tableType = tempTable ? IConstants.ST_TTABLE : IConstants.ST_DBTABLE;
+    var tableName = ref.getObjectIdentifier();
+    var tempTable = "T".equalsIgnoreCase(ref.getTempRef());
+    var tableType = tempTable ? IConstants.ST_TTABLE : IConstants.ST_DBTABLE;
     if (tempTable && (tableName.lastIndexOf(':') != -1)) {
       // Temp-table defined in classes are prefixed by the class name
       tableName = tableName.substring(tableName.lastIndexOf(':') + 1);
@@ -524,16 +524,24 @@ public class ParseUnit {
       // DBName._Metaschema -> skip
       return;
     }
+    if (!tempTable && tableName.indexOf('.') > -1) {
+      // Replace alias with database name to search RecordNameNodes
+      var tbl = session.getSchema().lookupTable(tableName);
+      if (tbl != null)
+        tableName = tbl.getDatabase().getName() + "." + tbl.getName();
+    }
 
-    boolean lFound = false;
+    var lFound = false;
     for (RecordNameNode recNode : recordNodes) {
       if (isReferenceAssociatedToRecordNode(recNode, src, ref, tableName, tableType)) {
-        recNode.addSearchIndex(recNode.getTableBuffer().getTable().getName() + "." + ref.getObjectContext(), "WHOLE-INDEX".equals(ref.getDetail()));
+        recNode.addSearchIndex(recNode.getTableBuffer().getTable().getName() + "." + ref.getObjectContext(),
+            "WHOLE-INDEX".equals(ref.getDetail()));
         // All sort-access on the same line number
         src.getReference().stream() //
           .filter(it -> "SORT-ACCESS".equals(it.getReferenceType())) //
           .filter(it -> it.getRefSeq().intValue() > ref.getRefSeq().intValue()) //
-          .filter(it -> it.getFileNum().intValue()  == ref.getFileNum().intValue() && it.getLineNum().intValue() == ref.getLineNum().intValue()) //
+          .filter(it -> it.getFileNum().intValue() == ref.getFileNum().intValue()
+              && it.getLineNum().intValue() == ref.getLineNum().intValue()) //
           .filter(it -> ref.getObjectIdentifier().equals(it.getObjectIdentifier())) //
           .forEach(it -> recNode.addSortAccess(it.getObjectContext()));
         lFound = true;

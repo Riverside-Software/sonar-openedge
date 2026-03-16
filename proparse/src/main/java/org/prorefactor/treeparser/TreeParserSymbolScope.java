@@ -26,16 +26,16 @@ import java.util.Set;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.IConstants;
 import org.prorefactor.core.schema.ITable;
+import org.prorefactor.core.schema.TableType;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.treeparser.symbols.Dataset;
 import org.prorefactor.treeparser.symbols.Datasource;
 import org.prorefactor.treeparser.symbols.Event;
+import org.prorefactor.treeparser.symbols.ISymbol;
 import org.prorefactor.treeparser.symbols.Query;
 import org.prorefactor.treeparser.symbols.Routine;
 import org.prorefactor.treeparser.symbols.Stream;
-import org.prorefactor.treeparser.symbols.Symbol;
 import org.prorefactor.treeparser.symbols.TableBuffer;
 import org.prorefactor.treeparser.symbols.Variable;
 import org.prorefactor.treeparser.symbols.Widget;
@@ -54,14 +54,14 @@ public class TreeParserSymbolScope {
   private final int startTokenIndex;
   private final int stopTokenIndex;
 
-  final List<Symbol> allSymbols = new ArrayList<>();
+  final List<ISymbol> allSymbols = new ArrayList<>();
   final List<TreeParserSymbolScope> childScopes = new ArrayList<>();
   final List<Routine> eventRoutines = new ArrayList<>();
   final List<Routine> routineList = new ArrayList<>();
   final Map<String, TableBuffer> bufferMap = new HashMap<>();
   final Map<String, IFieldLevelWidget> fieldLevelWidgetMap = new HashMap<>();
   final Map<ITable, TableBuffer> unnamedBuffers = new HashMap<>();
-  final Map<Integer, Map<String, Symbol>> typeMap = new HashMap<>();
+  final Map<Integer, Map<String, ISymbol>> typeMap = new HashMap<>();
   final Map<String, Variable> variableMap = new HashMap<>();
 
   private Block rootBlock;
@@ -81,7 +81,7 @@ public class TreeParserSymbolScope {
     this.parentScope = parentScope;
     this.startTokenIndex = startTokenIndex;
     this.stopTokenIndex = stopTokenIndex;
-    typeMap.put(Proparse.VARIABLE, Collections.checkedMap((Map) variableMap, String.class, Symbol.class));
+    typeMap.put(Proparse.VARIABLE, Collections.checkedMap((Map) variableMap, String.class, ISymbol.class));
   }
 
   /** Add a FieldLevelWidget for names lookup. */
@@ -136,8 +136,8 @@ public class TreeParserSymbolScope {
 
   /** Add a TableBuffer to the appropriate map. */
   private void addTableBuffer(String name, ITable table, TableBuffer buffer) {
-    if (name.length() == 0) {
-      if (table.getStoretype() == IConstants.ST_DBTABLE)
+    if (name.isEmpty()) {
+      if (table.getTableType() == TableType.DB_TABLE)
         unnamedBuffers.put(table, buffer);
       else // default buffers for temp/work tables go into the "named" buffer map
         bufferMap.put(table.getName().toLowerCase(), buffer);
@@ -147,23 +147,22 @@ public class TreeParserSymbolScope {
   }
 
   /** Add a Symbol for names lookup. */
-  public void add(Symbol symbol) {
-    if (symbol instanceof IFieldLevelWidget) {
-      add((IFieldLevelWidget) symbol);
-    } else if (symbol instanceof Variable) {
-      add((Variable) symbol);
-    } else if (symbol instanceof Routine) {
-      add((Routine) symbol);
-    } else if (symbol instanceof TableBuffer) {
-      add((TableBuffer) symbol);
-    } else {
-      Map<String, Symbol> map = typeMap.get(symbol.getProgressType());
-      if (map == null) {
-        map = new HashMap<>();
-        typeMap.put(symbol.getProgressType(), map);
-      }
-      map.put(symbol.getName().toLowerCase(), symbol);
+  public void add(ISymbol symbol) {
+    if (symbol instanceof IFieldLevelWidget s2) {
+      add(s2);
+    } else if (symbol instanceof Variable s2) {
+      add(s2);
+    } else if (symbol instanceof Routine s2) {
+      add(s2);
+    } else if (symbol instanceof TableBuffer s2) {
+      add(s2);
     }
+    var map = typeMap.get(symbol.getProgressType());
+    if (map == null) {
+      map = new HashMap<>();
+      typeMap.put(symbol.getProgressType(), map);
+    }
+    map.put(symbol.getName().toLowerCase(), symbol);
   }
 
   /** Add a new scope to this scope. */
@@ -194,7 +193,7 @@ public class TreeParserSymbolScope {
    * All symbols within this scope are added to this scope's symbol list. This method has "package" visibility, since
    * the Symbol object adds itself to its scope.
    */
-  public void addSymbol(Symbol symbol) {
+  public void addSymbol(ISymbol symbol) {
     allSymbols.add(symbol);
   }
 
@@ -226,32 +225,33 @@ public class TreeParserSymbolScope {
   }
 
   /** Get a *copy* of the list of all symbols in this scope */
-  public List<Symbol> getAllSymbols() {
-    return new ArrayList<>(allSymbols);
+  public List<ISymbol> getAllSymbols() {
+    return Collections.unmodifiableList(allSymbols);
   }
 
   /** Get a list of this scope's symbols which match a given class */
   @SuppressWarnings("unchecked")
-  public <T extends Symbol> List<T> getAllSymbols(Class<T> klass) {
+  public <T extends ISymbol> List<T> getAllSymbols(Class<T> klass) {
     ArrayList<T> ret = new ArrayList<>();
-    for (Symbol s : allSymbols) {
+    for (var s : allSymbols) {
       if (klass.isInstance(s))
         ret.add((T) s);
     }
+
     return ret;
   }
 
   /** Get a list of this scope's symbols, and all symbols of all descendant scopes. */
-  public List<Symbol> getAllSymbolsDeep() {
-    ArrayList<Symbol> ret = new ArrayList<>(allSymbols);
-    for (TreeParserSymbolScope child : childScopes) {
+  public List<ISymbol> getAllSymbolsDeep() {
+    ArrayList<ISymbol> ret = new ArrayList<>(allSymbols);
+    for (var child : childScopes) {
       ret.addAll(child.getAllSymbolsDeep());
     }
     return ret;
   }
 
   /** Get a list of this scope's symbols, and all symbols of all descendant scopes, which match a given class. */
-  public <T extends Symbol> List<T> getAllSymbolsDeep(Class<T> klass) {
+  public <T extends ISymbol> List<T> getAllSymbolsDeep(Class<T> klass) {
     List<T> ret = getAllSymbols(klass);
     for (TreeParserSymbolScope child : childScopes) {
       ret.addAll(child.getAllSymbols(klass));
@@ -394,7 +394,7 @@ public class TreeParserSymbolScope {
     }
     TableBuffer symbol = bufferMap.get(bufferPart.toLowerCase());
     if (symbol == null || (!dbPart.isEmpty() && !dbPart.equalsIgnoreCase(symbol.getTable().getDatabase().getName()))
-        || (!dbPart.isEmpty() && (symbol.getTable().getStoretype() == IConstants.ST_TTABLE))) {
+        || (!dbPart.isEmpty() && (symbol.getTable().getTableType() == TableType.TEMP_TABLE))) {
       if (parentScope != null) {
         TableBuffer tb = parentScope.lookupBuffer(inName);
         if (tb != null) {
@@ -461,8 +461,8 @@ public class TreeParserSymbolScope {
     return (Stream) lookupSymbolLocally(Proparse.STREAM, name);
   }
 
-  public Symbol lookupSymbol(Integer symbolType, String name) {
-    Symbol symbol = lookupSymbolLocally(symbolType, name);
+  public ISymbol lookupSymbol(Integer symbolType, String name) {
+    var symbol = lookupSymbolLocally(symbolType, name);
     if (symbol != null)
       return symbol;
     if (parentScope != null)
@@ -470,8 +470,8 @@ public class TreeParserSymbolScope {
     return null;
   }
 
-  public Symbol lookupSymbolLocally(Integer symbolType, String name) {
-    Map<String, Symbol> map = typeMap.get(symbolType);
+  public ISymbol lookupSymbolLocally(Integer symbolType, String name) {
+    var map = typeMap.get(symbolType);
     if (map == null)
       return null;
     return map.get(name.toLowerCase());
