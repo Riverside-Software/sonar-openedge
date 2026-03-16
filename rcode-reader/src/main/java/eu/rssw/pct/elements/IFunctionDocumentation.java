@@ -192,7 +192,8 @@ public interface IFunctionDocumentation extends IElementDocumentation {
   private Pair<String, String> getCompletionElement(IFunctionParameterList variant, int numParams, boolean upperCase,
       boolean useParentheses) {
     var label = new StringBuilder(upperCase ? getName().toUpperCase() : getName().toLowerCase());
-    var insertText = new StringBuilder(upperCase ? getName().toUpperCase() : getName().toLowerCase());
+    var insertText = new StringBuilder(
+        upperCase ? getName().toUpperCase().split(" ")[0] : getName().toLowerCase().split(" ")[0]);
 
     if (useParentheses(useParentheses, numParams)) {
       label.append("(");
