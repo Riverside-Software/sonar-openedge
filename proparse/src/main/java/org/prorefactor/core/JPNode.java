@@ -74,6 +74,7 @@ public class JPNode {
   private final int childNum;
   @Nullable
   private final List<JPNode> children;
+  private final List<JPNode> immutableChildren;
 
   // Fields are usually set in TreeParser
   private Symbol symbol;
@@ -89,6 +90,7 @@ public class JPNode {
     this.parent = parent;
     this.childNum = num;
     this.children = hasChildren ? new ArrayList<>() : null;
+    this.immutableChildren = hasChildren ? Collections.unmodifiableList(children) : List.of();
   }
 
   public ProToken getToken() {
@@ -206,7 +208,7 @@ public class JPNode {
 
   @Nonnull
   private List<JPNode> getChildren() {
-    return children == null ? List.of() : Collections.unmodifiableList(children);
+    return immutableChildren;
   }
 
   public int getNumberOfChildren() {
