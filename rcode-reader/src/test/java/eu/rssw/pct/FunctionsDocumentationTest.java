@@ -115,7 +115,11 @@ public class FunctionsDocumentationTest {
 
     var lineCounterFunc = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("LINE-COUNTER");
     assertNotNull(lineCounterFunc);
-    assertEquals(lineCounterFunc.getIDESignature(provider, true), "LINE-COUNTER([CHAR stream [, HDL handle]])");
+    assertEquals(lineCounterFunc.getIDESignatures(provider, false)[0], "LINE-COUNTER");
+    assertEquals(lineCounterFunc.getIDESignatures(provider, false)[1], "LINE-COUNTER([CHAR stream])");
+    assertEquals(lineCounterFunc.getIDESignatures(provider, false)[2], "LINE-COUNTER([HDL handle])");
+
+    assertEquals(lineCounterFunc.getIDESignature(provider, false), "LINE-COUNTER");
 
     var connectedFunc = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("CONNECTED");
     assertNotNull(connectedFunc);
@@ -227,16 +231,15 @@ public class FunctionsDocumentationTest {
 
   @Test
   public void testOptionalParentheses() {
-    // TODO A corriger, le type en entrée n'est pas CHARACTER
     var provider = VERSION_TYPE_INFO_PROVIDER.apply(OpenEdgeVersion.V128);
     var availableFunc = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("AVAILABLE");
     assertNotNull(availableFunc);
-    assertEquals(availableFunc.getIDESignature(provider, true), "AVAILABLE(CHAR record)");
-    assertEquals(availableFunc.getIDESignature(provider, false), "AVAILABLE CHAR record");
+    assertEquals(availableFunc.getIDESignature(provider, true), "AVAILABLE(BUFFER)");
+    assertEquals(availableFunc.getIDESignature(provider, false), "AVAILABLE BUFFER");
     var ambiguousFunc = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("AMBIGUOUS");
     assertNotNull(ambiguousFunc);
-    assertEquals(ambiguousFunc.getIDESignature(provider, true), "AMBIGUOUS(CHAR record)");
-    assertEquals(ambiguousFunc.getIDESignature(provider, false), "AMBIGUOUS CHAR record");
+    assertEquals(ambiguousFunc.getIDESignature(provider, true), "AMBIGUOUS(BUFFER)");
+    assertEquals(ambiguousFunc.getIDESignature(provider, false), "AMBIGUOUS BUFFER");
   }
 
 }

@@ -132,12 +132,20 @@ public interface IFunctionDocumentation extends IElementDocumentation {
       } else {
         sb.append(", ");
       }
-      if (p.getDataType().getPrimitive() == PrimitiveDataType.CLASS)
+      if (p.getDataType().getPrimitive() == PrimitiveDataType.CLASS) {
         sb.append(p.getDataType().getClassName());
-      else
-        sb.append(p.getDataType().getPrimitive().getIDESignature());
-      sb.append(" ");
-      sb.append(p.getName());
+        sb.append(" ");
+        sb.append(p.getName());
+      } else {
+        var sigPar = p.getDataType().getPrimitive().getIDESignature();
+        if ("char".equalsIgnoreCase(sigPar) && "Record".equalsIgnoreCase(p.getName())) {
+          sb.append("BUFFER");
+        } else {
+          sb.append(p.getDataType().getPrimitive().getIDESignature());
+          sb.append(" ");
+          sb.append(p.getName());
+        }
+      }
     }
     // Close all opened brackets
     while (openBrackets-- > 0) {
@@ -227,7 +235,7 @@ public interface IFunctionDocumentation extends IElementDocumentation {
   /**
    * YES: parentheses required
    * NO: no parentheses
-   * BOTH: both styles accepted by the compiler 
+   * BOTH: both styles accepted by the compiler
    */
   public enum Parentheses {
     YES,

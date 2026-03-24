@@ -1746,6 +1746,9 @@
       "parentheses": "no",
       "variants": [
         {
+          "parameters": []
+        },
+        {
           "parameters": [
             {
               "name": "logical",
@@ -1866,6 +1869,9 @@
       "parentheses": "no",
       "variants": [
         {
+          "parameters": []
+        },
+        {
           "parameters": [
             {
               "name": "frame",
@@ -1894,6 +1900,9 @@
       "returnType": "INTEGER",
       "parentheses": "no",
       "variants": [
+        {
+          "parameters": []
+        },
         {
           "parameters": [
             {
@@ -1946,6 +1955,9 @@
       "parentheses": "no",
       "variants": [
         {
+          "parameters": []
+        },
+        {
           "parameters": [
             {
               "name": "frame",
@@ -1974,6 +1986,9 @@
       "returnType": "DECIMAL",
       "parentheses": "no",
       "variants": [
+        {
+          "parameters": []
+        },
         {
           "parameters": [
             {
@@ -2254,6 +2269,9 @@
       "returnType": "HANDLE",
       "parentheses": "no",
       "variants": [
+        {
+          "parameters": []
+        },
         {
           "parameters": [
             {
@@ -2553,6 +2571,9 @@
       "returnType": "CHARACTER",
       "parentheses": "no",
       "variants": [
+        {
+          "parameters": []
+        },
         {
           "parameters": [
             {
@@ -3158,13 +3179,20 @@
       "parentheses": "no",
       "variants": [
         {
+          "parameters": []
+        },
+        {
           "parameters": [
             {
               "name": "stream",
               "type": "CHARACTER",
               "description": "Specifies the name of a stream. If you do not name a stream, the AVM uses the unnamed stream. For more information on streams, see this book's DEFINE STREAM statement reference entry and OpenEdge Programming Interfaces.",
               "optional": true
-            },
+            }
+          ]
+        },
+        {
+          "parameters": [
             {
               "name": "handle",
               "type": "HANDLE",
@@ -3504,6 +3532,9 @@
       "parentheses": "no",
       "variants": [
         {
+          "parameters": []
+        },
+        {
           "parameters": [
             {
               "name": "datetime-expression",
@@ -3749,13 +3780,20 @@
       "parentheses": "no",
       "variants": [
         {
+          "parameters": []
+        },
+        {
           "parameters": [
             {
               "name": "stream",
               "type": "CHARACTER",
               "description": "The name of an output stream. If you do not name a stream, PAGE-NUMBER returns the page number of the default unnamed output stream.",
               "optional": true
-            },
+            }
+          ]
+        },
+        {
+          "parameters": [
             {
               "name": "handle",
               "type": "HANDLE",
@@ -3773,13 +3811,20 @@
       "parentheses": "no",
       "variants": [
         {
+          "parameters": []
+        },
+        {
           "parameters": [
             {
               "name": "stream",
               "type": "CHARACTER",
               "description": "The name of an output stream. If you do not name a stream, PAGE-SIZE returns the page size of the default unnamed output stream.",
               "optional": true
-            },
+            }
+          ]
+        },
+        {
+          "parameters": [
             {
               "name": "handle",
               "type": "HANDLE",
@@ -3918,6 +3963,9 @@
       "returnType": "CHARACTER",
       "parentheses": "no",
       "variants": [
+        {
+          "parameters": []
+        },
         {
           "parameters": [
             {
@@ -4724,6 +4772,9 @@
       "parentheses": "no",
       "variants": [
         {
+          "parameters": []
+        },
+        {
           "parameters": [
             {
               "name": "datetime-tz-expression",
@@ -4863,6 +4914,9 @@
       "returnType": "CHARACTER",
       "parentheses": "no",
       "variants": [
+        {
+          "parameters": []
+        },
         {
           "parameters": [
             {
