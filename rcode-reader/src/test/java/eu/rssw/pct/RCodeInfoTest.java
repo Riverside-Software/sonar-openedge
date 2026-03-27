@@ -597,6 +597,8 @@ public class RCodeInfoTest {
       assertEquals(testMethod.getIDESignature(), "testMethod(↑TBL tt1, ↓DS ds1, ↑INT[] xx)");
       assertEquals(testMethod.getIDESignature(false), "testMethod(↑TBL tt1, ↓DS ds1, ↑INT[] xx)");
       assertEquals(testMethod.getIDESignature(true), "testMethod(↓TBL tt1, ↑DS ds1, ↓INT[] xx)");
+      assertEquals(testMethod.getIDEInsertElement(false), "testMethod(table ${1:tt1}, output dataset ${2:ds1}, ${3:xx})$0");
+      assertEquals(testMethod.getIDEInsertElement(true), "testMethod(TABLE ${1:tt1}, OUTPUT DATASET ${2:ds1}, ${3:xx})$0");
       assertEquals(testMethod.getExtent(), -32767);
       assertEquals(testMethod.getParameters().length, 3);
       assertEquals(testMethod.getParameters()[0].getParameterType(), ParameterType.TABLE);
