@@ -242,4 +242,10 @@ public class FunctionsDocumentationTest {
     assertEquals(ambiguousFunc.getIDESignature(provider, false), "AMBIGUOUS BUFFER");
   }
 
+  @Test
+  public void testNew() {
+    var newFunc = VERSION_FUNCTION_DOCUMENTATION_PROVIDER.apply(OpenEdgeVersion.V128).apply("NEW");
+    // nothing for NEW
+    assertNull(newFunc);
+  }
 }

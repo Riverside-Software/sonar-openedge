@@ -3,7 +3,7 @@
     "title": "OpenEdge 12.8.8.00 ABL Functions Reference",
     "description": "Complete reference of all ABL built-in functions for OpenEdge 12.8.8.00",
     "version": "12.8.8.00",
-    "totalFunctions": 226
+    "totalFunctions": 224
   },
   "functions": [
     {
@@ -3583,47 +3583,6 @@
               "type": "DATE",
               "description": "An expression that evaluates to a DATETIME or DATETIME-TZ. The MTIME function returns the time portion of datetime-expression in milliseconds. If datetime-expression is a DATETIME-TZ, the MTIME function returns the local time relative to the time zone of the DATETIME-TZ value. For Example, a DATETIME-TZ field, fdt, is created in London (time zone UTC+00:00) with a value of May 5, 2002 at 7:15:03.002 am. MTIME(fdt) returns 26,103,002, regardless of the session's time zone.",
               "optional": true
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "NEW (classes)",
-      "description": "Creates an instance of a class (object) and returns an object reference to that instance. You can use this object reference to access the PUBLIC data members, properties, and methods of the instance. For more information on object references, see the reference entry for a Class-based object reference.",
-      "parentheses": "yes",
-      "variants": [
-        {
-          "parameters": [
-            {
-              "name": "object-type-name",
-              "type": "CHARACTER",
-              "description": "Specifies the type name of the ABL or .NET class you want to instantiate. Specify a class type name using the syntax as described in the Type-name syntax reference entry. If object-type-name specifies a .NET object, it can be most any .NET class, with a few restrictions. For more information, see the Notes of this reference entry. The value of object-type-name is restricted to alphanumeric characters plus the symbols #, $, %, and _.If, without casting, you assign the NEW function value to a target data element, or pass the NEW function as input to a target routine parameter, object-type-name must specify one of the following classes: The same class type that is defined for the target A subclass of the class type that is defined for the target A class type that implements the interface type defined for the target If object-type-name specifies one of the following kinds of object types, ABL raises a compiler error: An interface type An abstract class type",
-              "optional": false
-            },
-            {
-              "name": "parameter",
-              "type": "CHARACTER",
-              "description": "Specifies zero or more parameters passed to a PUBLIC instance constructor that is defined for the class. You must provide the parameters identified by the specified constructor, matched with respect to number, data type, and mode. To invoke a constructor that is overloaded in the class, you must specify sufficient information for each parameter to disambiguate it from all other constructors in the class. Otherwise, ABL raises an error identifying the ambiguity.For information on the parameter passing syntax and disambiguating overloaded constructors, see the Parameter passing syntax reference entry. For information on defining a constructor for a class, see the CONSTRUCTOR statement reference entry.",
-              "optional": true
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "NEW (record buffers)",
-      "description": "Checks a record buffer and returns a TRUE value if the record in that buffer is newly created. If the record was read from the database, NEW returns a FALSE value.",
-      "returnType": "LOGICAL",
-      "parentheses": "both",
-      "variants": [
-        {
-          "parameters": [
-            {
-              "name": "record",
-              "type": "CHARACTER",
-              "description": "The name of the record buffer you want to check with the NEW function.To use the NEW function with a record in a table defined for multiple databases, you must qualify the record's table name with the database name. See the record definition in the Record phrase reference entry for more information.",
-              "optional": false
             }
           ]
         }
