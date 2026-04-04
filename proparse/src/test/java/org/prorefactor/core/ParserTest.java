@@ -1282,7 +1282,7 @@ public class ParserTest extends AbstractProparseTest {
     assertFalse(list03.isEmpty());
     assertEquals(list03.get(0).getDirectChildren(ABLNodeType.PARAMETER_ITEM).size(), 2);
   }
-  
+
   @Test
   public void testWaitForSet() {
     var unit = getParseUnit("WAIT-FOR xObj:methodName() SET this-object:attrName.", session);
@@ -1290,6 +1290,19 @@ public class ParserTest extends AbstractProparseTest {
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 1);
   }
-  
+
+  @Test
+  public void testUndoThrowNew() {
+    var code = """
+        undo, throw new Progress.Lang.Error('', '').
+        undo, throw new Progress.Lang.Error(available customer, ambiguous item).
+        """;
+    var unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 2);
+    var exprList = unit.getTopNode().queryExpressions();
+    assertEquals(exprList.size(), 2); // NEW Progress.Lang...
+  }
 
 }

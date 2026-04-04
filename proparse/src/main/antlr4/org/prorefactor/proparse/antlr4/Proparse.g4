@@ -3725,7 +3725,11 @@ undoAction:
   | NEXT blockLabel?
   | RETRY blockLabel?
   | RETURN returnOption
-  | THROW expression
+  | THROW ( undoThrowNew | expression )
+  ;
+
+undoThrowNew:
+    NEW newTypeName parameterList
   ;
 
 unloadStatement:
