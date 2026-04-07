@@ -113,7 +113,8 @@ public class CrossReferenceUtils {
         else
           return parsePlainTextXref(xref.toAbsolutePath().toString(), inpStream, getCharset(plainTextCodepage));
       } catch (IOException caught) {
-        LOGGER.error("Unable to open file " + xref.toAbsolutePath(), caught);
+        LOGGER.error("Unable to open XREF file {}: {}" , xref.toAbsolutePath(), caught.getMessage());
+        LOGGER.debug("Details:", caught);
       }
     }
     return doc;
