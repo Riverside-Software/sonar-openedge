@@ -19,17 +19,17 @@
  */
 package eu.rssw.antlr.database;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,15 +72,22 @@ public class TestKryo {
     assertEquals(db.getTables().size(), 25);
     assertEquals(db.getSequences().size(), 13);
 
+    var referenceFile = Path.of("src/test/resources/sp2k.kryo.bin");
+    var outputFile = Path.of("target/kryo/test01.bin");
     Kryo kryo = getKryoInstance();
-    try (OutputStream fos = new FileOutputStream("target/kryo/test01.bin"); //
+    try (OutputStream fos = Files.newOutputStream(outputFile); //
         Output output = new Output(fos)) {
+      output.writeInt(0x57535352); // Magic
+      output.writeInt(2); // Version
       kryo.writeClassAndObject(output, db);
     }
+    assertThat(referenceFile).hasSameBinaryContentAs(referenceFile);
 
     DatabaseDescription db2 = null;
-    try (InputStream fis = new FileInputStream("target/kryo/test01.bin");
+    try (InputStream fis = Files.newInputStream(outputFile); //
         Input input = new Input(fis)) {
+      input.readInt();
+      input.readInt();
       Object o = kryo.readClassAndObject(input);
       assertTrue(o instanceof DatabaseDescription);
       db2 = (DatabaseDescription) db;
