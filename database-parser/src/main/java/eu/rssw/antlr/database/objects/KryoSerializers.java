@@ -25,6 +25,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.serializers.CollectionSerializer;
 
 public class KryoSerializers {
 
@@ -47,31 +48,48 @@ public class KryoSerializers {
     public void write(Kryo kryo, Output output, Table table) {
       output.writeString(table.getName());
       output.writeString(table.getArea());
-      output.writeString(table.getLabel());
       output.writeString(table.getDescription());
       output.writeString(table.getDumpName());
-      output.writeString(table.getValMsg());
-      output.writeBoolean(table.isFrozen());
-      output.writeInt(table.getFirstLine());
-      output.writeInt(table.getLastLine());
 
-      var fields = new ArrayList<>(table.getFields());
+      var ser = new CollectionSerializer<>();
+      //ser.setAcceptsNull(true);
+      //ser.setElementClass(Field.class, new DbFieldSerializer());
+      //ser.setElementsCanBeNull(false);
+      
+      kryo.writeObject(output, table.getFields(), ser);
+      /*var fields = new ArrayList<>(table.getFields());
       output.writeInt(fields.size(), true);
       for (Field f : fields) {
         kryo.writeObject(output, f);
-      }
+      }*/
 
-      var indexes = new ArrayList<>(table.getIndexes());
+      output.writeVarInt(table.getFirstLine(), false);
+      output.writeBoolean(table.isFrozen());
+
+      kryo.writeObject(output, table.getIndexes(), new CollectionSerializer<>());
+      /*var indexes = new ArrayList<>(table.getIndexes());
       output.writeInt(indexes.size(), true);
       for (Index idx : indexes) {
         kryo.writeObject(output, idx);
-      }
+      }*/
 
-      var triggers = new ArrayList<>(table.getTriggers());
+      
+      output.writeString(table.getLabel());
+      output.writeVarInt(table.getLastLine(), false);
+      
+      kryo.writeObject(output, table.getTriggers(), new CollectionSerializer<>());
+      
+      /*var triggers = new ArrayList<>(table.getTriggers());
       output.writeInt(triggers.size(), true);
       for (Trigger t : triggers) {
         kryo.writeObject(output, t);
-      }
+      }*/
+      
+      output.writeString(table.getValMsg());
+      
+
+
+
     }
 
     @Override
@@ -123,25 +141,26 @@ public class KryoSerializers {
     public void write(Kryo kryo, Output output, Field field) {
       output.writeString(field.getName());
       output.writeString(field.getDataType());
-      kryo.writeObjectOrNull(output, field.getOrder(), Integer.class);
-      kryo.writeObjectOrNull(output, field.getPosition(), Integer.class);
-      kryo.writeObjectOrNull(output, field.getExtent(), Integer.class);
-      output.writeString(field.getDescription());
-      output.writeString(field.getLabel());
       output.writeString(field.getColumnLabel());
-      output.writeString(field.getLobArea());
+      output.writeString(field.getDescription());
+      kryo.writeObjectOrNull(output, field.getExtent(), Integer.class);
+      output.writeVarInt(field.getFirstLine(),false);
       output.writeString(field.getFormat());
       output.writeString(field.getInitial());
-      kryo.writeObjectOrNull(output, field.getMaxWidth(), Integer.class);
       output.writeBoolean(field.isMandatory());
-      output.writeInt(field.getFirstLine());
-      output.writeInt(field.getLastLine());
+      output.writeString(field.getLabel());
+      output.writeVarInt(field.getLastLine(), false);
+      output.writeString(field.getLobArea());
+      kryo.writeObjectOrNull(output, field.getMaxWidth(), Integer.class);
+      kryo.writeObjectOrNull(output, field.getOrder(), Integer.class);
+      kryo.writeObjectOrNull(output, field.getPosition(), Integer.class);
 
-      var triggers = new ArrayList<>(field.getTriggers());
+      kryo.writeObject(output, field.getTriggers(), new CollectionSerializer<>());
+      /*var triggers = new ArrayList<>(field.getTriggers());
       output.writeInt(triggers.size(), true);
       for (Trigger t : triggers) {
         kryo.writeObject(output, t);
-      }
+      }*/
     }
 
     @Override
@@ -174,19 +193,21 @@ public class KryoSerializers {
     @Override
     public void write(Kryo kryo, Output output, Index index) {
       output.writeString(index.getName());
-      output.writeString(index.getArea());
-      output.writeBoolean(index.isPrimary());
-      output.writeBoolean(index.isUnique());
-      output.writeBoolean(index.isWord());
-      output.writeString(index.getBufferPool());
-      output.writeInt(index.getFirstLine());
-      output.writeInt(index.getLastLine());
 
       output.writeInt(index.getFields().size(), true);
       for (IndexField idxFld : index.getFields()) {
         output.writeString(idxFld.getField().getName());
         output.writeBoolean(idxFld.isAscending());
       }
+
+      output.writeString(index.getArea());
+      output.writeString(index.getBufferPool());
+      output.writeVarInt(index.getFirstLine(), false);
+      output.writeVarInt(index.getLastLine(), false);
+      output.writeBoolean(index.isPrimary());
+      output.writeBoolean(index.isUnique());
+      output.writeBoolean(index.isWord());
+
     }
 
     @Override
@@ -215,25 +236,25 @@ public class KryoSerializers {
     @Override
     public void write(Kryo kryo, Output output, Sequence seq) {
       output.writeString(seq.getName());
-      kryo.writeObjectOrNull(output, seq.getInitialValue(), Long.class);
-      kryo.writeObjectOrNull(output, seq.getMinValue(), Long.class);
-      kryo.writeObjectOrNull(output, seq.getMaxValue(), Long.class);
-      kryo.writeObjectOrNull(output, seq.getIncrement(), Long.class);
       output.writeBoolean(seq.isCycleOnLimit());
-      output.writeInt(seq.getFirstLine());
-      output.writeInt(seq.getLastLine());
+      output.writeVarInt(seq.getFirstLine(), false);
+      kryo.writeObjectOrNull(output, seq.getIncrement(), Long.class);
+      kryo.writeObjectOrNull(output, seq.getInitialValue(), Long.class);
+      output.writeVarInt(seq.getLastLine(), false);
+      kryo.writeObjectOrNull(output, seq.getMaxValue(), Long.class);
+      kryo.writeObjectOrNull(output, seq.getMinValue(), Long.class);
     }
 
     @Override
     public Sequence read(Kryo kryo, Input input, Class<? extends Sequence> type) {
       return new Sequence.Builder(input.readString())
-          .setInitialValue(kryo.readObjectOrNull(input, Long.class))
-          .setMinValue(kryo.readObjectOrNull(input, Long.class))
-          .setMaxValue(kryo.readObjectOrNull(input, Long.class))
-          .setIncrement(kryo.readObjectOrNull(input, Long.class))
           .setCycleOnLimit(input.readBoolean())
-          .setFirstLine(input.readInt())
-          .setLastLine(input.readInt())
+          .setFirstLine(input.readVarInt(false))
+          .setIncrement(kryo.readObjectOrNull(input, Long.class))
+          .setInitialValue(kryo.readObjectOrNull(input, Long.class))
+          .setLastLine(input.readVarInt(false))
+          .setMaxValue(kryo.readObjectOrNull(input, Long.class))
+          .setMinValue(kryo.readObjectOrNull(input, Long.class))
           .build();
     }
   }
@@ -243,9 +264,9 @@ public class KryoSerializers {
     public void write(Kryo kryo, Output output, Trigger trigger) {
       kryo.writeClassAndObject(output, trigger.getType());
       output.writeString(trigger.getProcedure());
+      output.writeString(trigger.getCrc());
       output.writeBoolean(trigger.isNoOverride());
       output.writeBoolean(trigger.isOverride());
-      output.writeString(trigger.getCrc());
     }
 
     @Override

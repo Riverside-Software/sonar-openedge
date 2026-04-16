@@ -73,13 +73,16 @@ public class TestKryo {
     assertEquals(db.getSequences().size(), 13);
 
     Kryo kryo = getKryoInstance();
-    try (OutputStream fos = new FileOutputStream("target/kryo/test01.bin"); //
+    try (OutputStream fos = new FileOutputStream("target/kryo/testTBL.bin"); //
+        // OutputStream zip = new GZIPOutputStream(fos);
         Output output = new Output(fos)) {
-      kryo.writeClassAndObject(output, db);
+      // db.getSequences().stream().sorted((a,b) ->  a.getName().compareTo(b.getName())).forEach(it -> kryo.writeClassAndObject(output,it));
+      db.getTables().stream().sorted((a,b) ->  a.getName().compareTo(b.getName())).forEach(it -> kryo.writeClassAndObject(output,it));
+      // kryo.writeClassAndObject(output, db.getSequences());
     }
 
     DatabaseDescription db2 = null;
-    try (InputStream fis = new FileInputStream("target/kryo/test01.bin");
+    try (InputStream fis = new FileInputStream("target/kryo/testSEQ.bin");
         Input input = new Input(fis)) {
       Object o = kryo.readClassAndObject(input);
       assertTrue(o instanceof DatabaseDescription);
