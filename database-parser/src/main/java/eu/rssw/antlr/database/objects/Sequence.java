@@ -2,7 +2,7 @@
  * OpenEdge plugin for SonarQube
  * Copyright (c) 2015-2026 Riverside Software
  * contact AT riverside DASH software DOT fr
- *
+ * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,65 +19,77 @@
  */
 package eu.rssw.antlr.database.objects;
 
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 public class Sequence {
   private final String name;
-  private final Long initialValue;
-  private final Long minValue;
-  private final Long maxValue;
-  private final Long increment;
-  private final boolean cycleOnLimit;
-  private final int firstLine;
-  private final int lastLine;
+  private Long initialValue;
+  private Long minValue;
+  private Long maxValue;
+  private Long increment;
+  private boolean cycleOnLimit;
 
-  private Sequence(Builder builder) {
-    this.name = Objects.requireNonNull(builder.name);
-    this.initialValue = builder.initialValue;
-    this.minValue = builder.minValue;
-    this.maxValue = builder.maxValue;
-    this.increment = builder.increment;
-    this.cycleOnLimit = builder.cycleOnLimit;
-    this.firstLine = builder.firstLine;
-    this.lastLine = builder.lastLine;
+  private int firstLine;
+  private int lastLine;
+
+  public Sequence(String name) {
+    this.name = name;
   }
 
-  @Nullable
   public Long getInitialValue() {
     return initialValue;
   }
 
-  @Nullable
+  public void setInitialValue(Long initialValue) {
+    this.initialValue = initialValue;
+  }
+
   public Long getMinValue() {
     return minValue;
   }
 
-  @Nullable
+  public void setMinValue(Long minValue) {
+    this.minValue = minValue;
+  }
+
   public Long getMaxValue() {
     return maxValue;
   }
 
-  @Nullable
+  public void setMaxValue(Long maxValue) {
+    this.maxValue = maxValue;
+  }
+
   public Long getIncrement() {
     return increment;
+  }
+
+  public void setIncrement(Long increment) {
+    this.increment = increment;
   }
 
   public boolean isCycleOnLimit() {
     return cycleOnLimit;
   }
 
+  public void setCycleOnLimit(boolean cycleOnLimit) {
+    this.cycleOnLimit = cycleOnLimit;
+  }
+
   public int getFirstLine() {
     return firstLine;
+  }
+
+  public void setFirstLine(int firstLine) {
+    this.firstLine = firstLine;
   }
 
   public int getLastLine() {
     return lastLine;
   }
 
-  @Nonnull
+  public void setLastLine(int lastLine) {
+    this.lastLine = lastLine;
+  }
+
   public String getName() {
     return name;
   }
@@ -85,59 +97,5 @@ public class Sequence {
   @Override
   public String toString() {
     return "Sequence " + name;
-  }
-
-  public static class Builder {
-    private final String name;
-    private Long initialValue;
-    private Long minValue;
-    private Long maxValue;
-    private Long increment;
-    private boolean cycleOnLimit;
-    private int firstLine;
-    private int lastLine;
-
-    public Builder(@Nonnull String name) {
-      this.name = name;
-    }
-
-    public Builder setInitialValue(Long initialValue) {
-      this.initialValue = initialValue;
-      return this;
-    }
-
-    public Builder setMinValue(Long minValue) {
-      this.minValue = minValue;
-      return this;
-    }
-
-    public Builder setMaxValue(Long maxValue) {
-      this.maxValue = maxValue;
-      return this;
-    }
-
-    public Builder setIncrement(Long increment) {
-      this.increment = increment;
-      return this;
-    }
-
-    public Builder setCycleOnLimit(boolean cycleOnLimit) {
-      this.cycleOnLimit = cycleOnLimit;
-      return this;
-    }
-
-    public Builder setFirstLine(int firstLine) {
-      this.firstLine = firstLine;
-      return this;
-    }
-
-    public Builder setLastLine(int lastLine) {
-      this.lastLine = lastLine;
-      return this;
-    }
-
-    public Sequence build() {
-      return new Sequence(this);
-    }
   }
 }

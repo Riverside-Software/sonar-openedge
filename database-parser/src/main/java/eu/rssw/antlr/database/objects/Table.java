@@ -2,7 +2,7 @@
  * OpenEdge plugin for SonarQube
  * Copyright (c) 2015-2026 Riverside Software
  * contact AT riverside DASH software DOT fr
- *
+ * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,82 +21,93 @@ package eu.rssw.antlr.database.objects;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class Table {
   private final String name;
-  private final String area;
-  private final String label;
-  private final String description;
-  private final String dumpName;
-  private final String valMsg;
-  private final boolean frozen;
-  private final Collection<Field> fields;
-  private final Collection<Index> indexes;
-  private final Collection<Trigger> triggers;
-  private final int firstLine;
-  private final int lastLine;
+  private String area;
+  private String label;
+  private String description;
+  private String dumpName;
+  private String valMsg;
+  private boolean frozen;
 
-  private Table(Builder builder) {
-    this.name = Objects.requireNonNull(builder.name);
-    this.area = builder.area;
-    this.label = builder.label;
-    this.description = builder.description;
-    this.dumpName = builder.dumpName;
-    this.valMsg = builder.valMsg;
-    this.frozen = builder.frozen;
-    this.fields = Collections.unmodifiableList(new ArrayList<>(builder.fields));
-    this.indexes = Collections.unmodifiableList(new ArrayList<>(builder.indexes));
-    this.triggers = Collections.unmodifiableList(new ArrayList<>(builder.triggers));
-    this.firstLine = builder.firstLine;
-    this.lastLine = builder.lastLine;
+  private Collection<Field> fields = new ArrayList<>();
+  private Collection<Index> indexes = new ArrayList<>();
+  private Collection<Trigger> triggers = new ArrayList<>();
+
+  private int firstLine;
+  private int lastLine;
+
+  public Table(String name) {
+    this.name = name;
   }
 
-  @Nonnull
   public String getName() {
     return name;
   }
 
-  @Nullable
   public String getArea() {
     return area;
+  }
+
+  public void setArea(String area) {
+    this.area = area;
   }
 
   public boolean isFrozen() {
     return frozen;
   }
 
-  @Nullable
+  public void setFrozen(boolean frozen) {
+    this.frozen = frozen;
+  }
+
   public String getLabel() {
     return label;
   }
 
-  @Nullable
+  public void setLabel(String label) {
+    this.label = label;
+  }
+
   public String getDescription() {
     return description;
   }
 
-  @Nullable
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
   public String getDumpName() {
     return dumpName;
   }
 
-  @Nullable
+  public void setDumpName(String dumpName) {
+    this.dumpName = dumpName;
+  }
+
   public String getValMsg() {
     return valMsg;
+  }
+
+  public void setValMsg(String valMsg) {
+    this.valMsg = valMsg;
   }
 
   public Collection<Field> getFields() {
     return fields;
   }
 
+  public void setFields(Collection<Field> fields) {
+    this.fields = fields;
+  }
+
   public Collection<Index> getIndexes() {
     return indexes;
+  }
+
+  public void setIndexes(Collection<Index> indexes) {
+    this.indexes = indexes;
   }
 
   public Collection<Trigger> getTriggers() {
@@ -107,11 +118,18 @@ public class Table {
     return firstLine;
   }
 
+  public void setFirstLine(int firstLine) {
+    this.firstLine = firstLine;
+  }
+
   public int getLastLine() {
     return lastLine;
   }
 
-  @Nullable
+  public void setLastLine(int lastLine) {
+    this.lastLine = lastLine;
+  }
+
   public Field getField(String name) {
     for (Field fld : fields) {
       if (fld.getName().equalsIgnoreCase(name))
@@ -120,7 +138,6 @@ public class Table {
     return null;
   }
 
-  @Nullable
   public Index getIndex(String name) {
     for (Index idx : indexes) {
       if (idx.getName().equalsIgnoreCase(name))
@@ -129,13 +146,24 @@ public class Table {
     return null;
   }
 
-  @Nullable
   public Trigger getTrigger(TriggerType type) {
     for (Trigger trig : triggers) {
       if (trig.getType() == type)
         return trig;
     }
     return null;
+  }
+
+  public void addIndex(Index index) {
+    indexes.add(index);
+  }
+
+  public void addField(Field field) {
+    fields.add(field);
+  }
+
+  public void addTrigger(Trigger trigger) {
+    triggers.add(trigger);
   }
 
   @Override
@@ -160,116 +188,5 @@ public class Table {
   @Override
   public String toString() {
     return "Table " + name;
-  }
-
-  public static class Builder {
-    private final String name;
-    private String area;
-    private String label;
-    private String description;
-    private String dumpName;
-    private String valMsg;
-    private boolean frozen;
-    private List<Field> fields = new ArrayList<>();
-    private List<Index> indexes = new ArrayList<>();
-    private List<Trigger> triggers = new ArrayList<>();
-    private int firstLine;
-    private int lastLine;
-
-    public Builder(@Nonnull String name) {
-      this.name = name;
-    }
-
-    @Nonnull
-    public String getName() {
-      return name;
-    }
-
-    public Builder setArea(String area) {
-      this.area = area;
-      return this;
-    }
-
-    public Builder setLabel(String label) {
-      this.label = label;
-      return this;
-    }
-
-    public Builder setDescription(String description) {
-      this.description = description;
-      return this;
-    }
-
-    public Builder setDumpName(String dumpName) {
-      this.dumpName = dumpName;
-      return this;
-    }
-
-    public Builder setValMsg(String valMsg) {
-      this.valMsg = valMsg;
-      return this;
-    }
-
-    public Builder setFrozen(boolean frozen) {
-      this.frozen = frozen;
-      return this;
-    }
-
-    public Builder setFirstLine(int firstLine) {
-      this.firstLine = firstLine;
-      return this;
-    }
-
-    public Builder setLastLine(int lastLine) {
-      this.lastLine = lastLine;
-      return this;
-    }
-
-    public Builder addField(Field field) {
-      this.fields.add(field);
-      return this;
-    }
-
-    public Builder addIndex(Index index) {
-      this.indexes.add(index);
-      return this;
-    }
-
-    public Builder addTrigger(Trigger trigger) {
-      this.triggers.add(trigger);
-      return this;
-    }
-
-    @Nullable
-    public Field getField(String name) {
-      for (Field fld : fields) {
-        if (fld.getName().equalsIgnoreCase(name))
-          return fld;
-      }
-      return null;
-    }
-
-    @Nullable
-    public Index getIndex(String name) {
-      for (Index idx : indexes) {
-        if (idx.getName().equalsIgnoreCase(name))
-          return idx;
-      }
-      return null;
-    }
-
-    public Builder updateIndexBufferPool(String indexName, String bufferPool) {
-      for (int i = 0; i < indexes.size(); i++) {
-        if (indexes.get(i).getName().equalsIgnoreCase(indexName)) {
-          indexes.set(i, indexes.get(i).withBufferPool(bufferPool));
-          break;
-        }
-      }
-      return this;
-    }
-
-    public Table build() {
-      return new Table(this);
-    }
   }
 }

@@ -2,7 +2,7 @@
  * OpenEdge plugin for SonarQube
  * Copyright (c) 2015-2026 Riverside Software
  * contact AT riverside DASH software DOT fr
- *
+ * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,11 +20,12 @@
 package eu.rssw.antlr.database.objects;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.serializers.FieldSerializer;
 
 public class KryoSerializers {
 
@@ -34,227 +35,163 @@ public class KryoSerializers {
 
   public static void addSerializers(Kryo kryo) {
     kryo.register(DatabaseDescription.class, 70);
-    kryo.register(Table.class, new DbTableSerializer(), 71);
-    kryo.register(Field.class, new DbFieldSerializer(), 72);
-    kryo.register(Index.class, new DbIndexSerializer(), 73);
-    kryo.register(Sequence.class, new DbSequenceSerializer(), 74);
-    kryo.register(Trigger.class, new DbTriggerSerializer(), 75);
+    kryo.register(Table.class, new KryoSerializers.DbTableSerializer(kryo, Table.class), 71);
+    kryo.register(Field.class, new KryoSerializers.DbFieldSerializer(kryo, Field.class), 72);
+    kryo.register(Index.class, new KryoSerializers.DbIndexSerializer(kryo, Index.class), 73);
+    kryo.register(Sequence.class, new KryoSerializers.DbSequenceSerializer(kryo, Sequence.class), 74);
+    kryo.register(Trigger.class, new KryoSerializers.DbTriggerSerializer(kryo, Trigger.class), 75);
     kryo.register(TriggerType.class, 76);
   }
 
-  public static class DbTableSerializer extends Serializer<Table> {
+  public static class DbTableSerializer extends FieldSerializer<Table> {
+    public DbTableSerializer(Kryo kryo, Class<Table> type) {
+      super(kryo, type);
+    }
+
     @Override
-    public void write(Kryo kryo, Output output, Table table) {
-      output.writeString(table.getName());
-      output.writeString(table.getArea());
-      output.writeString(table.getLabel());
-      output.writeString(table.getDescription());
-      output.writeString(table.getDumpName());
-      output.writeString(table.getValMsg());
-      output.writeBoolean(table.isFrozen());
-      output.writeInt(table.getFirstLine());
-      output.writeInt(table.getLastLine());
+    protected void initializeCachedFields() {
+      removeField("name");
+    }
 
-      var fields = new ArrayList<>(table.getFields());
-      output.writeInt(fields.size(), true);
-      for (Field f : fields) {
-        kryo.writeObject(output, f);
-      }
+    @Override
+    protected Table create(Kryo kryo, Input input, Class<? extends Table> type) {
+      return new Table(input.readString());
+    }
 
-      var indexes = new ArrayList<>(table.getIndexes());
-      output.writeInt(indexes.size(), true);
-      for (Index idx : indexes) {
-        kryo.writeObject(output, idx);
-      }
-
-      var triggers = new ArrayList<>(table.getTriggers());
-      output.writeInt(triggers.size(), true);
-      for (Trigger t : triggers) {
-        kryo.writeObject(output, t);
-      }
+    @Override
+    public void write(Kryo kryo, Output output, Table object) {
+      // Final fields first
+      output.writeString(object.getName());
+      // Then standard fields
+      super.write(kryo, output, object);
     }
 
     @Override
     public Table read(Kryo kryo, Input input, Class<? extends Table> type) {
-      Table.Builder builder = new Table.Builder(input.readString())
-          .setArea(input.readString())
-          .setLabel(input.readString())
-          .setDescription(input.readString())
-          .setDumpName(input.readString())
-          .setValMsg(input.readString())
-          .setFrozen(input.readBoolean())
-          .setFirstLine(input.readInt())
-          .setLastLine(input.readInt());
-
-      int fieldCount = input.readInt(true);
-      for (int i = 0; i < fieldCount; i++) {
-        builder.addField(kryo.readObject(input, Field.class));
-      }
-
-      int indexCount = input.readInt(true);
-      for (int i = 0; i < indexCount; i++) {
-        Index rawIdx = kryo.readObject(input, Index.class);
-        // Rebuild index with correct field references from this table
-        Index.Builder idxBuilder = new Index.Builder(rawIdx.getName())
-            .setArea(rawIdx.getArea())
-            .setPrimary(rawIdx.isPrimary())
-            .setUnique(rawIdx.isUnique())
-            .setWord(rawIdx.isWord())
-            .setBufferPool(rawIdx.getBufferPool())
-            .setFirstLine(rawIdx.getFirstLine())
-            .setLastLine(rawIdx.getLastLine());
-        for (IndexField fld : rawIdx.getFields()) {
-          idxBuilder.addField(new IndexField(builder.getField(fld.getField().getName()), fld.isAscending()));
+      Table tbl = super.read(kryo, input, type);
+      // Rewrite index fields
+      for (Index idx : tbl.getIndexes()) {
+        List<IndexField> newList = new ArrayList<>();
+        for (IndexField fld : idx.getFields()) {
+          newList.add(new IndexField(tbl.getField(fld.getField().getName()), fld.isAscending()));
         }
-        builder.addIndex(idxBuilder.build());
+        idx.getFields().clear();
+        idx.getFields().addAll(newList);
       }
 
-      int triggerCount = input.readInt(true);
-      for (int i = 0; i < triggerCount; i++) {
-        builder.addTrigger(kryo.readObject(input, Trigger.class));
-      }
-
-      return builder.build();
+      return tbl;
     }
   }
 
-  public static class DbFieldSerializer extends Serializer<Field> {
-    @Override
-    public void write(Kryo kryo, Output output, Field field) {
-      output.writeString(field.getName());
-      output.writeString(field.getDataType());
-      kryo.writeObjectOrNull(output, field.getOrder(), Integer.class);
-      kryo.writeObjectOrNull(output, field.getPosition(), Integer.class);
-      kryo.writeObjectOrNull(output, field.getExtent(), Integer.class);
-      output.writeString(field.getDescription());
-      output.writeString(field.getLabel());
-      output.writeString(field.getColumnLabel());
-      output.writeString(field.getLobArea());
-      output.writeString(field.getFormat());
-      output.writeString(field.getInitial());
-      kryo.writeObjectOrNull(output, field.getMaxWidth(), Integer.class);
-      output.writeBoolean(field.isMandatory());
-      output.writeInt(field.getFirstLine());
-      output.writeInt(field.getLastLine());
-
-      var triggers = new ArrayList<>(field.getTriggers());
-      output.writeInt(triggers.size(), true);
-      for (Trigger t : triggers) {
-        kryo.writeObject(output, t);
-      }
+  public static class DbFieldSerializer extends FieldSerializer<Field> {
+    public DbFieldSerializer(Kryo kryo, Class<Field> type) {
+      super(kryo, type);
     }
 
     @Override
-    public Field read(Kryo kryo, Input input, Class<? extends Field> type) {
-      Field.Builder builder = new Field.Builder(input.readString(), input.readString())
-          .setOrder(kryo.readObjectOrNull(input, Integer.class))
-          .setPosition(kryo.readObjectOrNull(input, Integer.class))
-          .setExtent(kryo.readObjectOrNull(input, Integer.class))
-          .setDescription(input.readString())
-          .setLabel(input.readString())
-          .setColumnLabel(input.readString())
-          .setLobArea(input.readString())
-          .setFormat(input.readString())
-          .setInitial(input.readString())
-          .setMaxWidth(kryo.readObjectOrNull(input, Integer.class))
-          .setMandatory(input.readBoolean())
-          .setFirstLine(input.readInt())
-          .setLastLine(input.readInt());
+    protected void initializeCachedFields() {
+      removeField("name");
+      removeField("dataType");
+    }
 
-      int triggerCount = input.readInt(true);
-      for (int i = 0; i < triggerCount; i++) {
-        builder.addTrigger(kryo.readObject(input, Trigger.class));
-      }
+    @Override
+    protected Field create(Kryo kryo, Input input, Class<? extends Field> type) {
+      return new Field(input.readString(), input.readString());
+    }
 
-      return builder.build();
+    @Override
+    public void write(Kryo kryo, Output output, Field object) {
+      // Final fields first
+      output.writeString(object.getName());
+      output.writeString(object.getDataType());
+      // Then standard fields
+      super.write(kryo, output, object);
     }
   }
 
-  public static class DbIndexSerializer extends Serializer<Index> {
-    @Override
-    public void write(Kryo kryo, Output output, Index index) {
-      output.writeString(index.getName());
-      output.writeString(index.getArea());
-      output.writeBoolean(index.isPrimary());
-      output.writeBoolean(index.isUnique());
-      output.writeBoolean(index.isWord());
-      output.writeString(index.getBufferPool());
-      output.writeInt(index.getFirstLine());
-      output.writeInt(index.getLastLine());
+  public static class DbIndexSerializer extends FieldSerializer<Index> {
+    public DbIndexSerializer(Kryo kryo, Class<Index> type) {
+      super(kryo, type);
+    }
 
-      output.writeInt(index.getFields().size(), true);
-      for (IndexField idxFld : index.getFields()) {
+    @Override
+    protected void initializeCachedFields() {
+      removeField("name");
+      removeField("fields");
+    }
+
+    @Override
+    protected Index create(Kryo kryo, Input input, Class<? extends Index> type) {
+      Index idx = new Index(input.readString());
+      int len = input.readInt(true);
+      for (int zz = 0; zz < len; zz++) {
+        idx.addField(new IndexField(new Field(input.readString(), "SER_TYPE"), input.readBoolean()));
+      }
+
+      return idx;
+    }
+
+    @Override
+    public void write(Kryo kryo, Output output, Index object) {
+      // Final fields first
+      output.writeString(object.getName());
+      output.writeInt(object.getFields().size(), true);
+      for (IndexField idxFld : object.getFields()) {
         output.writeString(idxFld.getField().getName());
         output.writeBoolean(idxFld.isAscending());
       }
-    }
-
-    @Override
-    public Index read(Kryo kryo, Input input, Class<? extends Index> type) {
-      Index.Builder builder = new Index.Builder(input.readString())
-          .setArea(input.readString())
-          .setPrimary(input.readBoolean())
-          .setUnique(input.readBoolean())
-          .setWord(input.readBoolean())
-          .setBufferPool(input.readString())
-          .setFirstLine(input.readInt())
-          .setLastLine(input.readInt());
-
-      int fieldCount = input.readInt(true);
-      for (int i = 0; i < fieldCount; i++) {
-        builder.addField(new IndexField(
-            new Field.Builder(input.readString(), "SER_TYPE").build(),
-            input.readBoolean()));
-      }
-
-      return builder.build();
+      // Then standard fields
+      super.write(kryo, output, object);
     }
   }
 
-  public static class DbSequenceSerializer extends Serializer<Sequence> {
-    @Override
-    public void write(Kryo kryo, Output output, Sequence seq) {
-      output.writeString(seq.getName());
-      kryo.writeObjectOrNull(output, seq.getInitialValue(), Long.class);
-      kryo.writeObjectOrNull(output, seq.getMinValue(), Long.class);
-      kryo.writeObjectOrNull(output, seq.getMaxValue(), Long.class);
-      kryo.writeObjectOrNull(output, seq.getIncrement(), Long.class);
-      output.writeBoolean(seq.isCycleOnLimit());
-      output.writeInt(seq.getFirstLine());
-      output.writeInt(seq.getLastLine());
+  public static class DbSequenceSerializer extends FieldSerializer<Sequence> {
+    public DbSequenceSerializer(Kryo kryo, Class<Sequence> type) {
+      super(kryo, type);
     }
 
     @Override
-    public Sequence read(Kryo kryo, Input input, Class<? extends Sequence> type) {
-      return new Sequence.Builder(input.readString())
-          .setInitialValue(kryo.readObjectOrNull(input, Long.class))
-          .setMinValue(kryo.readObjectOrNull(input, Long.class))
-          .setMaxValue(kryo.readObjectOrNull(input, Long.class))
-          .setIncrement(kryo.readObjectOrNull(input, Long.class))
-          .setCycleOnLimit(input.readBoolean())
-          .setFirstLine(input.readInt())
-          .setLastLine(input.readInt())
-          .build();
+    protected void initializeCachedFields() {
+      removeField("name");
+    }
+
+    @Override
+    protected Sequence create(Kryo kryo, Input input, Class<? extends Sequence> type) {
+      return new Sequence(input.readString());
+    }
+
+    @Override
+    public void write(Kryo kryo, Output output, Sequence object) {
+      // Final fields first
+      output.writeString(object.getName());
+      // Then standard fields
+      super.write(kryo, output, object);
     }
   }
 
-  public static class DbTriggerSerializer extends Serializer<Trigger> {
-    @Override
-    public void write(Kryo kryo, Output output, Trigger trigger) {
-      kryo.writeClassAndObject(output, trigger.getType());
-      output.writeString(trigger.getProcedure());
-      output.writeBoolean(trigger.isNoOverride());
-      output.writeBoolean(trigger.isOverride());
-      output.writeString(trigger.getCrc());
+  public static class DbTriggerSerializer extends FieldSerializer<Trigger> {
+    public DbTriggerSerializer(Kryo kryo, Class<Trigger> type) {
+      super(kryo, type);
     }
 
     @Override
-    public Trigger read(Kryo kryo, Input input, Class<? extends Trigger> type) {
-      return new Trigger.Builder((TriggerType) kryo.readClassAndObject(input), input.readString())
-          .setNoOverride(input.readBoolean())
-          .setOverride(input.readBoolean())
-          .setCrc(input.readString())
-          .build();
+    protected void initializeCachedFields() {
+      removeField("type");
+      removeField("procedure");
+    }
+
+    @Override
+    protected Trigger create(Kryo kryo, Input input, Class<? extends Trigger> type) {
+      return new Trigger((TriggerType) kryo.readClassAndObject(input), input.readString());
+    }
+
+    @Override
+    public void write(Kryo kryo, Output output, Trigger object) {
+      // Final fields first
+      kryo.writeClassAndObject(output, object.getType());
+      output.writeString(object.getProcedure());
+      // Then standard fields
+      super.write(kryo, output, object);
     }
   }
 

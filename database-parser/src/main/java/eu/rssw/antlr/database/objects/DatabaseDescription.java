@@ -101,43 +101,40 @@ public class DatabaseDescription {
     DatabaseDescription db = new DatabaseDescription(name);
     try (InputStreamReader isr = new InputStreamReader(in); BufferedReader reader = new BufferedReader(isr)) {
       String line = null;
-      Table.Builder currTblBuilder = null;
+      Table currTbl = null;
       while ((line = reader.readLine()) != null) {
         if (line.startsWith("S")) {
-          db.addSequence(new Sequence.Builder(line.substring(1)).build());
+          db.addSequence(new Sequence(line.substring(1)));
         } else if (line.startsWith("T")) {
-          if (currTblBuilder != null)
-            db.addTable(currTblBuilder.build());
-          currTblBuilder = new Table.Builder(line.substring(1));
+          currTbl = new Table(line.substring(1));
+          db.addTable(currTbl);
         } else if (line.startsWith("F")) {
           // FieldName:DataType:Extent
           int ch1 = line.indexOf(':');
           int ch2 = line.lastIndexOf(':');
-          if ((currTblBuilder == null) || (ch1 == -1) || (ch2 == -1))
+          if ((currTbl == null) || (ch1 == -1) || (ch2 == -1))
             throw new IOException("Invalid file format: " + line);
 
-          Field f = new Field.Builder(line.substring(1, ch1), line.substring(ch1 + 1, ch2))
-              .setExtent(Integer.parseInt(line.substring(ch2 + 1)))
-              .build();
-          currTblBuilder.addField(f);
+          Field f = new Field(line.substring(1, ch1), line.substring(ch1 + 1, ch2));
+          f.setExtent(Integer.parseInt(line.substring(ch2 + 1)));
+          currTbl.addField(f);
         } else if (line.startsWith("I")) {
-          if (currTblBuilder == null)
+          if (currTbl == null)
             throw new IOException("No associated table for " + line);
           // IndexName:Attributes:Field1:Field2:...
           var lst = line.split(":");
+          //List<String> lst = Splitter.on(':').trimResults().splitToList(line);
           if (lst.length < 3)
             throw new IOException("Invalid file format: " + line);
-          Index.Builder idxBuilder = new Index.Builder(lst[0].substring(1))
-              .setUnique(lst[1].indexOf('U') > -1)
-              .setPrimary(lst[1].indexOf('P') > -1);
+          Index i = new Index(lst[0].substring(1));
+          i.setUnique(lst[1].indexOf('U') > -1);
+          i.setPrimary(lst[1].indexOf('P') > -1);
           for (int zz = 2; zz < lst.length; zz++) {
-            idxBuilder.addField(new IndexField(currTblBuilder.getField(lst[zz].substring(1)), lst[zz].charAt(0) == 'A'));
+            i.addField(new IndexField(currTbl.getField(lst[zz].substring(1)), lst[zz].charAt(0) == 'A'));
           }
-          currTblBuilder.addIndex(idxBuilder.build());
+          currTbl.addIndex(i);
         }
       }
-      if (currTblBuilder != null)
-        db.addTable(currTblBuilder.build());
     }
 
     return db;
