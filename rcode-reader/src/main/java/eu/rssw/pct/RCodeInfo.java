@@ -213,7 +213,7 @@ public class RCodeInfo {
     }
   }
 
-  private final void processSignatureBlock(InputStream input, PrintStream out)
+  void processSignatureBlock(InputStream input, PrintStream out)
       throws IOException, InvalidRCodeException {
     byte[] header = input.readNBytes(signatureSize);
     if (out != null) {
