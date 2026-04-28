@@ -1947,7 +1947,7 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertEquals(rels.get(0).getParentBuffer().getName(), "tt1");
     assertEquals(rels.get(0).getChildBuffer().getName(), "tt2");
   }
-  
+
   @Test
   public void testDataset07() {
     var code = """
@@ -2160,6 +2160,39 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertNotNull(symbol3);
     assertNotNull(symbol3.getDefineNode());
     assertEquals(symbol3.getDefineNode().getLine(), 2);
+  }
+
+  @Test
+  public void testRcodeInfo01() {
+    var code = """
+        BLOCK-LEVEL ON ERROR UNDO, THROW.
+        CLASS sample.sonar:
+            DEF PROTECTED TEMP-TABLE ttcustom NO-UNDO RCODE-INFO
+                FIELD customField AS CHARACTER.
+            DEF PROTECTED TEMP-TABLE ttcustom2 NO-UNDO RCODE-INFORMATION
+                FIELD customField2 AS CHARACTER.
+        END CLASS.
+        """;
+
+    ParseUnit unit = getParseUnit(code, session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getRootScope());
+  }
+
+  @Test
+  public void testRcodeInfo02() {
+    var code = """
+        DEFINE QUERY q FOR Customer RCODE-INFORMATION.
+        DEFINE QUERY q FOR Customer RCODE-INFO.
+        """;
+
+    ParseUnit unit = getParseUnit(code, session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getRootScope());
   }
 
 }
