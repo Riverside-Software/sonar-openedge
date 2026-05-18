@@ -60,13 +60,14 @@ public class SystemHandleTest {
         if (!"com-self".equalsIgnoreCase(systemHandle.getName()) && !"focus".equalsIgnoreCase(systemHandle.getName())
             && !"default-window".equalsIgnoreCase(systemHandle.getName())
             && !"current-window".equalsIgnoreCase(systemHandle.getName())
-            && !"active-window".equalsIgnoreCase(systemHandle.getName())) {
+            && !"active-window".equalsIgnoreCase(systemHandle.getName())
+            && !"shadow-window".equalsIgnoreCase(systemHandle.getName())) {
           assertTrue(systemHandle.hasAttribute("type"), systemHandle.toString());
           assertFalse(systemHandle.hasAttribute("unknown"));
         }
         for (var method : systemHandle.getMethods()) {
           assertNotNull(method.getVariants());
-          assertNotNull(method.getIDESignature(VERSION_TYPE_INFO_PROVIDER.apply(OpenEdgeVersion.V128), true));
+          assertNotNull(method.getIDESignature(VERSION_TYPE_INFO_PROVIDER.apply(version), true));
           assertNotNull(method.getVariants()[0].getParameters());
           assertTrue(method.getVariants().length > 0);
           for (var variant : method.getVariants()) {
@@ -231,5 +232,14 @@ public class SystemHandleTest {
     assertEquals(list2.size(), 13);
     var sub2 = list2.stream().filter(it -> "ALLOW-PREV-DESERIALIZATION".equalsIgnoreCase(it.getName())).toList();
     assertEquals(sub2.size(), 1);
+  }
+
+  @Test
+  public void testBrowse() {
+    for (OpenEdgeVersion version : OpenEdgeVersion.values()) {
+      var syshdl = VERSION_SYS_HANDLE_PROVIDER.apply(version).apply("BROWSE");
+      assertNotNull(syshdl);
+      assertNotNull(syshdl.getMethod("ADD-FIRST"));
+    }
   }
 }
