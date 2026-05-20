@@ -23,7 +23,7 @@ dump:
   dump_type* footer? EOF;
 
 dump_type:
-  annotation | addDatabase | addSequence | addTable | addField | addIndex | addConstraint | updateField | renameField | renameIndex | updateIndex | updateIndex2 | dropIndex | dropField | dropTable | updateTable;
+  annotation | addDatabase | addSequence | addTable | addField | addIndex | addConstraint | updateField | renameField | renameIndex | updateIndex | dropIndex | dropField | dropTable | updateTable;
 
 annotation:
   ann=ANNOTATION_NAME '(' (UNQUOTED_STRING '=' QUOTED_STRING (',' UNQUOTED_STRING '=' QUOTED_STRING)*)? ')' '.';
@@ -269,10 +269,7 @@ renameIndex:
     'RENAME' 'INDEX' QUOTED_STRING 'TO' QUOTED_STRING 'ON' QUOTED_STRING;
 
 updateIndex:
-    'UPDATE' 'PRIMARY'? 'INDEX' index=QUOTED_STRING 'ON' table=QUOTED_STRING addIndexOption*;
-
-updateIndex2:
-    'UPDATE' 'INDEX' index=QUOTED_STRING 'OF' table=QUOTED_STRING ( 'BUFFER-POOL' bpVal=QUOTED_STRING | encryptionOption )*;
+    'UPDATE' 'PRIMARY'? 'INDEX' index=QUOTED_STRING ( 'ON' | 'OF' ) table=QUOTED_STRING ( 'BUFFER-POOL' bpVal=QUOTED_STRING | encryptionOption | addIndexOption)*;
 
 dropIndex:
     'DROP' 'INDEX' index=QUOTED_STRING 'ON' table=QUOTED_STRING;

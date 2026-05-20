@@ -56,7 +56,7 @@ import eu.rssw.antlr.database.DumpFileGrammarParser.TableDumpNameContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.TableFrozenContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.TableTriggerContext;
 import eu.rssw.antlr.database.DumpFileGrammarParser.TableValMsgContext;
-import eu.rssw.antlr.database.DumpFileGrammarParser.UpdateIndex2Context;
+import eu.rssw.antlr.database.DumpFileGrammarParser.UpdateIndexContext;
 import eu.rssw.antlr.database.objects.DatabaseDescription;
 import eu.rssw.antlr.database.objects.Field;
 import eu.rssw.antlr.database.objects.Index;
@@ -381,7 +381,7 @@ public class DumpFileVisitor extends DumpFileGrammarBaseVisitor<Void> {
   }
 
   @Override
-  public Void visitUpdateIndex2(UpdateIndex2Context ctx) {
+  public Void visitUpdateIndex(UpdateIndexContext ctx) {
     String tableName = ctx.table.getText();
     String indexName = ctx.index.getText();
     Table table = db.getTable(tableName);
