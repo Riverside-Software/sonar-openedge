@@ -170,7 +170,7 @@ public interface IFunctionDocumentation extends IElementDocumentation {
     }
   }
 
-  private IFunctionParameterList[] getVariants(@Nonnull DataType[] datatypes, Function<String, ITypeInfo> provider) {
+  default IFunctionParameterList[] getVariants(@Nonnull DataType[] datatypes, Function<String, ITypeInfo> provider) {
     var variants = getVariants();
     if (variants.length == 0)
       return variants;
