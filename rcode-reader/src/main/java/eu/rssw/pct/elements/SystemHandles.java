@@ -84,8 +84,16 @@ public class SystemHandles {
         if (hdl.methods != null) {
           for (var methodEntry : hdl.methods) {
             if (methodEntry.variants != null) {
-              var xx = 1;
-              var variants = new FunctionParameterList[methodEntry.variants == null ? 0 : methodEntry.variants.length];
+              var offset = 0;
+              var needToAddEmptyVariant = (methodEntry.variants.length == 1)
+                  && (methodEntry.variants[0].parameters.length == 1)
+                  && "OPTION".equalsIgnoreCase(methodEntry.variants[0].parameters[0].name);
+              var lengthVariant = 0;
+              if (methodEntry.variants != null) {
+                lengthVariant = needToAddEmptyVariant ? methodEntry.variants.length + 1 : methodEntry.variants.length;
+              }
+
+              var variants = new FunctionParameterList[lengthVariant];
               for (var varianEntry : methodEntry.variants) {
                 var params = new ParamDocumentation[varianEntry.parameters == null ? 0 : varianEntry.parameters.length];
                 if (varianEntry.parameters != null) {
@@ -99,9 +107,15 @@ public class SystemHandles {
                   }
                 }
                 var variant = new FunctionParameterList(params);
-                variants[xx - 1] = variant;
-                xx++;
+                variants[offset] = variant;
+                offset++;
               }
+              // Empty variant for method with one parameter "OPTION"
+              if (needToAddEmptyVariant) {
+                var variant = new FunctionParameterList();
+                variants[offset] = variant;
+              }
+
               var functionDocumentation = new FunctionDocumentation(
                   methodEntry.name, methodEntry.description, methodEntry.returnType.equalsIgnoreCase("None")
                       ? DataType.NOT_COMPUTED.toString() : DataType.get(methodEntry.returnType).toString(),
