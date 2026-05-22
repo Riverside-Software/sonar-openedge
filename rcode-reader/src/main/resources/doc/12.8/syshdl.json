@@ -1245,7 +1245,7 @@
                 },
                 {
                   "name": "OPTION",
-                  "type": "CHARACTER",
+                  "type": "VOID",
                   "description": "SHARE-LOCK | EXCLUSIVE-LOCK | NO-LOCK",
                   "optional": true
                 }
@@ -8620,7 +8620,7 @@
               "parameters": [
                 {
                   "name": "OPTION",
-                  "type": "CHARACTER",
+                  "type": "VOID",
                   "description": "NO-LOCK | SHARE-LOCK | EXCLUSIVE-LOCK"
                 }
               ]
@@ -8636,7 +8636,7 @@
               "parameters": [
                 {
                   "name": "OPTION",
-                  "type": "CHARACTER",
+                  "type": "VOID",
                   "description": "NO-LOCK | SHARE-LOCK | EXCLUSIVE-LOCK"
                 }
               ]
@@ -8652,7 +8652,7 @@
               "parameters": [
                 {
                   "name": "OPTION",
-                  "type": "CHARACTER",
+                  "type": "VOID",
                   "description": "NO-LOCK | SHARE-LOCK | EXCLUSIVE-LOCK"
                 }
               ]
@@ -8668,7 +8668,7 @@
               "parameters": [
                 {
                   "name": "OPTION",
-                  "type": "CHARACTER",
+                  "type": "VOID",
                   "description": "NO-LOCK | SHARE-LOCK | EXCLUSIVE-LOCK"
                 }
               ]
@@ -8684,7 +8684,7 @@
               "parameters": [
                 {
                   "name": "OPTION",
-                  "type": "CHARACTER",
+                  "type": "VOID",
                   "description": "NO-LOCK | SHARE-LOCK | EXCLUSIVE-LOCK"
                 }
               ]
@@ -17711,7 +17711,7 @@
               "parameters": [
                 {
                   "name": "OPTION",
-                  "type": "CHARACTER",
+                  "type": "VOID",
                   "description": "BEFORE | AFTER"
                 }
               ]
@@ -18054,7 +18054,7 @@
                 {
                   "name": "OPTION",
                   "type": "CHARACTER",
-                  "description": "ALWAYS | CONDITIONAL",
+                  "description": "\"ALWAYS\" | \"CONDITIONAL\"",
                   "optional": true
                 }
               ]

@@ -216,11 +216,18 @@ public interface IFunctionDocumentation extends IElementDocumentation {
         label.append(", ");
         insertText.append(", ");
       }
-      if (variant.getParameters()[pos].getDataType().getPrimitive() == PrimitiveDataType.CLASS)
-        label.append(variant.getParameters()[pos].getDataType().getClassName());
-      else
-        label.append(variant.getParameters()[pos].getDataType().getPrimitive().getIDESignature());
-      label.append(" ").append(variant.getParameters()[pos].getName());
+
+      if (variant.getParameters()[pos].getDataType().getPrimitive() == PrimitiveDataType.CLASS) {
+        label.append(variant.getParameters()[pos].getDataType().getClassName()).append(" ");
+      } else {
+        var sigParam = variant.getParameters()[pos].getDataType().getPrimitive();
+        label.append(sigParam == PrimitiveDataType.VOID ? "" : sigParam.getIDESignature() + " ");
+      }
+      if ("OPTION".equalsIgnoreCase(variant.getParameters()[pos].getName()))
+        label.append("<");
+      label.append(variant.getParameters()[pos].getName());
+      if ("OPTION".equalsIgnoreCase(variant.getParameters()[pos].getName()))
+        label.append(">");
       insertText.append("${").append(pos + 1).append(":").append(variant.getParameters()[pos].getName()).append("}");
     }
     if (useParentheses(useParentheses, numParams)) {
