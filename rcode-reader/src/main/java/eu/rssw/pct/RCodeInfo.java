@@ -25,10 +25,24 @@ import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
+import java.util.Optional;
 
+import org.prorefactor.core.Pair;
+
+import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.IMethodElement;
+import eu.rssw.pct.elements.IParameter;
 import eu.rssw.pct.elements.ITypeInfo;
+import eu.rssw.pct.elements.ParameterMode;
+import eu.rssw.pct.elements.fixed.MethodElement;
+import eu.rssw.pct.elements.fixed.Parameter;
 import eu.rssw.pct.elements.v11.TypeInfoV11;
 import eu.rssw.pct.elements.v12.TypeInfoV12;
 
@@ -98,6 +112,7 @@ public class RCodeInfo {
   private boolean isClass = false;
 
   private ITypeInfo typeInfo;
+  private IMethodElement mainBlock;
 
   public RCodeInfo(InputStream input) throws InvalidRCodeException, IOException {
     this(input, null);
@@ -225,28 +240,19 @@ public class RCodeInfo {
     if (header.length == 0)
       return;
     int preambleSize = readAsciiEncodedNumber(header, 0, 4);
-    int numElements = readAsciiEncodedNumber(header, 4, 4);
-    // Version of signature block : offset 8, 4 bytes
-    // Encoding : offset 12, null-terminated string
+    // Number of elements in block at offset 0x04
+    int sigBlockVersion = readAsciiEncodedNumber(header, 8, 4);
+    if (sigBlockVersion < 5) 
+      return ;
+    var cs = oeCharset(readNullTerminatedString(header, 12));
 
-    int pos = preambleSize;
-    for (int kk = 0; kk < numElements; kk++) {
-      String str = readNullTerminatedString(header, pos);
-      pos += str.length() + 1;
+    var pos = preambleSize;
+    var str0 = readNullTerminatedString(header, pos, cs);
+    if (!str0.isBlank())
+      parseSignature(str0);
 
-      // Datasets and temp-tables not read for now
-      if (str.startsWith("DSET") || str.startsWith("TTAB")) {
-        continue;
-      }
-
-      // Will probably be skipped
-      // Function fn = parseProcSignature(str);
-      // if ((unit.mainProcedure == null) && (fn.type == FunctionType.MAIN)) {
-      // unit.mainProcedure = fn;
-      // } else {
-      // unit.funcs.add(fn);
-      // }
-    }
+    // Signature block contains the signature of all internal procedures / functions
+    // Not parsed as there's no value for CABL or the language server
   }
 
   private final void processSegmentTable(InputStream input, PrintStream out) throws IOException {
@@ -340,6 +346,12 @@ public class RCodeInfo {
     return typeInfo;
   }
 
+  public Optional<IMethodElement> getMainBlock() {
+    if (isClass)
+      return Optional.empty();
+    return Optional.ofNullable(mainBlock);
+  }
+
   /**
    * Returns r-code compiler version
    * 
@@ -378,6 +390,96 @@ public class RCodeInfo {
     return rcodeSize;
   }
 
+  private void parseSignature(String str) {
+    var pos = str.indexOf(' ');
+    var kind = str.substring(0, pos);
+
+    if ("MAIN".equals(kind)) {
+      mainBlock = parseProcedureSignature(str.substring(pos + 1));
+    }
+  }
+
+  private static IMethodElement parseProcedureSignature(String str) {
+    var pos = str.indexOf(',');
+    var name = str.substring(0, pos);
+
+    var lastSpace = name.lastIndexOf(' ');
+    name = name.substring(0, lastSpace);
+
+    var nextPos = nextComma(str, pos + 1);
+    var returnType = parseReturnType(str.substring(pos + 1, nextPos));
+
+    pos = nextPos;
+    nextPos = nextComma(str, pos + 1);
+    List<IParameter> params = new ArrayList<>();
+    while (nextPos != -1) {
+      if (str.substring(pos + 1).startsWith("0"))
+        break;
+      params.add(parseParameter(str.substring(pos + 1, nextPos)));
+      pos = nextPos;
+      nextPos = nextComma(str, pos + 1);
+    }
+
+    return new MethodElement(name, false, returnType.getO1(), params.toArray(new IParameter[0]));
+  }
+
+  private static IParameter parseParameter(String str) {
+    var pos = str.indexOf(' ');
+
+    var mode = str.substring(0, pos);
+    if ("1".equals(mode))
+      mode = "INPUT";
+    else if ("2".equals(mode))
+      mode = "OUTPUT";
+    else if ("3".equals(mode))
+      mode = "INPUT-OUTPUT";
+    else if ("4".equals(mode))
+      mode = "BUFFER";
+
+    str = str.substring(pos + 1);
+    pos = str.indexOf(' ');
+    var name = str.substring(0, pos);
+    var type = parseReturnType(str.substring(pos + 1));
+
+    return new Parameter(0, name, type.getO2(), ParameterMode.getParameterMode(mode), type.getO1());
+  }
+
+  private static Pair<DataType, Integer> parseReturnType(String str) {
+    var pos = str.indexOf(' ');
+    if (pos == -1) {
+      var dt = parseDataType(str);
+      return Pair.of(dt, 0);
+    } else {
+      var dt = parseDataType(str.substring(0, pos));
+      var extent = Integer.parseInt(str.substring(pos + 1));
+      return Pair.of(dt, extent);
+    }
+  }
+
+  private static DataType parseDataType(String str) {
+    if ((str == null) || str.isBlank())
+      return DataType.VOID;
+
+    try {
+      var dataType = DataType.get(Integer.parseInt(str));
+      if (dataType != DataType.UNKNOWN)
+        return dataType;
+    } catch (NumberFormatException caught) {
+      // No-op
+    }
+
+    return new DataType(str);
+  }
+
+  private static int nextComma(String str, int fromIndex) {
+    var len = str.length();
+    if (fromIndex >= len)
+      return -1;
+    var idx = str.indexOf(',', fromIndex);
+    // Return end of string if no comma found
+    return idx == -1 ? len : idx;
+  }
+
   public static String readNullTerminatedString(byte[] array, int offset) {
     return readNullTerminatedString(array, offset, Charset.defaultCharset());
   }
@@ -405,6 +507,14 @@ public class RCodeInfo {
       return Integer.valueOf(new String(Arrays.copyOfRange(array, pos, pos + length)), 16);
     } catch (NumberFormatException caught) {
       throw new InvalidRCodeException(caught);
+    }
+  }
+
+  private static final Charset oeCharset(String str) {
+    try {
+      return Charset.forName(str);
+    } catch (IllegalCharsetNameException | UnsupportedCharsetException caught) {
+      return StandardCharsets.UTF_8;
     }
   }
 
