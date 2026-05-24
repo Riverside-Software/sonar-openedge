@@ -1947,7 +1947,7 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertEquals(rels.get(0).getParentBuffer().getName(), "tt1");
     assertEquals(rels.get(0).getChildBuffer().getName(), "tt2");
   }
-  
+
   @Test
   public void testDataset07() {
     var code = """
@@ -2113,6 +2113,86 @@ public class TreeParser03Test extends AbstractProparseTest {
 
     var dataset = lstwidget.get(0).getSymbol();
     assertNotNull(dataset);
+  }
+
+  @Test
+  public void testInheritedFields() {
+    var code = """
+        DEFINE TEMP-TABLE TT_Base
+          FIELD BaseField AS LOGICAL.
+
+        DEFINE TEMP-TABLE TT_Inherited LIKE TT_Base
+          FIELD ExtendedField AS LOGICAL.
+
+        CREATE TT_Base.
+        CREATE TT_Inherited.
+
+        TT_Base.BaseField = TRUE.
+        TT_Inherited.ExtendedField = TRUE.
+        TT_Inherited.BaseField = TRUE.
+        """;
+
+    var unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+    assertEquals(unit.getRootScope().getAllSymbols().size(), 6);
+    assertNotNull(unit.getRootScope().getAllSymbols().get(0).getDefineNode());
+    assertNotNull(unit.getRootScope().getAllSymbols().get(1).getDefineNode());
+    assertNotNull(unit.getRootScope().getAllSymbols().get(2).getDefineNode());
+    assertNotNull(unit.getRootScope().getAllSymbols().get(3).getDefineNode());
+    assertNotNull(unit.getRootScope().getAllSymbols().get(4).getDefineNode());
+    assertNotNull(unit.getRootScope().getAllSymbols().get(5).getDefineNode());
+    assertEquals(unit.getTopNode().query(ABLNodeType.FIELD_REF).size(), 3);
+    var fieldrefNode = unit.getTopNode().query(ABLNodeType.FIELD_REF).get(0);
+    var symbol = fieldrefNode.getSymbol();
+    assertNotNull(symbol);
+    assertNotNull(symbol.getDefineNode());
+    assertEquals(symbol.getDefineNode().getLine(), 2);
+    var fieldrefNode2 = unit.getTopNode().query(ABLNodeType.FIELD_REF).get(1);
+    var symbol2 = fieldrefNode2.getSymbol();
+    assertNotNull(symbol2);
+    assertNotNull(symbol2.getDefineNode());
+    assertEquals(symbol2.getDefineNode().getLine(), 5);
+    var fieldrefNode3 = unit.getTopNode().query(ABLNodeType.FIELD_REF).get(2);
+    var symbol3 = fieldrefNode3.getSymbol();
+    assertNotNull(symbol3);
+    assertNotNull(symbol3.getDefineNode());
+    assertEquals(symbol3.getDefineNode().getLine(), 2);
+  }
+
+  @Test
+  public void testRcodeInfo01() {
+    var code = """
+        BLOCK-LEVEL ON ERROR UNDO, THROW.
+        CLASS sample.sonar:
+            DEF PROTECTED TEMP-TABLE ttcustom NO-UNDO RCODE-INFO
+                FIELD customField AS CHARACTER.
+            DEF PROTECTED TEMP-TABLE ttcustom2 NO-UNDO RCODE-INFORMATION
+                FIELD customField2 AS CHARACTER.
+        END CLASS.
+        """;
+
+    ParseUnit unit = getParseUnit(code, session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getRootScope());
+  }
+
+  @Test
+  public void testRcodeInfo02() {
+    var code = """
+        DEFINE QUERY q FOR Customer RCODE-INFORMATION.
+        DEFINE QUERY q FOR Customer RCODE-INFO.
+        """;
+
+    ParseUnit unit = getParseUnit(code, session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getRootScope());
   }
 
 }

@@ -60,13 +60,14 @@ public class SystemHandleTest {
         if (!"com-self".equalsIgnoreCase(systemHandle.getName()) && !"focus".equalsIgnoreCase(systemHandle.getName())
             && !"default-window".equalsIgnoreCase(systemHandle.getName())
             && !"current-window".equalsIgnoreCase(systemHandle.getName())
-            && !"active-window".equalsIgnoreCase(systemHandle.getName())) {
+            && !"active-window".equalsIgnoreCase(systemHandle.getName())
+            && !"shadow-window".equalsIgnoreCase(systemHandle.getName())) {
           assertTrue(systemHandle.hasAttribute("type"), systemHandle.toString());
           assertFalse(systemHandle.hasAttribute("unknown"));
         }
         for (var method : systemHandle.getMethods()) {
           assertNotNull(method.getVariants());
-          assertNotNull(method.getIDESignature(VERSION_TYPE_INFO_PROVIDER.apply(OpenEdgeVersion.V128), true));
+          assertNotNull(method.getIDESignature(VERSION_TYPE_INFO_PROVIDER.apply(version), true));
           assertNotNull(method.getVariants()[0].getParameters());
           assertTrue(method.getVariants().length > 0);
           for (var variant : method.getVariants()) {
@@ -232,4 +233,93 @@ public class SystemHandleTest {
     var sub2 = list2.stream().filter(it -> "ALLOW-PREV-DESERIALIZATION".equalsIgnoreCase(it.getName())).toList();
     assertEquals(sub2.size(), 1);
   }
+
+  @Test
+  public void testBrowse() {
+    for (OpenEdgeVersion version : OpenEdgeVersion.values()) {
+      var syshdl = VERSION_SYS_HANDLE_PROVIDER.apply(version).apply("BROWSE");
+      assertNotNull(syshdl);
+      assertNotNull(syshdl.getMethod("ADD-FIRST"));
+    }
+  }
+
+  @Test
+  public void testParamOption01() {
+    for (var version : OpenEdgeVersion.values()) {
+      var syshdl = VERSION_SYS_HANDLE_PROVIDER.apply(version).apply("Query");
+      assertNotNull(syshdl);
+      var val1 = syshdl.getMethod("GET-CURRENT");
+      assertNotNull(val1);
+      assertEquals(val1.getVariants().length, 2);
+      assertEquals(val1.getVariants()[1].getParameters().length, 0);
+      var val2 = syshdl.getMethod("GET-FIRST");
+      assertNotNull(val2);
+      assertEquals(val2.getVariants().length, 2);
+      assertEquals(val2.getVariants()[1].getParameters().length, 0);
+      var val3 = syshdl.getMethod("GET-LAST");
+      assertNotNull(val3);
+      assertEquals(val3.getVariants().length, 2);
+      assertEquals(val3.getVariants()[1].getParameters().length, 0);
+      var val4 = syshdl.getMethod("GET-NEXT");
+      assertNotNull(val4);
+      assertEquals(val4.getVariants().length, 2);
+      assertEquals(val4.getVariants()[1].getParameters().length, 0);
+      var val5 = syshdl.getMethod("GET-PREV");
+      assertNotNull(val5);
+      assertEquals(val5.getVariants().length, 2);
+      assertEquals(val5.getVariants()[1].getParameters().length, 0);
+    }
+  }
+
+  @Test
+  public void testParamOption02() {
+    for (var version : OpenEdgeVersion.values()) {
+      var syshdl = VERSION_SYS_HANDLE_PROVIDER.apply(version).apply("Browse");
+      assertNotNull(syshdl);
+      var val1 = syshdl.getMethod("INSERT-ROW");
+      assertNotNull(val1);
+      assertEquals(val1.getVariants().length, 2);
+      assertEquals(val1.getVariants()[1].getParameters().length, 0);
+      var val2 = syshdl.getMethod("SET-REPOSITIONED-ROW");
+      assertNotNull(val2);
+      assertEquals(val2.getVariants().length, 1);
+      assertEquals(val2.getVariants()[0].getParameters().length, 2);
+      assertFalse(val2.getVariants()[0].getParameters()[0].isOptional());
+      assertTrue(val2.getVariants()[0].getParameters()[1].isOptional());
+    }
+  }
+
+  @Test
+  public void testNotEmptyVariant() {
+    for (var version : OpenEdgeVersion.values()) {
+      var syshdl = VERSION_SYS_HANDLE_PROVIDER.apply(version).apply("Buffer");
+      assertNotNull(syshdl);
+      var val1 = syshdl.getMethod("FIND-BY-ROWID");
+      assertNotNull(val1);
+      assertEquals(val1.getVariants().length, 1);
+      assertEquals(val1.getVariants()[0].getParameters().length, 2);
+      assertFalse(val1.getVariants()[0].getParameters()[0].isOptional());
+      assertTrue(val1.getVariants()[0].getParameters()[1].isOptional());
+    }
+  }
+
+  @Test
+  public void testParamOrder() {
+    for (var version : OpenEdgeVersion.values()) {
+      var syshdl = VERSION_SYS_HANDLE_PROVIDER.apply(version).apply("Buffer");
+      assertNotNull(syshdl);
+      var val1 = syshdl.getMethod("WRITE-JSON");
+      assertNotNull(val1);
+      assertEquals(val1.getVariants().length, 7);
+      assertEquals(val1.getVariants()[0].getParameters().length, 7);
+      assertEquals(val1.getVariants()[0].getParameters()[0].getName(), "target-type");
+      assertEquals(val1.getVariants()[0].getParameters()[1].getName(), "file");
+      assertEquals(val1.getVariants()[0].getParameters()[2].getName(), "formatted");
+      assertEquals(val1.getVariants()[0].getParameters()[3].getName(), "encoding");
+      assertEquals(val1.getVariants()[0].getParameters()[4].getName(), "omit-initial-values");
+      assertEquals(val1.getVariants()[0].getParameters()[5].getName(), "omit-outer-object");
+      assertEquals(val1.getVariants()[0].getParameters()[6].getName(), "write-before-image");
+    }
+  }
+
 }

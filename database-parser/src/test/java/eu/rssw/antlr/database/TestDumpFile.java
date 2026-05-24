@@ -242,4 +242,15 @@ public class TestDumpFile {
     var db = DumpFileUtils.getDatabaseDescription(Paths.get("src/test/resources/testQuotedString.df"));
     assertEquals(db.getSequences().size(), 2);
   }
+
+  @Test
+  public void testUpdateIndex() throws IOException {
+    var db = DumpFileUtils.getDatabaseDescription(Paths.get("src/test/resources/updateIndex.df"));
+    var tbl1 = db.getTable("Benefits");
+    assertNotNull(tbl1);
+    var idx1 = tbl1.getIndex("EmpNo");
+    assertNotNull(idx1);
+    assertTrue(idx1.isInAlternateBufferPool());
+  }
+
 }

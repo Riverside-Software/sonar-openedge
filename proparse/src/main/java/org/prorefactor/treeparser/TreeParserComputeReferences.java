@@ -75,7 +75,7 @@ public class TreeParserComputeReferences extends AbstractBlockProparseListener {
   @Override
   public void enterParameterArgDataset(ParameterArgDatasetContext ctx) {
     if (ctx.identifier() != null) {
-      Dataset dataset = currentScope.lookupDataset(ctx.identifier().getText());
+      var dataset = (Dataset) currentScope.lookupSymbol(ABLNodeType.DATASET.getType(), ctx.identifier().getText());
       if (dataset != null) {
         dataset.noteReference(support.getNode(ctx), ContextQualifier.REF);
         support.getNode(ctx).setSymbol(dataset);

@@ -89,6 +89,19 @@ public class RCodeInfoTest {
     }
   }
 
+  private Kryo getKryo() {
+    Kryo kryo = new Kryo();
+    kryo.setReferences(true);
+    kryo.register(HashMap.class);
+    kryo.register(ArrayList.class);
+    kryo.register(EnumSet.class);
+    eu.rssw.pct.elements.fixed.KryoSerializers.addSerializers(kryo);
+    eu.rssw.pct.elements.v12.KryoSerializers.addSerializers(kryo);
+    eu.rssw.pct.elements.v11.KryoSerializers.addSerializers(kryo);
+
+    return kryo;
+  }
+
   @Test
   public void testInvalidRCode() throws IOException {
     try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/Invalid.r"))) {
@@ -108,7 +121,7 @@ public class RCodeInfoTest {
       assertEquals(rci.getCrc(), 1876);
       assertEquals(rci.getDigest(), "E762264216FF9D45EB82D4FFF4618578");
       assertNull(rci.getTypeInfo());
-
+      assertTrue(rci.getMainBlock().isEmpty()); // V10 signature is not parsed
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }
@@ -122,6 +135,7 @@ public class RCodeInfoTest {
       assertEquals(rci.getCrc(), 1876);
       assertNull(rci.getDigest());
       assertNull(rci.getTypeInfo());
+      assertTrue(rci.getMainBlock().isEmpty()); // V10 signature is not parsed
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }
@@ -135,6 +149,7 @@ public class RCodeInfoTest {
       assertEquals(rci.getCrc(), 33974);
       assertEquals(rci.getDigest(), "F9FBF64A38EC9A6264A00CAAF9E136FC");
       assertNull(rci.getTypeInfo());
+      assertTrue(rci.getMainBlock().isEmpty()); // V10 signature is not parsed
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }
@@ -148,6 +163,7 @@ public class RCodeInfoTest {
       assertEquals(rci.getCrc(), 33974);
       assertEquals(rci.getDigest(), "135A1AD0C1F088893A46D39ED9765BAC");
       assertNull(rci.getTypeInfo());
+      assertTrue(rci.getMainBlock().isPresent());
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }
@@ -161,6 +177,7 @@ public class RCodeInfoTest {
       assertEquals(rci.getCrc(), 33974);
       assertEquals(rci.getDigest(), "JKgWEeW5CtyJXjUM6zQqqAa3KqAQXY2ttIe9uepOFjQ=");
       assertNull(rci.getTypeInfo());
+      assertTrue(rci.getMainBlock().isPresent());
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }
@@ -176,23 +193,11 @@ public class RCodeInfoTest {
     testEnum("src/test/resources/rcode/MyEnumV12.r", true, 14646);
   }
 
-  private Kryo getKryo() {
-    Kryo kryo = new Kryo();
-    kryo.setReferences(true);
-    kryo.register(HashMap.class);
-    kryo.register(ArrayList.class);
-    kryo.register(EnumSet.class);
-    eu.rssw.pct.elements.fixed.KryoSerializers.addSerializers(kryo);
-    eu.rssw.pct.elements.v12.KryoSerializers.addSerializers(kryo);
-    eu.rssw.pct.elements.v11.KryoSerializers.addSerializers(kryo);
-
-    return kryo;
-  }
-
   public void testEnum(String fileName, boolean checkEnumValues, long expectedCrc) throws IOException {
     try (InputStream input = Files.newInputStream(Paths.get(fileName))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
+      assertTrue(rci.getMainBlock().isEmpty());
       assertEquals(rci.getCrc(), expectedCrc);
       assertNotNull(rci.getTypeInfo());
       assertNotNull(rci.getTypeInfo().getProperties());
@@ -243,6 +248,7 @@ public class RCodeInfoTest {
     try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/IMyTest.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
+      assertTrue(rci.getMainBlock().isEmpty());
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }
@@ -253,6 +259,7 @@ public class RCodeInfoTest {
     try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/BackupDataCallback.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
+      assertTrue(rci.getMainBlock().isEmpty());
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }
@@ -263,6 +270,7 @@ public class RCodeInfoTest {
     try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/propList.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
+      assertTrue(rci.getMainBlock().isEmpty());
       ITypeInfo info = rci.getTypeInfo();
       assertNotNull(info);
       assertNotNull(info.getProperties());
@@ -304,6 +312,7 @@ public class RCodeInfoTest {
     try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/ttClass.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
+      assertTrue(rci.getMainBlock().isEmpty());
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }
@@ -314,6 +323,7 @@ public class RCodeInfoTest {
     try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/ClassMinSize.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
+      assertTrue(rci.getMainBlock().isEmpty());
       assertEquals(rci.getTypeInfo().getProperties().size(), 2);
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
@@ -324,6 +334,8 @@ public class RCodeInfoTest {
   public void testProcedure() throws IOException {
     try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/compile.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
+      assertTrue(rci.getMainBlock().isPresent());
+      assertEquals(rci.getMainBlock().get().getParameters().length, 0);
       assertFalse(rci.isClass());
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
@@ -331,19 +343,21 @@ public class RCodeInfoTest {
   }
 
   @Test
-  public void testProcedure2() throws IOException {
+  public void testNotProcedure2() throws IOException {
     try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/AbstractTTCollection.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertTrue(rci.isClass());
+      assertTrue(rci.getMainBlock().isEmpty());
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }
   }
 
   @Test
-  public void testProcedure3() throws IOException {
+  public void testNotProcedure3() throws IOException {
     try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/FileTypeRegistry.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
+      assertTrue(rci.getMainBlock().isEmpty());
       assertTrue(rci.isClass());
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
@@ -355,6 +369,51 @@ public class RCodeInfoTest {
     try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/_dmpincr.r"))) {
       RCodeInfo rci = new RCodeInfo(input);
       assertFalse(rci.isClass());
+      assertTrue(rci.getMainBlock().isPresent());
+      assertEquals(rci.getMainBlock().get().getReturnType(), DataType.VOID);
+      assertEquals(rci.getMainBlock().get().getParameters().length, 0);
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
+  public void testProcedure05() throws IOException {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/mainBlockSig.r"))) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertTrue(rci.getMainBlock().isPresent());
+      assertFalse(rci.isClass());
+      var sig = rci.getMainBlock().get();
+      assertEquals(sig.getParameters().length, 5);
+      assertEquals(sig.getReturnType(), DataType.VOID);
+      assertEquals(sig.getExtent(), 0);
+      assertEquals(sig.getParameters()[0].getDataType(), DataType.INTEGER);
+      assertEquals(sig.getParameters()[1].getDataType(), DataType.CHARACTER);
+      assertEquals(sig.getParameters()[2].getDataType(), DataType.DECIMAL);
+      assertEquals(sig.getParameters()[3].getDataType(), DataType.TABLE);
+      assertEquals(sig.getParameters()[4].getDataType(), DataType.DATASET);
+      assertEquals(sig.getParameters()[0].getMode(), ParameterMode.INPUT);
+      assertEquals(sig.getParameters()[1].getMode(), ParameterMode.OUTPUT);
+      assertEquals(sig.getParameters()[2].getMode(), ParameterMode.INPUT_OUTPUT);
+      assertEquals(sig.getParameters()[3].getMode(), ParameterMode.INPUT);
+      assertEquals(sig.getParameters()[4].getMode(), ParameterMode.OUTPUT);
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
+  public void testTrigger01() throws IOException {
+    try (InputStream input = Files.newInputStream(Paths.get("src/test/resources/rcode/trig01.r"))) {
+      RCodeInfo rci = new RCodeInfo(input);
+      assertTrue(rci.getMainBlock().isPresent());
+      assertFalse(rci.isClass());
+      var sig = rci.getMainBlock().get();
+      assertEquals(sig.getParameters().length, 1);
+      assertEquals(sig.getReturnType(), DataType.VOID);
+      assertEquals(sig.getExtent(), 0);
+      assertEquals(sig.getParameters()[0].getDataType(), new DataType("sports.Customer"));
+      assertEquals(sig.getParameters()[0].getMode(), ParameterMode.BUFFER);
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }
@@ -597,6 +656,8 @@ public class RCodeInfoTest {
       assertEquals(testMethod.getIDESignature(), "testMethod(↑TBL tt1, ↓DS ds1, ↑INT[] xx)");
       assertEquals(testMethod.getIDESignature(false), "testMethod(↑TBL tt1, ↓DS ds1, ↑INT[] xx)");
       assertEquals(testMethod.getIDESignature(true), "testMethod(↓TBL tt1, ↑DS ds1, ↓INT[] xx)");
+      assertEquals(testMethod.getIDEInsertElement(false), "testMethod(table ${1:tt1}, output dataset ${2:ds1}, ${3:xx})$0");
+      assertEquals(testMethod.getIDEInsertElement(true), "testMethod(TABLE ${1:tt1}, OUTPUT DATASET ${2:ds1}, ${3:xx})$0");
       assertEquals(testMethod.getExtent(), -32767);
       assertEquals(testMethod.getParameters().length, 3);
       assertEquals(testMethod.getParameters()[0].getParameterType(), ParameterType.TABLE);

@@ -2395,6 +2395,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       // For each field in "table", create a field def in currDefTable
       for (IField field : currDefTableLike.getTable().getFieldPosOrder()) {
         rootScope.defineTableField(field.getName(), currDefTable).assignAttributesLike(field);
+        currDefTable.getFieldBufferByName(field.getName()).setDefinitionNode(
+            currDefTableLike.getFieldBuffer(field).getDefineNode());
       }
     }
   }

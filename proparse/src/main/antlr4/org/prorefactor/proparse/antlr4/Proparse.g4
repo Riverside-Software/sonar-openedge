@@ -1911,7 +1911,7 @@ defineQueryStatement:
     QUERY id=identifier
     FOR record recordFields?
     ( COMMA record recordFields? )*
-    ( cacheExpr | SCROLLING | RCODEINFORMATION )*
+    ( cacheExpr | SCROLLING | RCODEINFORMATION | RCODEINFO )*
     statementEnd
     { support.defVar($id.text); }
   ;
@@ -1961,6 +1961,7 @@ defineTempTableStatement:
     defTableLike?
     labelConstant?
     RCODEINFORMATION?
+    RCODEINFO?
     defTableBeforeTable?
     defTableField*
     defTableIndex*
@@ -3724,7 +3725,11 @@ undoAction:
   | NEXT blockLabel?
   | RETRY blockLabel?
   | RETURN returnOption
-  | THROW expression
+  | THROW ( undoThrowNew | expression )
+  ;
+
+undoThrowNew:
+    NEW newTypeName parameterList
   ;
 
 unloadStatement:

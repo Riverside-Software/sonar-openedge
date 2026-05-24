@@ -2851,6 +2851,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitUndoThrowNew(UndoThrowNewContext ctx) {
+    return createTree(ctx, ABLNodeType.NEW_TYPE_REF).setExpression(true);
+  }
+
+  @Override
   public Builder visitUnloadStatement(UnloadStatementContext ctx) {
     return createStatementTreeFromFirstNode(ctx);
   }

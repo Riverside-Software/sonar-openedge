@@ -1,0 +1,27 @@
+ADD TABLE "Benefits"
+  AREA "Employee"
+  DESCRIPTION "The benefits table contains employee benefits."
+  DUMP-NAME "benefits"
+
+ADD FIELD "EmpNum" OF "Benefits" AS integer 
+  FORMAT "zzzzzzzzz9"
+  INITIAL "0"
+  LABEL "Emp No"
+  POSITION 2
+  MAX-WIDTH 4
+  VALEXP "CAN-FIND(employee OF benefits)"
+  VALMSG "Employee must exist."
+  HELP "Please enter the Emp Number"
+  ORDER 10
+
+ADD INDEX "EmpNo" ON "Benefits" 
+  AREA "Employee"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "EmpNum" ASCENDING 
+
+UPDATE INDEX "EmpNo" OF "Benefits"
+  ENCRYPTION YES
+  CIPHER-NAME AES_CBC_128
+  BUFFER-POOL "alternate"
+  DESCRIPTION ""

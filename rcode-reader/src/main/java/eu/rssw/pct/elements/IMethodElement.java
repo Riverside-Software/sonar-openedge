@@ -101,9 +101,16 @@ public interface IMethodElement extends IAccessibleElement {
         mode = "input-output ";
       else if ((p.getMode() == ParameterMode.OUTPUT) || (p.getMode() == ParameterMode.RETURN))
         mode = "output ";
-      if (upperCase)
+      String type = "";
+      if (p.getParameterType() == ParameterType.TABLE)
+        type = "table ";
+      else if (p.getParameterType() == ParameterType.DATASET)
+        type = "dataset ";
+      if (upperCase) {
         mode = mode.toUpperCase();
-      retVal.append(mode).append("${" + cnt++ + ":").append(p.getName()).append("}");
+        type = type.toUpperCase();
+      }
+      retVal.append(mode).append(type).append("${").append(cnt++).append(":").append(p.getName()).append("}");
     }
     retVal.append(")$0");
     return retVal.toString();

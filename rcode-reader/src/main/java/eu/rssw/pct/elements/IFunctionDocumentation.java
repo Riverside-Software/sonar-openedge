@@ -132,12 +132,20 @@ public interface IFunctionDocumentation extends IElementDocumentation {
       } else {
         sb.append(", ");
       }
-      if (p.getDataType().getPrimitive() == PrimitiveDataType.CLASS)
+      if (p.getDataType().getPrimitive() == PrimitiveDataType.CLASS) {
         sb.append(p.getDataType().getClassName());
-      else
-        sb.append(p.getDataType().getPrimitive().getIDESignature());
-      sb.append(" ");
-      sb.append(p.getName());
+        sb.append(" ");
+        sb.append(p.getName());
+      } else {
+        var sigPar = p.getDataType().getPrimitive().getIDESignature();
+        if ("char".equalsIgnoreCase(sigPar) && "Record".equalsIgnoreCase(p.getName())) {
+          sb.append("BUFFER");
+        } else {
+          sb.append(p.getDataType().getPrimitive().getIDESignature());
+          sb.append(" ");
+          sb.append(p.getName());
+        }
+      }
     }
     // Close all opened brackets
     while (openBrackets-- > 0) {
@@ -162,7 +170,7 @@ public interface IFunctionDocumentation extends IElementDocumentation {
     }
   }
 
-  private IFunctionParameterList[] getVariants(@Nonnull DataType[] datatypes, Function<String, ITypeInfo> provider) {
+  default IFunctionParameterList[] getVariants(@Nonnull DataType[] datatypes, Function<String, ITypeInfo> provider) {
     var variants = getVariants();
     if (variants.length == 0)
       return variants;
@@ -208,11 +216,18 @@ public interface IFunctionDocumentation extends IElementDocumentation {
         label.append(", ");
         insertText.append(", ");
       }
-      if (variant.getParameters()[pos].getDataType().getPrimitive() == PrimitiveDataType.CLASS)
-        label.append(variant.getParameters()[pos].getDataType().getClassName());
-      else
-        label.append(variant.getParameters()[pos].getDataType().getPrimitive().getIDESignature());
-      label.append(" ").append(variant.getParameters()[pos].getName());
+
+      if (variant.getParameters()[pos].getDataType().getPrimitive() == PrimitiveDataType.CLASS) {
+        label.append(variant.getParameters()[pos].getDataType().getClassName()).append(" ");
+      } else {
+        var sigParam = variant.getParameters()[pos].getDataType().getPrimitive();
+        label.append(sigParam == PrimitiveDataType.VOID ? "" : sigParam.getIDESignature() + " ");
+      }
+      if ("OPTION".equalsIgnoreCase(variant.getParameters()[pos].getName()))
+        label.append("<");
+      label.append(variant.getParameters()[pos].getName());
+      if ("OPTION".equalsIgnoreCase(variant.getParameters()[pos].getName()))
+        label.append(">");
       insertText.append("${").append(pos + 1).append(":").append(variant.getParameters()[pos].getName()).append("}");
     }
     if (useParentheses(useParentheses, numParams)) {
@@ -227,7 +242,7 @@ public interface IFunctionDocumentation extends IElementDocumentation {
   /**
    * YES: parentheses required
    * NO: no parentheses
-   * BOTH: both styles accepted by the compiler 
+   * BOTH: both styles accepted by the compiler
    */
   public enum Parentheses {
     YES,
