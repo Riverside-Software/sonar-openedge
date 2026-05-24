@@ -413,7 +413,7 @@ public class RCodeInfo {
     nextPos = nextComma(str, pos + 1);
     List<IParameter> params = new ArrayList<>();
     while (nextPos != -1) {
-      if (str.substring(pos + 1).startsWith("0"))
+      if (str.startsWith("0", pos + 1))
         break;
       params.add(parseParameter(str.substring(pos + 1, nextPos)));
       pos = nextPos;
