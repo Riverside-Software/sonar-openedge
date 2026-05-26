@@ -17,12 +17,8 @@ package org.prorefactor.treeparser.symbols;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.nodetypes.IStatement;
-import org.prorefactor.core.nodetypes.IStatementBlock;
-import org.prorefactor.core.nodetypes.IfStatementNode;
 import org.prorefactor.treeparser.ExecutionGraph;
 import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
@@ -36,10 +32,6 @@ import eu.rssw.pct.elements.PrimitiveDataType;
  * Program_root, PROCEDURE, FUNCTION, or METHOD.
  */
 public class Routine extends Symbol {
-  private static final Predicate<IStatement> IS_BLOCK = it -> (it.getNodeType() == ABLNodeType.FUNCTION)
-      || (it.getNodeType() == ABLNodeType.PROCEDURE) || (it.getNodeType() == ABLNodeType.METHOD)
-      || (it.getNodeType() == ABLNodeType.ON);
-
   private final TreeParserSymbolScope routineScope;
   private final List<Parameter> parameters = new ArrayList<>();
   private DataType returnDatatypeNode = null;
@@ -221,99 +213,10 @@ public class Routine extends Symbol {
 
   public ExecutionGraph getExecutionGraph() {
     if (graph == null) {
-      this.graph = createExecutionGraph();
+      this.graph = ExecutionGraph.of(routineScope.getRootBlock().getNode());
     }
 
     return graph;
-  }
-  
-  private ExecutionGraph createExecutionGraph() {
-    var g2 = new ExecutionGraph();
-    if (routineScope.getRootBlock().getNode().isIStatementBlock()) {
-      addVerticesAndEdges(g2, routineScope.getRootBlock().getNode().asIStatementBlock(), null);
-    }
-
-    return g2;
-  }
-
-  private IStatement getNextNonRoutineStatement(IStatement stmt) {
-    var currStmt = stmt.getNextStatement();
-    while ((currStmt != null) && IS_BLOCK.test(currStmt)) {
-      currStmt = currStmt.getNextStatement();
-    }
-    return currStmt;
-  }
-
-  private void addVerticesAndEdges(ExecutionGraph graph, IStatementBlock block, IStatement exitStmt) {
-    // Init navigation
-    var currStmt = block.getFirstStatement();
-    var prevStmt = block.asJPNode();
-
-    // Add block vertex
-    graph.addVertex(block.asJPNode());
-
-    while (currStmt != null) {
-      if (IS_BLOCK.test(currStmt)) {
-        currStmt = currStmt.getNextStatement();
-        continue;
-      }
-
-      if (currStmt instanceof IfStatementNode ifStmt) {
-        var tmp = getNextNonRoutineStatement(currStmt);
-        addVertices(graph, ifStmt, tmp == null ? exitStmt : tmp);
-      } else if (currStmt instanceof IStatementBlock stmtBlock) {
-        var tmp = getNextNonRoutineStatement(currStmt);
-        addVerticesAndEdges(graph, stmtBlock, tmp == null ? exitStmt : tmp);
-      } else {
-        graph.addVertex(currStmt.asJPNode());
-      }
-      graph.addEdge(prevStmt, currStmt.asJPNode());
-
-      prevStmt = currStmt.asJPNode();
-      currStmt = currStmt.getNextStatement();
-    }
-    if ((exitStmt != null) && (prevStmt != null)) {
-      graph.addVertex(exitStmt.asJPNode());
-      graph.addEdge(prevStmt, exitStmt.asJPNode());
-    }
-  }
-
-  private void addVertices(ExecutionGraph graph, IfStatementNode ifNode, IStatement exitStmt) {
-    graph.addVertex(ifNode.asJPNode());
-
-    if (ifNode.getThenBlockOrNode() instanceof IfStatementNode ifNode2)
-      addVertices(graph, ifNode2, exitStmt);
-    else if (ifNode.getThenBlockOrNode() instanceof IStatementBlock stmtBlock) {
-      addVerticesAndEdges(graph, stmtBlock, exitStmt);
-    } else {
-      graph.addVertex(ifNode.getThenBlockOrNode().asJPNode());
-      if (exitStmt != null) {
-        graph.addVertex(exitStmt.asJPNode());
-        graph.addEdge(ifNode.getThenBlockOrNode().asJPNode(), exitStmt.asJPNode());
-      }
-    }
-    graph.addEdge(ifNode.asJPNode(), ifNode.getThenBlockOrNode().asJPNode());
-
-    if (ifNode.getElseBlockOrNode() != null) {
-      if (ifNode.getElseBlockOrNode() instanceof IfStatementNode ifNode2)
-        addVertices(graph, ifNode2, exitStmt);
-      else if (ifNode.getElseBlockOrNode() instanceof IStatementBlock stmtBlock)
-        addVerticesAndEdges(graph, stmtBlock, exitStmt);
-      else {
-        graph.addVertex(ifNode.getElseBlockOrNode().asJPNode());
-        if (exitStmt != null) {
-          graph.addVertex(exitStmt.asJPNode());
-          graph.addEdge(ifNode.getElseBlockOrNode().asJPNode(), exitStmt.asJPNode());
-        }
-      }
-
-      graph.addEdge(ifNode.asJPNode(), ifNode.getElseBlockOrNode().asJPNode());
-    }
-
-    if (exitStmt != null) {
-      graph.addVertex(exitStmt.asJPNode());
-      graph.addEdge(ifNode.asJPNode(), exitStmt.asJPNode());
-    }
   }
 
   /**

@@ -16,16 +16,33 @@ package org.prorefactor.treeparser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
+import org.prorefactor.core.nodetypes.IStatement;
+import org.prorefactor.core.nodetypes.IStatementBlock;
+import org.prorefactor.core.nodetypes.IfStatementNode;
 
 public class ExecutionGraph {
+  private static final Predicate<IStatement> IS_BLOCK = it -> (it.getNodeType() == ABLNodeType.FUNCTION)
+      || (it.getNodeType() == ABLNodeType.PROCEDURE) || (it.getNodeType() == ABLNodeType.METHOD)
+      || (it.getNodeType() == ABLNodeType.ON);
+
   private final List<JPNode> vertices = new ArrayList<>();
   private final List<List<Integer>> edges = new ArrayList<>();
   private final List<List<Integer>> revEdges = new ArrayList<>();
 
   public ExecutionGraph() {
     // No-op
+  }
+
+  public static ExecutionGraph of(JPNode rootNode) {
+    var g = new ExecutionGraph();
+    if (rootNode.isIStatementBlock()) {
+      g.addVerticesAndEdges(rootNode.asIStatementBlock(), null);
+    }
+    return g;
   }
 
   public void addVertex(JPNode vertex) {
@@ -72,6 +89,84 @@ public class ExecutionGraph {
   public List<Integer> getReverseEdges(JPNode node) {
     var idx = vertices.indexOf(node);
     return idx == -1 ? List.of() : revEdges.get(idx); 
+  }
+
+  private IStatement getNextNonRoutineStatement(IStatement stmt) {
+    var currStmt = stmt.getNextStatement();
+    while ((currStmt != null) && IS_BLOCK.test(currStmt)) {
+      currStmt = currStmt.getNextStatement();
+    }
+    return currStmt;
+  }
+
+  private void addVerticesAndEdges(IStatementBlock block, IStatement exitStmt) {
+    var currStmt = block.getFirstStatement();
+    var prevStmt = block.asJPNode();
+
+    addVertex(block.asJPNode());
+
+    while (currStmt != null) {
+      if (IS_BLOCK.test(currStmt)) {
+        currStmt = currStmt.getNextStatement();
+        continue;
+      }
+
+      if (currStmt instanceof IfStatementNode ifStmt) {
+        var tmp = getNextNonRoutineStatement(currStmt);
+        addVertices(ifStmt, tmp == null ? exitStmt : tmp);
+      } else if (currStmt instanceof IStatementBlock stmtBlock) {
+        var tmp = getNextNonRoutineStatement(currStmt);
+        addVerticesAndEdges(stmtBlock, tmp == null ? exitStmt : tmp);
+      } else {
+        addVertex(currStmt.asJPNode());
+      }
+      addEdge(prevStmt, currStmt.asJPNode());
+
+      prevStmt = currStmt.asJPNode();
+      currStmt = currStmt.getNextStatement();
+    }
+    if ((exitStmt != null) && (prevStmt != null)) {
+      addVertex(exitStmt.asJPNode());
+      addEdge(prevStmt, exitStmt.asJPNode());
+    }
+  }
+
+  private void addVertices(IfStatementNode ifNode, IStatement exitStmt) {
+    addVertex(ifNode.asJPNode());
+
+    if (ifNode.getThenBlockOrNode() instanceof IfStatementNode ifNode2)
+      addVertices(ifNode2, exitStmt);
+    else if (ifNode.getThenBlockOrNode() instanceof IStatementBlock stmtBlock) {
+      addVerticesAndEdges(stmtBlock, exitStmt);
+    } else {
+      addVertex(ifNode.getThenBlockOrNode().asJPNode());
+      if (exitStmt != null) {
+        addVertex(exitStmt.asJPNode());
+        addEdge(ifNode.getThenBlockOrNode().asJPNode(), exitStmt.asJPNode());
+      }
+    }
+    addEdge(ifNode.asJPNode(), ifNode.getThenBlockOrNode().asJPNode());
+
+    if (ifNode.getElseBlockOrNode() != null) {
+      if (ifNode.getElseBlockOrNode() instanceof IfStatementNode ifNode2)
+        addVertices(ifNode2, exitStmt);
+      else if (ifNode.getElseBlockOrNode() instanceof IStatementBlock stmtBlock)
+        addVerticesAndEdges(stmtBlock, exitStmt);
+      else {
+        addVertex(ifNode.getElseBlockOrNode().asJPNode());
+        if (exitStmt != null) {
+          addVertex(exitStmt.asJPNode());
+          addEdge(ifNode.getElseBlockOrNode().asJPNode(), exitStmt.asJPNode());
+        }
+      }
+
+      addEdge(ifNode.asJPNode(), ifNode.getElseBlockOrNode().asJPNode());
+    }
+
+    if (exitStmt != null) {
+      addVertex(exitStmt.asJPNode());
+      addEdge(ifNode.asJPNode(), exitStmt.asJPNode());
+    }
   }
 
   /**
