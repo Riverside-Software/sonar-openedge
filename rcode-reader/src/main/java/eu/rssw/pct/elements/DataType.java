@@ -313,33 +313,45 @@ public class DataType {
 
   /**
    * Return true if parameter datatype can be passed to this object.
-   * LONGCHAR.isCompatible(CHARACTER) is true
-   * CHARACTER.isCompatible(LONGCHAR) is false
-   * Progress.Lang.Object.isCompatible(Progress.Json.JsonObject) is true
-   * Progress.Json.JsonObject.isCompatible(Progress.Lang.Object) is false
+   * <ul>
+   * <li>LONGCHAR.isCompatible(CHARACTER) is true</li>
+   * <li>CHARACTER.isCompatible(LONGCHAR) is false</li>
+   * <li>Progress.Lang.Object.isCompatible(Progress.Json.JsonObject) is true</li>
+   * <li>Progress.Json.JsonObject.isCompatible(Progress.Lang.Object) is false</li>
+   * </ul>
    */
-  public boolean isCompatible(DataType obj, Function<String, ITypeInfo> provider) {
+  public boolean isCompatible(DataType paramDataType, Function<String, ITypeInfo> provider) {
     if (primDataType == PrimitiveDataType.LONGCHAR) {
-      return (obj.primDataType == PrimitiveDataType.LONGCHAR) || (obj.primDataType == PrimitiveDataType.CHARACTER);
+      return (paramDataType.primDataType == PrimitiveDataType.LONGCHAR)
+          || (paramDataType.primDataType == PrimitiveDataType.CHARACTER);
     } else if (primDataType == PrimitiveDataType.DECIMAL) {
-      return (obj.primDataType == PrimitiveDataType.DECIMAL) || (obj.primDataType == PrimitiveDataType.INT64)
-          || (obj.primDataType == PrimitiveDataType.INTEGER);
+      return (paramDataType.primDataType == PrimitiveDataType.DECIMAL)
+          || (paramDataType.primDataType == PrimitiveDataType.INT64)
+          || (paramDataType.primDataType == PrimitiveDataType.INTEGER);
     } else if (primDataType == PrimitiveDataType.INT64) {
-      return (obj.primDataType == PrimitiveDataType.INT64) || (obj.primDataType == PrimitiveDataType.INTEGER);
+      return (paramDataType.primDataType == PrimitiveDataType.INT64)
+          || (paramDataType.primDataType == PrimitiveDataType.INTEGER);
     } else if (primDataType == PrimitiveDataType.DATETIME_TZ) {
-      return (obj.primDataType == PrimitiveDataType.DATETIME_TZ) || (obj.primDataType == PrimitiveDataType.DATETIME)
-          || (obj.primDataType == PrimitiveDataType.DATE);
+      return (paramDataType.primDataType == PrimitiveDataType.DATETIME_TZ)
+          || (paramDataType.primDataType == PrimitiveDataType.DATETIME)
+          || (paramDataType.primDataType == PrimitiveDataType.DATE);
     } else if (primDataType == PrimitiveDataType.DATETIME) {
-      return (obj.primDataType == PrimitiveDataType.DATETIME) || (obj.primDataType == PrimitiveDataType.DATE);
+      return (paramDataType.primDataType == PrimitiveDataType.DATETIME)
+          || (paramDataType.primDataType == PrimitiveDataType.DATE);
+    } else if (primDataType == PrimitiveDataType.HANDLE) {
+      return (paramDataType.primDataType == PrimitiveDataType.HANDLE)
+          || (paramDataType.primDataType == PrimitiveDataType.DATASET_HANDLE)
+          || (paramDataType.primDataType == PrimitiveDataType.TABLE_HANDLE)
+          || (paramDataType.primDataType == PrimitiveDataType.COMPONENT_HANDLE);
     } else if (primDataType == PrimitiveDataType.CLASS) {
-      ITypeInfo info = provider.apply(className);
+      var info = provider.apply(className);
       if (info == null) {
-        return className.equals(obj.getClassName());
+        return className.equals(paramDataType.getClassName());
       } else {
-        return info.isAssignableFrom(obj.getClassName(), provider);
+        return info.isAssignableFrom(paramDataType.getClassName(), provider);
       }
     } else {
-      return equals(obj);
+      return equals(paramDataType);
     }
   }
 

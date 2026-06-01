@@ -73,39 +73,35 @@ public class ITypeInfoTest {
       var provider = VERSION_TYPE_INFO_PROVIDER.apply(version);
       var info = provider.apply("Progress.Json.ObjectModel.JsonArray");
       assertNotNull(info);
-      assertNull(
-          info.getMethod(provider, "Add", new DataType[] {}, new ParameterMode[] {}));
-      assertNotNull(info.getMethod(provider, "Add",
-          new DataType[] {DataType.CHARACTER}, new ParameterMode[] {ParameterMode.INPUT}));
+      assertNull(info.getMethod(provider, "Add", new DataType[] {}, new ParameterMode[] {}));
+      assertNotNull(info.getMethod(provider, "Add", new DataType[] {DataType.CHARACTER},
+          new ParameterMode[] {ParameterMode.INPUT}));
       assertNotNull(info.getMethod(provider, "Add", new DataType[] {DataType.LONGCHAR},
           new ParameterMode[] {ParameterMode.INPUT}));
-      assertNotNull(info.getMethod(provider, "Add",
-          new DataType[] {new DataType("Progress.Json.ObjectModel.JsonArray")},
+      assertNotNull(
+          info.getMethod(provider, "Add", new DataType[] {new DataType("Progress.Json.ObjectModel.JsonArray")},
+              new ParameterMode[] {ParameterMode.INPUT}));
+      assertNull(info.getMethod(provider, "Add", new DataType[] {new DataType("Progress.Lang.Object")},
           new ParameterMode[] {ParameterMode.INPUT}));
-      assertNull(info.getMethod(provider, "Add",
-          new DataType[] {new DataType("Progress.Lang.Object")}, new ParameterMode[] {ParameterMode.INPUT}));
 
-      var val1 = info.getMethod(provider, "GetDatetime",
-          new DataType[] {DataType.INTEGER, DataType.INTEGER},
+      var val1 = info.getMethod(provider, "GetDatetime", new DataType[] {DataType.INTEGER, DataType.INTEGER},
           new ParameterMode[] {ParameterMode.INPUT, ParameterMode.INPUT});
       assertNotNull(val1);
       assertEquals(val1.getO1().getTypeName(), "Progress.Json.ObjectModel.JsonArray");
       assertEquals(val1.getO2().getReturnType(), DataType.DATETIME);
 
-      var methd01 = info.getMethod(provider, "GetCharacter",
-          new DataType[] {DataType.INTEGER}, new ParameterMode[] {ParameterMode.INPUT});
+      var methd01 = info.getMethod(provider, "GetCharacter", new DataType[] {DataType.INTEGER},
+          new ParameterMode[] {ParameterMode.INPUT});
       assertNotNull(methd01);
       assertEquals(methd01.getO2().getExtent(), 0);
 
-      var methd02 = info.getMethod(provider, "GetCharacter",
-          new DataType[] {DataType.INTEGER, DataType.INTEGER},
+      var methd02 = info.getMethod(provider, "GetCharacter", new DataType[] {DataType.INTEGER, DataType.INTEGER},
           new ParameterMode[] {ParameterMode.INPUT, ParameterMode.INPUT});
       assertNotNull(methd02);
       assertEquals(methd02.getO2().getExtent(), -1);
 
       var info2 = provider.apply("Progress.Json.ObjectModel.JsonObject");
-      var methd03 = info2.getMethod(provider, "Write",
-          new DataType[] {DataType.CHARACTER, DataType.LOGICAL},
+      var methd03 = info2.getMethod(provider, "Write", new DataType[] {DataType.CHARACTER, DataType.LOGICAL},
           new ParameterMode[] {ParameterMode.INPUT, ParameterMode.INPUT});
       assertNotNull(methd03);
       assertEquals(methd03.getO2().getParameters()[0].getMode(), ParameterMode.INPUT_OUTPUT);
@@ -121,10 +117,8 @@ public class ITypeInfoTest {
       ITypeInfo info02 = provider.apply("Progress.Json.ObjectModel.JsonArray");
       assertNotNull(info01);
       assertNotNull(info02);
-      assertNotNull(info01.getMethod(provider, "ToString", new DataType[] {},
-          new ParameterMode[] {}));
-      assertNotNull(info02.getMethod(provider, "ToString", new DataType[] {},
-          new ParameterMode[] {}));
+      assertNotNull(info01.getMethod(provider, "ToString", new DataType[] {}, new ParameterMode[] {}));
+      assertNotNull(info02.getMethod(provider, "ToString", new DataType[] {}, new ParameterMode[] {}));
     }
   }
 
@@ -337,7 +331,7 @@ public class ITypeInfoTest {
   }
 
   @Test
-  public void testCompatibleMatch() {
+  public void testCompatibleMatch01() {
     HashMap<String, ITypeInfo> map = new HashMap<>();
     for (var version : OpenEdgeVersion.values()) {
       map.clear();
@@ -353,6 +347,64 @@ public class ITypeInfoTest {
       var val6 = typeInfo2.getMethod(map::get, "method01", new DataType[] {DataType.INTEGER},
           new ParameterMode[] {ParameterMode.INPUT});
       assertNotNull(val6);
+    }
+  }
+
+  @Test
+  public void testCompatibleMatch02() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+    for (var version : OpenEdgeVersion.values()) {
+      map.clear();
+      BuiltinClasses.getBuiltinClasses(version).forEach(it -> map.put(it.getTypeName(), it));
+
+      var typeInfo2 = new TypeInfo("TestClass2", false, false, "Progress.Lang.Object", "");
+      // void method01(prm1: DSET_HDL)
+      typeInfo2.addMethod(new MethodElement("method01", false, DataType.VOID, //
+          new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.DATASET_HANDLE)));
+      // void method02(prm1: HDL)
+      typeInfo2.addMethod(new MethodElement("method02", false, DataType.VOID, //
+          new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.HANDLE)));
+      // void method03(prm1: TBL_HDL)
+      typeInfo2.addMethod(new MethodElement("method03", false, DataType.VOID, //
+          new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.TABLE_HANDLE)));
+      // void method04(prm1: WIDG_HDL)
+      typeInfo2.addMethod(new MethodElement("method04", false, DataType.VOID, //
+          new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.COMPONENT_HANDLE)));
+      map.put(typeInfo2.getTypeName(), typeInfo2);
+
+      var val1 = typeInfo2.getMethod(map::get, "method01", new DataType[] {DataType.DATASET_HANDLE},
+          new ParameterMode[] {ParameterMode.INPUT});
+      assertNotNull(val1);
+      var val2 = typeInfo2.getMethod(map::get, "method01", new DataType[] {DataType.HANDLE},
+          new ParameterMode[] {ParameterMode.INPUT});
+      assertNull(val2);
+
+      var val3 = typeInfo2.getMethod(map::get, "method02", new DataType[] {DataType.DATASET_HANDLE},
+          new ParameterMode[] {ParameterMode.INPUT});
+      assertNotNull(val3);
+      var val4 = typeInfo2.getMethod(map::get, "method02", new DataType[] {DataType.HANDLE},
+          new ParameterMode[] {ParameterMode.INPUT});
+      assertNotNull(val4);
+      var val5 = typeInfo2.getMethod(map::get, "method02", new DataType[] {DataType.TABLE_HANDLE},
+          new ParameterMode[] {ParameterMode.INPUT});
+      assertNotNull(val5);
+      var val6 = typeInfo2.getMethod(map::get, "method02", new DataType[] {DataType.COMPONENT_HANDLE},
+          new ParameterMode[] {ParameterMode.INPUT});
+      assertNotNull(val6);
+
+      var val7 = typeInfo2.getMethod(map::get, "method03", new DataType[] {DataType.HANDLE},
+          new ParameterMode[] {ParameterMode.INPUT});
+      assertNull(val7);
+      var val8 = typeInfo2.getMethod(map::get, "method03", new DataType[] {DataType.TABLE_HANDLE},
+          new ParameterMode[] {ParameterMode.INPUT});
+      assertNotNull(val8);
+
+      var val9 = typeInfo2.getMethod(map::get, "method04", new DataType[] {DataType.HANDLE},
+          new ParameterMode[] {ParameterMode.INPUT});
+      assertNull(val9);
+      var val10 = typeInfo2.getMethod(map::get, "method04", new DataType[] {DataType.COMPONENT_HANDLE},
+          new ParameterMode[] {ParameterMode.INPUT});
+      assertNotNull(val10);
     }
   }
 }

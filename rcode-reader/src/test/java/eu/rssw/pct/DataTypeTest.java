@@ -105,6 +105,10 @@ public class DataTypeTest {
     assertFalse(DataType.CHARACTER.isCompatible(DataType.LONGCHAR, null));
     assertTrue(DataType.DECIMAL.isCompatible(DataType.INTEGER, null));
     assertFalse(DataType.INTEGER.isCompatible(DataType.DECIMAL, null));
+    assertFalse(DataType.DATASET_HANDLE.isCompatible(DataType.HANDLE, null));
+    assertTrue(DataType.HANDLE.isCompatible(DataType.DATASET_HANDLE, null));
+    assertTrue(DataType.HANDLE.isCompatible(DataType.TABLE_HANDLE, null));
+    assertTrue(DataType.HANDLE.isCompatible(DataType.COMPONENT_HANDLE, null));
     // Classes
     for (var version : OpenEdgeVersion.values()) {
       var provider = VERSION_TYPE_INFO_PROVIDER.apply(version);
