@@ -685,7 +685,7 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     var p2 = unit.getRootScope().getRoutines().get(2);
     assertEquals(p2.getName(), "foo2");
     var g2 = p2.getExecutionGraph();
-    assertEquals(g2.getVertices().size(), 7);
+    assertEquals(g2.getVertices().size(), 8);
     assertEquals(g2.getVertices().get(4).getNodeType(), ABLNodeType.RETURN);
     assertEquals(g2.getVertices().get(5).getNodeType(), ABLNodeType.FINALLY);
     assertEquals(g2.getEdges(g2.getVertices().get(4)), List.of(5));
@@ -704,7 +704,7 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     assertEquals(p1.getName(), "foo");
     var g1 = p1.getExecutionGraph();
     assertEquals(g1.getVertices().size(), 4);
-
+System.out.println(g1.toMermaidString());
     var currStmt = p1.getExecutionGraph().getVertices().get(0).asIStatement();
     assertEquals(currStmt.getNodeType(), ABLNodeType.FUNCTION);
     assertTrue(currStmt.asJPNode().isIStatementBlock());
@@ -714,8 +714,10 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     assertEquals(currStmt.getNodeType(), ABLNodeType.CREATE);
     currStmt = currStmt.getNextStatement();
     assertEquals(currStmt.getNodeType(), ABLNodeType.QUIT);
+    // QUIT is followed by FINALLY in the AST chain (lexical order), but FINALLY is NOT in the
+    // execution graph because QUIT terminates the program without executing the FINALLY block.
     currStmt = currStmt.getNextStatement();
-    assertNull(currStmt);
+    assertEquals(currStmt.getNodeType(), ABLNodeType.FINALLY);
   }
 
   @Test
@@ -743,6 +745,23 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
     assertEquals(currStmt.getNodeType(), ABLNodeType.RETURN);
     currStmt = currStmt.getNextStatement();
     assertNull(currStmt);
+  }
+
+  @Test
+  public void testReturn() {
+    // Return without FINALLY
+    var unit = getParseUnit(new File("src/test/resources/treeparser05/test13.p"), session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    var p1 = unit.getRootScope().getRoutines().get(0);
+    assertEquals(p1.getName(), "");
+    var g1 = p1.getExecutionGraph();
+    assertEquals(g1.getVertices().size(), 6);
+    assertEquals(g1.getEdges().get(2), List.of(3, 5));
   }
 
   // ExecutionGraph tests

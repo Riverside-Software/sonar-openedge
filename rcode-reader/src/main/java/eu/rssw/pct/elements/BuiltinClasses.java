@@ -47,8 +47,8 @@ import eu.rssw.pct.mapping.OpenEdgeVersion;
 public class BuiltinClasses {
   private static final Map<OpenEdgeVersion, Collection<ITypeInfo>> BUILTIN_CLASSES = new ConcurrentHashMap<>();
 
-  private static final ITypeInfo PROGRESS_LANG_OBJECT;
-  private static final ITypeInfo PROGRESS_LANG_ENUM;
+  public static final ITypeInfo PROGRESS_LANG_OBJECT;
+  public static final ITypeInfo PROGRESS_LANG_ENUM;
 
   public static final String PLO_CLASSNAME = "Progress.Lang.Object";
   public static final String PLE_CLASSNAME = "Progress.Lang.Enum";
@@ -147,7 +147,6 @@ public class BuiltinClasses {
     typeInfo.addProperty(new PropertyElement("Next-Sibling", false, new DataType(PLO_CLASSNAME)));
     typeInfo.addProperty(new PropertyElement("Prev-Sibling", false, new DataType(PLO_CLASSNAME)));
     PROGRESS_LANG_OBJECT = typeInfo;
-    // BUILTIN_CLASSES.add(typeInfo);
 
     typeInfo = new TypeInfo(PLE_CLASSNAME, false, false, PLO_CLASSNAME, "");
     typeInfo.addMethod(new MethodElement("GetValue", false, DataType.INT64));

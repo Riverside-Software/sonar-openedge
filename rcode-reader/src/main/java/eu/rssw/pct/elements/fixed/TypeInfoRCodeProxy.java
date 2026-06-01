@@ -28,7 +28,6 @@ import com.google.gson.annotations.JsonAdapter;
 import eu.rssw.pct.PLReader.InvalidLibraryException;
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
-import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.TypeInfoAdapter;
 
 @JsonAdapter(TypeInfoAdapter.class)
@@ -49,9 +48,9 @@ public class TypeInfoRCodeProxy extends TypeInfoProxy {
       if (info.isClass())
         typeInfo = info.getTypeInfo();
       else
-        typeInfo = new TypeInfo(typeName, false, false, BuiltinClasses.PLO_CLASSNAME, "");
+        typeInfo = getFallbackTypeInfo(typeName);
     } catch (InvalidLibraryException | InvalidRCodeException | IOException caught) {
-      typeInfo = new TypeInfo(typeName, false, false, BuiltinClasses.PLO_CLASSNAME, "");
+      typeInfo = getFallbackTypeInfo(typeName);
     }
   }
 
