@@ -964,12 +964,17 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       var relName = ctx.fieldExpr().get(zz + 1).getParent().getParent().getChild(1).getText();
       if (!stack.isEmpty() && (stack.peek() instanceof Dataset ds) && !relName.isEmpty() && ds.hasRelation(relName)) {
         var rel = ds.getRelation(relName);
-        var parentField = currentScope.lookupBuffer(rel.getParentBuffer().getName()).getFieldBufferByName(
-            ctx.fieldExpr().get(zz).field().getText());
-        var childField = currentScope.lookupBuffer(rel.getChildBuffer().getName()).getFieldBufferByName(
-            ctx.fieldExpr().get(zz + 1).field().getText());
-        if (parentField != null && childField != null)
-          rel.addRelationFields(parentField, childField);
+        var parentBuffer = rel.getParentBuffer();
+        var childBuffer = rel.getChildBuffer();
+        if ((parentBuffer != null) && (childBuffer != null)) {
+          var parentField = currentScope.lookupBuffer(parentBuffer.getName()).getFieldBufferByName(
+              ctx.fieldExpr().get(zz).field().getText());
+          var childField = currentScope.lookupBuffer(childBuffer.getName()).getFieldBufferByName(
+              ctx.fieldExpr().get(zz + 1).field().getText());
+
+          if ((parentField != null) && (childField != null))
+            rel.addRelationFields(parentField, childField);
+        }
       }
     }
   }
@@ -2576,7 +2581,7 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
         // As a result, some questionable code will fail to parse here if we don't also ignore those here.
         // Sigh. This would be a good lint rule.
         ABLNodeType parentType = refNode.getParent().getNodeType();
-        if (parentType == ABLNodeType.FIELDS || parentType == ABLNodeType.EXCEPT)
+        if ((parentType == ABLNodeType.FIELDS) || (parentType == ABLNodeType.EXCEPT) || (parentType == ABLNodeType.RELATIONFIELDS))
           return;
       }
       FieldBuffer fieldBuffer = ourBuffer.getFieldBuffer(field);

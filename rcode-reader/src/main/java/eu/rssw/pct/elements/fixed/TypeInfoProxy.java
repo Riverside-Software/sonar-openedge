@@ -22,6 +22,7 @@ package eu.rssw.pct.elements.fixed;
 import java.util.Collection;
 import java.util.List;
 
+import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.IBufferElement;
 import eu.rssw.pct.elements.IDatasetElement;
 import eu.rssw.pct.elements.IEventElement;
@@ -226,6 +227,15 @@ public abstract class TypeInfoProxy implements ITypeInfo {
   public boolean isUseWidgetPool() {
     checkTypeInfo();
     return typeInfo.isUseWidgetPool();
+  }
+
+  protected ITypeInfo getFallbackTypeInfo(String typeName) {
+    if (BuiltinClasses.PLO_CLASSNAME.equalsIgnoreCase(typeName))
+      return BuiltinClasses.PROGRESS_LANG_OBJECT;
+    else if (BuiltinClasses.PLE_CLASSNAME.equalsIgnoreCase(typeName))
+      return BuiltinClasses.PROGRESS_LANG_ENUM;
+    else
+      return new TypeInfo(typeName, false, false, BuiltinClasses.PLO_CLASSNAME, "");
   }
 
 }

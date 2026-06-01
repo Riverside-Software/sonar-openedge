@@ -17,13 +17,8 @@ package org.prorefactor.treeparser.symbols;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 import org.prorefactor.core.ABLNodeType;
-import org.prorefactor.core.JPNode;
-import org.prorefactor.core.nodetypes.IStatement;
-import org.prorefactor.core.nodetypes.IStatementBlock;
-import org.prorefactor.core.nodetypes.IfStatementNode;
 import org.prorefactor.treeparser.ExecutionGraph;
 import org.prorefactor.treeparser.Parameter;
 import org.prorefactor.treeparser.TreeParserSymbolScope;
@@ -37,10 +32,6 @@ import eu.rssw.pct.elements.PrimitiveDataType;
  * Program_root, PROCEDURE, FUNCTION, or METHOD.
  */
 public class Routine extends Symbol {
-  private static final Predicate<IStatement> IS_BLOCK = it -> (it.getNodeType() == ABLNodeType.FUNCTION)
-      || (it.getNodeType() == ABLNodeType.PROCEDURE) || (it.getNodeType() == ABLNodeType.METHOD)
-      || (it.getNodeType() == ABLNodeType.ON);
-
   private final TreeParserSymbolScope routineScope;
   private final List<Parameter> parameters = new ArrayList<>();
   private DataType returnDatatypeNode = null;
@@ -85,7 +76,7 @@ public class Routine extends Symbol {
   public String getIDESignature() {
     return getIDESignature(false);
   }
-
+  
   public String getIDESignature(boolean chronological) {
     StringBuilder retVal = new StringBuilder(getName()).append('(');
     boolean first = true;
@@ -197,7 +188,6 @@ public class Routine extends Symbol {
 
   /**
    * Add pointer to FORWARDS declaration routine
-   * 
    * @param fwdRoutine
    */
   public void addForwardDeclaration(Routine fwdRoutine) {
@@ -223,170 +213,10 @@ public class Routine extends Symbol {
 
   public ExecutionGraph getExecutionGraph() {
     if (graph == null) {
-      this.graph = createExecutionGraph();
+      this.graph = ExecutionGraph.of(routineScope.getRootBlock().getNode());
     }
 
     return graph;
-  }
-
-  private ExecutionGraph createExecutionGraph() {
-    var g2 = new ExecutionGraph();
-    if (routineScope.getRootBlock().getNode().isIStatementBlock()) {
-      addVerticesAndEdges(g2, routineScope.getRootBlock().getNode().asIStatementBlock(), null);
-    }
-
-    return g2;
-  }
-
-  private IStatement getNextNonRoutineStatement(IStatement stmt) {
-    var currStmt = stmt.getNextStatement();
-    while ((currStmt != null) && IS_BLOCK.test(currStmt)) {
-      currStmt = currStmt.getNextStatement();
-    }
-    return currStmt;
-  }
-
-  private IStatement findFinallyStatement(IStatement stmt) {
-    // Exit current block
-    var currBlock = stmt.getEnclosingBlock();
-    IStatement currStmt = null;
-    if (!currBlock.isMethodBlock()) {
-      var saveBlock = stmt.getEnclosingBlock();
-      while ((currBlock.getNode().getNodeType() != ABLNodeType.PROGRAM_ROOT) && !currBlock.isMethodBlock()) {
-        saveBlock = currBlock;
-        currBlock = currBlock.getNode().asIStatement().getEnclosingBlock();
-      }
-
-      if ((saveBlock.getNode().getNodeType() != ABLNodeType.PROGRAM_ROOT)
-          && (saveBlock.getNode().asIStatement() != null)) {
-        currStmt = saveBlock.getNode().asIStatement().getNextStatement();
-      } else {
-        currStmt = stmt.getNextStatement();
-      }
-    } else {
-      currStmt = stmt.getNextStatement();
-    }
-    while ((currStmt != null) && (currStmt.getNodeType() != ABLNodeType.FINALLY)) {
-      currStmt = currStmt.getNextStatement();
-    }
-
-    return currStmt;
-  }
-
-  private void addVerticesAndEdges(ExecutionGraph graph, IStatementBlock block, IStatement exitStmt) {
-    // Init navigation
-    var currStmt = block.getFirstStatement();
-    var prevStmt = block.asJPNode();
-    var isBlock = false;
-    var doBreak = false;
-
-    // Add block vertex
-    graph.addVertex(block.asJPNode());
-
-    while (currStmt != null) {
-      isBlock = false;
-      if (IS_BLOCK.test(currStmt)) {
-        currStmt = currStmt.getNextStatement();
-        isBlock = true;
-      }
-
-      if (!isBlock) {
-        updateGraph(graph, currStmt.getNodeType() == ABLNodeType.RETURN ? null : exitStmt, currStmt, prevStmt);
-
-        if (currStmt.getNodeType() == ABLNodeType.RETURN) {
-          // Go to finally statement if exist
-          var finallyStmt = findFinallyStatement(currStmt);
-          if (finallyStmt == null) {
-            currStmt = null;
-            exitStmt = null;
-            prevStmt = null;
-            doBreak = true;
-          } else {
-            updateGraph(graph, null, finallyStmt, currStmt.asJPNode());
-            currStmt = null;
-            exitStmt = null;
-            prevStmt = null;
-            doBreak = true;
-          }
-        }
-
-        if (!doBreak && (currStmt.getNodeType() == ABLNodeType.QUIT)) {
-          exitStmt = null;
-          doBreak = true;
-        }
-
-        if (doBreak)
-          break;
-
-        prevStmt = currStmt.asJPNode();
-        currStmt = currStmt.getNextStatement();
-      }
-    }
-
-    if ((exitStmt != null) && (prevStmt != null)) {
-      graph.addVertex(exitStmt.asJPNode());
-      graph.addEdge(prevStmt, exitStmt.asJPNode());
-    }
-  }
-
-  private void updateGraph(ExecutionGraph graph, IStatement exitStmt, IStatement currStmt, JPNode prevStmt) {
-    if (currStmt instanceof IfStatementNode ifStmt) {
-      var tmp = getNextNonRoutineStatement(currStmt);
-      addVertices(graph, ifStmt, tmp == null ? exitStmt : tmp);
-    } else if (currStmt instanceof IStatementBlock stmtBlock) {
-      var tmp = getNextNonRoutineStatement(currStmt);
-      if (tmp == null)
-        tmp = exitStmt;
-      var exitStatement = !stmtBlock.asJPNode().query(ABLNodeType.RETURN).isEmpty() ? null : tmp;
-      addVerticesAndEdges(graph, stmtBlock, exitStatement);
-      if (!stmtBlock.asJPNode().query(ABLNodeType.RETURN).isEmpty()) {
-        currStmt.setNextStatement(null);
-      }
-    } else {
-      if (currStmt.getNodeType() == ABLNodeType.QUIT          ) {
-        currStmt.setNextStatement(null);
-      }
-      graph.addVertex(currStmt.asJPNode());
-    }
-    graph.addEdge(prevStmt, currStmt.asJPNode());
-  }
-
-  private void addVertices(ExecutionGraph graph, IfStatementNode ifNode, IStatement exitStmt) {
-    graph.addVertex(ifNode.asJPNode());
-
-    if (ifNode.getThenBlockOrNode() instanceof IfStatementNode ifNode2)
-      addVertices(graph, ifNode2, exitStmt);
-    else if (ifNode.getThenBlockOrNode() instanceof IStatementBlock stmtBlock) {
-      addVerticesAndEdges(graph, stmtBlock, exitStmt);
-    } else {
-      graph.addVertex(ifNode.getThenBlockOrNode().asJPNode());
-      if (exitStmt != null) {
-        graph.addVertex(exitStmt.asJPNode());
-        graph.addEdge(ifNode.getThenBlockOrNode().asJPNode(), exitStmt.asJPNode());
-      }
-    }
-    graph.addEdge(ifNode.asJPNode(), ifNode.getThenBlockOrNode().asJPNode());
-
-    if (ifNode.getElseBlockOrNode() != null) {
-      if (ifNode.getElseBlockOrNode() instanceof IfStatementNode ifNode2)
-        addVertices(graph, ifNode2, exitStmt);
-      else if (ifNode.getElseBlockOrNode() instanceof IStatementBlock stmtBlock)
-        addVerticesAndEdges(graph, stmtBlock, exitStmt);
-      else {
-        graph.addVertex(ifNode.getElseBlockOrNode().asJPNode());
-        if (exitStmt != null) {
-          graph.addVertex(exitStmt.asJPNode());
-          graph.addEdge(ifNode.getElseBlockOrNode().asJPNode(), exitStmt.asJPNode());
-        }
-      }
-
-      graph.addEdge(ifNode.asJPNode(), ifNode.getElseBlockOrNode().asJPNode());
-    }
-
-    if (exitStmt != null) {
-      graph.addVertex(exitStmt.asJPNode());
-      graph.addEdge(ifNode.asJPNode(), exitStmt.asJPNode());
-    }
   }
 
   /**

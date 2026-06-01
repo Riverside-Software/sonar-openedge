@@ -27,7 +27,6 @@ import eu.rssw.pct.PLReader;
 import eu.rssw.pct.PLReader.InvalidLibraryException;
 import eu.rssw.pct.RCodeInfo;
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
-import eu.rssw.pct.elements.BuiltinClasses;
 
 public class TypeInfoPLProxy extends TypeInfoProxy {
 
@@ -48,16 +47,16 @@ public class TypeInfoPLProxy extends TypeInfoProxy {
       PLReader reader = new PLReader(plPath);
       FileEntry entry = reader.getEntry(entryName);
       if (entry == null)
-        typeInfo = new TypeInfo(typeName, false, false, BuiltinClasses.PLO_CLASSNAME, "");
+        typeInfo = getFallbackTypeInfo(typeName);
       else {
         RCodeInfo info = new RCodeInfo(reader.getInputStream(entry));
         if (info.isClass())
           typeInfo = info.getTypeInfo();
         else
-          typeInfo = new TypeInfo(typeName, false, false, BuiltinClasses.PLO_CLASSNAME, "");
+          typeInfo = getFallbackTypeInfo(typeName);
       }
     } catch (InvalidLibraryException | InvalidRCodeException | IOException caught) {
-      typeInfo = new TypeInfo(typeName, false, false, BuiltinClasses.PLO_CLASSNAME, "");
+      typeInfo = getFallbackTypeInfo(typeName);
     }
   }
 
