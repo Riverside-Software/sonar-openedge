@@ -357,7 +357,7 @@ public class OpenEdgeSettings {
           for (String str : java.nio.file.Files.readAllLines(prolibCache.toPath(), StandardCharsets.UTF_8)) {
             int commaPos = str.indexOf(':');
             if ((commaPos > 0) && (str.length() > commaPos)) {
-              String plPart =  str.substring(commaPos + 1);
+              String plPart = str.substring(commaPos + 1);
               int hashPos = plPart.indexOf('#');
               if ((hashPos > 0) && (plPart.length() > hashPos)) {
                 defaultSession.injectTypeInfo(new TypeInfoPLProxy(str.substring(0, commaPos),
@@ -450,12 +450,16 @@ public class OpenEdgeSettings {
       if (f.isFile() && f.getName().endsWith(".r")) {
         srv.numRCode.incrementAndGet();
         srv.service.submit(() -> {
-          ITypeInfo info = parseRCode(f);
-          if (info != null) {
+          var rci = getRCodeInfo(f);
+          if (rci.isClass() && (rci.getTypeInfo() != null)) {
+            var info = rci.getTypeInfo();
             srv.numClasses.incrementAndGet();
             srv.numMethods.addAndGet(info.getMethods().size());
             srv.numProperties.addAndGet(info.getProperties().size());
             defaultSession.injectTypeInfo(info);
+          } else if (rci.getMainBlock().isPresent()) {
+            var relPath = Path.of(path.getAbsolutePath()).relativize(f.toPath()).toString();
+            defaultSession.injectSignature(rci.getMainBlock().get(), relPath);
           }
         });
       } else if (f.isFile() && f.getName().endsWith(".pl")) {
@@ -464,13 +468,10 @@ public class OpenEdgeSettings {
     });
   }
 
-  private ITypeInfo parseRCode(File file) {
-    try (FileInputStream fis = new FileInputStream(file)) {
+  private RCodeInfo getRCodeInfo(File file) {
+    try (var fis = new FileInputStream(file)) {
       LOG.debug("Parsing rcode {}", file.getAbsolutePath());
-      RCodeInfo rci = new RCodeInfo(fis);
-      if (rci.isClass()) {
-        return rci.getTypeInfo();
-      }
+      return new RCodeInfo(fis);
     } catch (InvalidRCodeException | IOException | RuntimeException caught) {
       LOG.error("Unable to parse rcode {} - Please open issue on GitHub - {}", file.getAbsolutePath(),
           caught.getClass().getName());
@@ -487,6 +488,8 @@ public class OpenEdgeSettings {
           RCodeInfo rci = new RCodeInfo(pl.getInputStream(entry));
           if (rci.isClass()) {
             defaultSession.injectTypeInfo(rci.getTypeInfo());
+          } else if (rci.getMainBlock().isPresent()) {
+            defaultSession.injectSignature(rci.getMainBlock().get(), entry.getFileName());
           }
         } catch (InvalidRCodeException | IOException caught) {
           LOG.error("Unable to open file " + entry.getFileName() + " in PL " + lib.getAbsolutePath(), caught);

@@ -41,6 +41,8 @@ public class TestProjectSensorContext {
   public static final String PROC_TEST3 = "src/procedures/test3.p";
   public static final String PROC_TEST3_I = "src/procedures/test3.i";
   public static final String PROC_TEST3_I1 = "src/procedures/test3.i1";
+  public static final String PROC_TEST6 = "src/procedures/test6.p";
+  public static final String PROC_TEST7 = "src/procedures/test7.p";
   public static final String PROC_INVALID = "src/procedures/invalid.p";
   public static final String CLS_TESTCLASS = "src/classes/rssw/testclass.cls";
 
@@ -54,7 +56,9 @@ public class TestProjectSensorContext {
 
   public static SensorContextTester createContext(MapSettings settings) throws IOException {
     settings.setProperty("sonar.sources", "src");
-    settings.setProperty(Constants.PROPATH, new File(BASEDIR).getAbsolutePath());
+    settings.setProperty(Constants.PROPATH,
+        new File(BASEDIR).getAbsolutePath() + "," + new File(BASEDIR).getAbsolutePath() + "\\src\\procedures" + ","
+            + new File(BASEDIR).getAbsolutePath() + "\\src\\classes");
     settings.setProperty(Constants.BINARIES, "build");
     settings.setProperty(Constants.DATABASES, SP2K_DF);
     settings.setProperty(Constants.SKIP_RCODE, true);
@@ -64,7 +68,8 @@ public class TestProjectSensorContext {
     SensorContextTester context = SensorContextTester.create(new File(BASEDIR));
     context.setSettings(settings);
 
-    Set<String> oeFiles = Set.of(PROC_TEST1, PROC_TEST2, PROC_TEST3, PROC_TEST3_I, PROC_INVALID, PROC_TEST3_I1, CLS_TESTCLASS);
+    Set<String> oeFiles = Set.of(PROC_TEST1, PROC_TEST2, PROC_TEST3, PROC_TEST3_I, PROC_INVALID, PROC_TEST3_I1,
+        CLS_TESTCLASS,PROC_TEST6,PROC_TEST7);
     Set<String> addedFiles = Set.of(PROC_TEST2, PROC_TEST3_I, PROC_INVALID, PROC_TEST3_I1, CLS_TESTCLASS);
 
     // DB Schema

@@ -49,13 +49,13 @@ import eu.rssw.pct.elements.IParameter;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.ParameterMode;
 import eu.rssw.pct.elements.PrimitiveDataType;
-import eu.rssw.pct.mapping.OpenEdgeVersion;
 import eu.rssw.pct.elements.fixed.EventElement;
 import eu.rssw.pct.elements.fixed.MethodElement;
 import eu.rssw.pct.elements.fixed.Parameter;
 import eu.rssw.pct.elements.fixed.PropertyElement;
 import eu.rssw.pct.elements.fixed.TypeInfo;
 import eu.rssw.pct.elements.fixed.VariableElement;
+import eu.rssw.pct.mapping.OpenEdgeVersion;
 
 /**
  * This class provides an interface to an org.prorefactor.refactor session. Much of this class was originally put in
@@ -71,6 +71,7 @@ public class RefactorSession implements IProparseEnvironment {
   // Structure from rcode
   private final Map<String, ITypeInfo> typeInfoMap;
   private final Map<String, ITypeInfo> lcTypeInfoMap;
+  private final Map<String, IMethodElement> mainBlockSignatureMap;
   // Read from internal classes list and assembly catalog
   private final Map<String, ITypeInfo> classInfo;
   private final Map<String, ITypeInfo> lcClassInfo;
@@ -91,14 +92,14 @@ public class RefactorSession implements IProparseEnvironment {
     this(proparseSettings, schema, Charset.defaultCharset());
   }
 
-  public RefactorSession(IProparseSettings proparseSettings, ISchema schema,
-      Charset charset) {
+  public RefactorSession(IProparseSettings proparseSettings, ISchema schema, Charset charset) {
     this.proparseSettings = proparseSettings;
     this.schema = schema;
     this.charset = charset;
 
     typeInfoMap = Collections.synchronizedMap(new HashMap<>());
     lcTypeInfoMap = Collections.synchronizedMap(new HashMap<>());
+    mainBlockSignatureMap = Collections.synchronizedMap(new HashMap<>());
     classInfo = new HashMap<>();
     lcClassInfo = new HashMap<>();
     classesPerPkg = new HashMap<>();
@@ -106,14 +107,14 @@ public class RefactorSession implements IProparseEnvironment {
     initializeProgressClasses();
   }
 
-  public RefactorSession(IProparseSettings proparseSettings, ISchema schema,
-      Charset charset, RefactorSession copy) {
+  public RefactorSession(IProparseSettings proparseSettings, ISchema schema, Charset charset, RefactorSession copy) {
     this.proparseSettings = proparseSettings;
     this.schema = schema;
     this.charset = charset;
 
     typeInfoMap = copy.typeInfoMap;
     lcTypeInfoMap = copy.lcTypeInfoMap;
+    mainBlockSignatureMap = copy.mainBlockSignatureMap;
     classInfo = copy.classInfo;
     lcClassInfo = copy.lcClassInfo;
     classesPerPkg = copy.classesPerPkg;
@@ -166,7 +167,7 @@ public class RefactorSession implements IProparseEnvironment {
 
       int dotPos = info.name.lastIndexOf('.');
       String pkgName = dotPos >= 1 ? info.name.substring(0, dotPos) : "";
-      synchronized(pkgLock) {
+      synchronized (pkgLock) {
         classesPerPkg.computeIfAbsent(pkgName, key -> new ArrayList<>()).add(typeInfo);
       }
     }
@@ -216,7 +217,7 @@ public class RefactorSession implements IProparseEnvironment {
   }
 
   public void injectClassesFromDotNetCatalog(Reader reader) {
-    for (ITypeInfo typeInfo: getClassesFromDotNetCatalog(reader)) {
+    for (ITypeInfo typeInfo : getClassesFromDotNetCatalog(reader)) {
       injectClassInfo(typeInfo);
     }
   }
@@ -242,6 +243,10 @@ public class RefactorSession implements IProparseEnvironment {
 
   public ISchema getSchema() {
     return schema;
+  }
+
+  public Map<String, IMethodElement> getMainBlockSignatures() {
+    return mainBlockSignatureMap;
   }
 
   /**
@@ -283,6 +288,13 @@ public class RefactorSession implements IProparseEnvironment {
     return info;
   }
 
+  @Nullable
+  public IMethodElement getMainBlockSignature(String procName) {
+    if (procName == null)
+      return null;
+    return mainBlockSignatureMap.get(procName);
+  }
+
   public List<String> getAllClassesFromPackage(String pkgName) {
     if (Strings.isNullOrEmpty(pkgName))
       return Collections.emptyList();
@@ -316,7 +328,7 @@ public class RefactorSession implements IProparseEnvironment {
 
     int dotPos = typeInfo.getTypeName().lastIndexOf('.');
     String pkgName = dotPos >= 1 ? typeInfo.getTypeName().substring(0, dotPos) : "";
-    synchronized(pkgLock) { 
+    synchronized (pkgLock) {
       classesPerPkg.computeIfAbsent(pkgName, key -> new ArrayList<>()).add(typeInfo);
     }
   }
@@ -333,9 +345,26 @@ public class RefactorSession implements IProparseEnvironment {
 
     int dotPos = typeInfo.getTypeName().lastIndexOf('.');
     String pkgName = dotPos >= 1 ? typeInfo.getTypeName().substring(0, dotPos) : "";
-    synchronized(pkgLock) { 
+    synchronized (pkgLock) {
       classesPerPkg.computeIfAbsent(pkgName, key -> new ArrayList<>()).add(typeInfo);
     }
+  }
+
+  /**
+   * Associate main block signature to procedure name
+   */
+  public void injectSignature(IMethodElement elem, String procName) {
+    LOG.debug("Inject signature for {}: {}", procName, elem);
+    if ((elem == null) || (procName == null))
+      return;
+    var tmp = procName.replace('\\', '/');
+    var lastSlash = tmp.lastIndexOf('/');
+    var lastDot = tmp.lastIndexOf('.');
+    if (lastDot > lastSlash)
+      tmp = tmp.substring(0, lastDot);
+    if (tmp.isBlank())
+      return;
+    mainBlockSignatureMap.put(tmp, elem);
   }
 
   public File findFile3(String fileName) {

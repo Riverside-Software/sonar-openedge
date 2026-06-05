@@ -51,8 +51,8 @@ public class Constants {
   public static final String DATABASES = "sonar.oe.databases"; // Batch scanner 
   public static final String SLINT_DATABASES = "sonar.oe.lint.databases"; // SonarLint Eclipse
   public static final String SLINT_DATABASES_KRYO = "sonar.oe.lint.databases.kryo"; // SonarLint VSCode (faster)
-  public static final String SLINT_PL_CACHE = "sonar.oe.lint.pl.cache"; // SonarLint Eclipse (will become deprecated)
-  public static final String SLINT_RCODE_CACHE = "sonar.oe.lint.rcode.cache"; // SonarLint Eclipse + VScode (will become deprecated)
+  public static final String SLINT_PL_CACHE = "sonar.oe.lint.pl.cache"; // SonarLint Eclipse
+  public static final String SLINT_RCODE_CACHE = "sonar.oe.lint.rcode.cache"; // SonarLint Eclipse
   public static final String SLINT_BUILD_BINARY_CACHE = "sonar.oe.binary.cache1"; // SonarLint VSCode only. Points to .builder/storage/typeInfoRoot
   public static final String SLINT_PROPATH_BINARY_CACHE = "sonar.oe.binary.cache2"; // SonarLint VSCode only. Points to .builder/storage/propathTypeInfoRoot
   public static final String ALIASES = "sonar.oe.aliases";

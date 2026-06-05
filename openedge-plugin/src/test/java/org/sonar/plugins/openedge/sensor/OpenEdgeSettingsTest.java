@@ -365,7 +365,8 @@ public class OpenEdgeSettingsTest {
 
     ClassDocumentation doc3 = session.getClassDocumentation("OpenEdge.Net.HTTP.Lib.ABLSockets.ABLSocketLibrary");
     assertNotNull(doc3);
-    DeprecatedInfo dep2 = doc3.objectDoc.get("M#MakeSyncRequest(IZOpenEdge.Net.ServerConnection.ClientSocket,IZOpenEdge.Net.HTTP.IHttpRequest,IZOpenEdge.Net.HTTP.IHttpResponse,IZOpenEdge.Core.ByteBucket)");
+    DeprecatedInfo dep2 = doc3.objectDoc.get(
+        "M#MakeSyncRequest(IZOpenEdge.Net.ServerConnection.ClientSocket,IZOpenEdge.Net.HTTP.IHttpRequest,IZOpenEdge.Net.HTTP.IHttpResponse,IZOpenEdge.Core.ByteBucket)");
     assertNotNull(dep2);
     assertEquals(dep2.since, "12.5.0");
   }
@@ -420,7 +421,8 @@ public class OpenEdgeSettingsTest {
     Schema sch = cache.getSchemaCache(context.fileSystem().baseDir().toString());
     assertNotNull(sch); // Empty schema is not cached
     assertEquals(rsEnv.getDefaultSession().getSchema(), sch);
-    List<ITypeInfo> catalog = cache.getCatalogCache(new File(TestProjectSensorContext.BASEDIR, "catalog.json").getAbsolutePath());
+    List<ITypeInfo> catalog = cache.getCatalogCache(
+        new File(TestProjectSensorContext.BASEDIR, "catalog.json").getAbsolutePath());
     assertNull(catalog);
   }
 
@@ -453,7 +455,8 @@ public class OpenEdgeSettingsTest {
     Schema sch = cache.getSchemaCache(context.fileSystem().baseDir().toString());
     assertNotNull(sch);
     assertEquals(rsEnv.getDefaultSession().getSchema(), sch);
-    List<ITypeInfo> catalog = cache.getCatalogCache(new File(TestProjectSensorContext.BASEDIR, "catalog.json").getAbsolutePath());
+    List<ITypeInfo> catalog = cache.getCatalogCache(
+        new File(TestProjectSensorContext.BASEDIR, "catalog.json").getAbsolutePath());
     assertNotNull(catalog);
     assertEquals(catalog.size(), 4797);
   }
@@ -476,7 +479,22 @@ public class OpenEdgeSettingsTest {
     assertTrue(oeSettings.getPropath().stream().anyMatch(it -> it.getName().endsWith("net-12.8.9.pl")));
     assertTrue(oeSettings.getPropath().stream().anyMatch(it -> it.getName().endsWith("core-12.8.9.apl")));
     assertTrue(oeSettings.getPropath().stream().anyMatch(it -> it.getName().endsWith("adecomm.pl")));
-    assertTrue(oeSettings.getPropath().stream().anyMatch(it -> it.getName().endsWith("4feb5d83e9b6559144d87a558145a720d4abc4cf")));
+    assertTrue(oeSettings.getPropath().stream().anyMatch(
+        it -> it.getName().endsWith("4feb5d83e9b6559144d87a558145a720d4abc4cf")));
+  }
+
+  @Test
+  public void testSignature() {
+    var context = SensorContextTester.create(new File(TestProjectSensorContext.BASEDIR));
+    context.setSettings(new MapSettings());
+
+    var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), OpenEdgePluginTest.SONARQUBE_RUNTIME);
+    oeSettings.init();
+
+    var ppSess = oeSettings.getProparseSessions().getDefaultSession();
+    assertNotNull(ppSess.getMainBlockSignature("src/procedures/test7"));
+    assertNull(ppSess.getMainBlockSignature("nonexistent"));
+    assertNull(ppSess.getMainBlockSignature(null));
   }
 
 }
