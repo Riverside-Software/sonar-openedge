@@ -55,6 +55,7 @@ import org.prorefactor.core.schema.IDatabase;
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.proparse.classdoc.ClassDocumentation;
 import org.prorefactor.refactor.RefactorSession;
+import org.prorefactor.refactor.settings.IProparseSettings;
 import org.prorefactor.refactor.settings.ProparseSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -223,7 +224,7 @@ public class OpenEdgeSettings {
 
   private final List<File> readPropath(String propValue) {
     List<File> retVal = new ArrayList<>();
-    LOG.info("Using PROPATH : {}", propValue);
+    LOG.info("Using PROPATH: {}", propValue);
     for (String str : Splitter.on(',').trimResults().split(propValue)) {
       File entry = resolvePath(str);
       LOG.debug("Adding {} to PROPATH", entry.getAbsolutePath());
@@ -795,113 +796,130 @@ public class OpenEdgeSettings {
   }
 
   private RefactorSession getProparseSession() {
-    if (defaultSession == null) {
-      Schema sch = null;
+    if (defaultSession == null)
+      defaultSession = createProparseSession();
+
+    return defaultSession;
+  }
+
+  private RefactorSession createProparseSession() {
+    Schema sch = null;
+    if (cache != null) {
+      sch = cache.getSchemaCache(fileSystem.baseDir().toString());
+      if ((sch != null) && LOG.isDebugEnabled()) {
+        LOG.debug("Reusing database schema from cache for project {} -- DB: {}", fileSystem.baseDir(),
+            sch.getDatabases().stream().map(IDatabase::getName).collect(Collectors.joining(", ")));
+      }
+    }
+    if (sch == null) {
+      sch = readSchema(config.get(Constants.DATABASES).orElse(""), config.get(Constants.ALIASES).orElse(""));
       if (cache != null) {
-        sch = cache.getSchemaCache(fileSystem.baseDir().toString());
-        if ((sch != null) && LOG.isDebugEnabled()) {
-          LOG.debug("Reusing database schema from cache for project {} -- DB: {}", fileSystem.baseDir(),
-              sch.getDatabases().stream().map(IDatabase::getName).collect(Collectors.joining(", ")));
-        }
-      }
-      if (sch == null) {
-        sch = readSchema(config.get(Constants.DATABASES).orElse(""), config.get(Constants.ALIASES).orElse(""));
-        if (cache != null) {
-          LOG.info("Cache database schema for project {}", fileSystem.baseDir());
-          cache.addSchemaCache(fileSystem.baseDir().toString(), sch);
-        }
-      }
-
-      ProparseSettings ppSettings = new ProparseSettings(getPropathAsString(),
-          config.getBoolean(Constants.BACKSLASH_ESCAPE).orElse(false));
-
-      // Tokens may start with special chars
-      Optional<String> tokenStartChars = config.get("sonar.oe.proparse.tokenStartChars");
-      if (tokenStartChars.isPresent())
-        ppSettings.setTokenStartChars(tokenStartChars.get().toCharArray());
-
-      // Some preprocessor values can be overridden at the project level
-      Optional<String> opsys = config.get("sonar.oe.preprocessor.opsys");
-      if (opsys.isPresent())
-        ppSettings.setCustomOpsys(opsys.get());
-
-      Optional<String> windowSystem = config.get("sonar.oe.preprocessor.window-system");
-      if (windowSystem.isPresent())
-        ppSettings.setCustomWindowSystem(windowSystem.get());
-
-      Optional<String> proVersion = config.get("sonar.oe.preprocessor.proversion");
-      if (proVersion.isPresent())
-        ppSettings.setCustomProversion(proVersion.get());
-
-      Optional<Boolean> batchMode = config.getBoolean("sonar.oe.preprocessor.batch-mode");
-      if (batchMode.isPresent())
-        ppSettings.setCustomBatchMode(batchMode.get());
-
-      Optional<String> processArch = config.get("sonar.oe.preprocessor.process-architecture");
-      Integer processArchInt = processArch.isPresent() ? Ints.tryParse(processArch.get()) : null;
-      if (processArchInt != null)
-        ppSettings.setCustomProcessArchitecture(processArchInt);
-
-      Optional<Boolean> skipXCode = config.getBoolean(Constants.SKIP_XCODE);
-      if (skipXCode.isPresent())
-        ppSettings.setCustomSkipXCode(skipXCode.get());
-
-      // ANTLR Token Deletion
-      ppSettings.setAntlrTokenDeletion(config.getBoolean("sonar.oe.proparse.token.deletion").orElse(false));
-      // ANTLR Token Insertion
-      ppSettings.setAntlrTokenInsertion(config.getBoolean("sonar.oe.proparse.token.insertion").orElse(false));
-      // ANTLR Recover
-      ppSettings.setAntlrRecover(config.getBoolean("sonar.oe.proparse.recover").orElse(false));
-      // Require full names
-      ppSettings.setRequireFullName(config.getBoolean(Constants.REQUIRE_FULL_NAMES).orElse(false));
-
-      defaultSession = new RefactorSession(ppSettings, sch, encoding());
-      Optional<String> assemblyCatalog = config.get(Constants.ASSEMBLY_CATALOG);
-      if (assemblyCatalog.isPresent()) {
-        try (Reader reader = new FileReader(assemblyCatalog.get())) {
-          defaultSession.injectClassesFromCatalog(reader);
-        } catch (IOException | JsonParseException caught) {
-          LOG.error("Unable to read assembly catalog '" + assemblyCatalog.get() + "'", caught);
-        }
-      }
-
-      Optional<String> dotNetCatalog = config.get(Constants.DOTNET_CATALOG);
-      if (dotNetCatalog.isPresent()) {
-        // First try to read from cache
-        List<ITypeInfo> list = cache == null ? null : cache.getCatalogCache(dotNetCatalog.get());
-        if (list == null) {
-          long startTime = System.currentTimeMillis();
-          try (Reader reader = new FileReader(dotNetCatalog.get())) {
-            list = RefactorSession.getClassesFromDotNetCatalog(reader);
-            if ((cache != null) && (list != null)) {
-              cache.addCatalogCache(dotNetCatalog.get(), list);
-            }
-            LOG.info("Read .Net catalog in {} ms", System.currentTimeMillis() - startTime);
-          } catch (IOException | JsonParseException caught) {
-            LOG.error("Unable to read .Net catalog '" + dotNetCatalog.get() + "'", caught);
-          }
-        }
-        if (list != null) {
-          for (ITypeInfo typeInfo : list) {
-            defaultSession.injectClassInfo(typeInfo);
-          }
-        }
-      }
-
-      if (runtime.getProduct() == SonarProduct.SONARQUBE) {
-        // Parse entire build directory if not in SonarLint
-        parseBuildDirectory();
-        // Parse class documentation
-        parseClassDocumentation();
-      } else if (runtime.getProduct() == SonarProduct.SONARLINT) {
-        initializePropathBinaryCache();
-        initializeBuildBinaryCache();
-        initializeProlibCache();
-        initializeRCodeCache();
+        LOG.info("Cache database schema for project {}", fileSystem.baseDir());
+        cache.addSchemaCache(fileSystem.baseDir().toString(), sch);
       }
     }
 
-    return defaultSession;
+    var ppSettings = createProparseSettings();
+    var session = new RefactorSession(ppSettings, sch, encoding());
+    // Important: all builtin classes are injected when RefactorSession is created
+    // This means there's no need to inject these classes from the various caches
+
+    // .Net catalog, property manually added in Eclipse
+    // Based on the old format the catalog.json
+    var assemblyCatalog = config.get(Constants.ASSEMBLY_CATALOG);
+    if (assemblyCatalog.isPresent()) {
+      try (var reader = new FileReader(assemblyCatalog.get())) {
+        session.injectClassesFromCatalog(reader);
+      } catch (IOException | JsonParseException caught) {
+        LOG.error("Unable to read assembly catalog '" + assemblyCatalog.get() + "'", caught);
+      }
+    }
+
+    // .Net catalog, automatically added in the SonarLint language server
+    // I think this is the new format of catalog.json
+    var dotNetCatalog = config.get(Constants.DOTNET_CATALOG);
+    if (dotNetCatalog.isPresent()) {
+      // First try to read from SonarLint cache
+      List<ITypeInfo> list = cache == null ? null : cache.getCatalogCache(dotNetCatalog.get());
+      if (list == null) {
+        long startTime = System.currentTimeMillis();
+        try (Reader reader = new FileReader(dotNetCatalog.get())) {
+          list = RefactorSession.getClassesFromDotNetCatalog(reader);
+          if ((cache != null) && (list != null)) {
+            cache.addCatalogCache(dotNetCatalog.get(), list);
+          }
+          LOG.info("Read .Net catalog in {} ms", System.currentTimeMillis() - startTime);
+        } catch (IOException | JsonParseException caught) {
+          LOG.error("Unable to read .Net catalog '" + dotNetCatalog.get() + "'", caught);
+        }
+      }
+      if (list != null) {
+        for (ITypeInfo typeInfo : list) {
+          session.injectClassInfo(typeInfo);
+        }
+      }
+    }
+
+    if (runtime.getProduct() == SonarProduct.SONARQUBE) {
+      // Parse entire build directory if not in SonarLint
+      parseBuildDirectory();
+      // Parse class documentation
+      parseClassDocumentation();
+    } else if (runtime.getProduct() == SonarProduct.SONARLINT) {
+      initializePropathBinaryCache();
+      initializeBuildBinaryCache();
+      initializeProlibCache();
+      initializeRCodeCache();
+    }
+
+    return session;
+  }
+
+  private IProparseSettings createProparseSettings() {
+    var ppSettings = new ProparseSettings(getPropathAsString(),
+        config.getBoolean(Constants.BACKSLASH_ESCAPE).orElse(false));
+
+    // Tokens may start with special chars
+    var tokenStartChars = config.get("sonar.oe.proparse.tokenStartChars");
+    if (tokenStartChars.isPresent())
+      ppSettings.setTokenStartChars(tokenStartChars.get().toCharArray());
+
+    // Some preprocessor values can be overridden at the project level
+    var opsys = config.get("sonar.oe.preprocessor.opsys");
+    if (opsys.isPresent())
+      ppSettings.setCustomOpsys(opsys.get());
+
+    var windowSystem = config.get("sonar.oe.preprocessor.window-system");
+    if (windowSystem.isPresent())
+      ppSettings.setCustomWindowSystem(windowSystem.get());
+
+    var proVersion = config.get("sonar.oe.preprocessor.proversion");
+    if (proVersion.isPresent())
+      ppSettings.setCustomProversion(proVersion.get());
+
+    var batchMode = config.getBoolean("sonar.oe.preprocessor.batch-mode");
+    if (batchMode.isPresent())
+      ppSettings.setCustomBatchMode(batchMode.get());
+
+    var processArch = config.get("sonar.oe.preprocessor.process-architecture");
+    var processArchInt = processArch.isPresent() ? Ints.tryParse(processArch.get()) : null;
+    if (processArchInt != null)
+      ppSettings.setCustomProcessArchitecture(processArchInt);
+
+    var skipXCode = config.getBoolean(Constants.SKIP_XCODE);
+    if (skipXCode.isPresent())
+      ppSettings.setCustomSkipXCode(skipXCode.get());
+
+    // ANTLR Token Deletion
+    ppSettings.setAntlrTokenDeletion(config.getBoolean("sonar.oe.proparse.token.deletion").orElse(false));
+    // ANTLR Token Insertion
+    ppSettings.setAntlrTokenInsertion(config.getBoolean("sonar.oe.proparse.token.insertion").orElse(false));
+    // ANTLR Recover
+    ppSettings.setAntlrRecover(config.getBoolean("sonar.oe.proparse.recover").orElse(false));
+    // Require full names
+    ppSettings.setRequireFullName(config.getBoolean(Constants.REQUIRE_FULL_NAMES).orElse(false));
+
+    return ppSettings;
   }
 
   public static List<ITypeInfo> readPackageAsProxy(Path rootPath, String fileName, Kryo kryo) {
