@@ -447,7 +447,7 @@ public class OpenEdgeSettings {
   private void parseRCodeInPath(File path, RCodeInjectorService srv) {
     LOG.debug("Parsing rcode in directory {}", path.getAbsolutePath());
     Files.fileTraverser().depthFirstPreOrder(path).forEach(f -> {
-      if (f.getName().endsWith(".r")) {
+      if (f.isFile() && f.getName().endsWith(".r")) {
         srv.numRCode.incrementAndGet();
         srv.service.submit(() -> {
           ITypeInfo info = parseRCode(f);
@@ -458,7 +458,7 @@ public class OpenEdgeSettings {
             defaultSession.injectTypeInfo(info);
           }
         });
-      } else if (f.getName().endsWith(".pl")) {
+      } else if (f.isFile() && f.getName().endsWith(".pl")) {
         srv.service.submit(() -> parseLibrary(f));
       }
     });
