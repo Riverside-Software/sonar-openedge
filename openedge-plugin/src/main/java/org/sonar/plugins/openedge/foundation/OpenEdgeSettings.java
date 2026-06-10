@@ -549,43 +549,6 @@ public class OpenEdgeSettings {
     return null;
   }
 
-  /**
-   * Return File pointer to rcode in sonar.oe.binaries and from propath directory if such rcode exists
-   * 
-   * @param fileName File name from profiler
-   */
-  public ITypeInfo getRCode2(String fileName) {
-    for (Path binariesDir : binariesDirs) {
-      Path rCode = binariesDir.resolve(fileName.replace('.', '/') + ".r");
-      if (rCode.toFile().exists())
-        return parseRCode(rCode.toFile());
-    }
-
-    for (File ppEntry : propathFull) {
-      boolean isPL = "pl".equalsIgnoreCase(FilenameUtils.getExtension(ppEntry.getName()));
-      if (isPL) {
-        PLReader reader = new PLReader(ppEntry.toPath());
-        FileEntry entry = reader.getEntry(fileName.replace('.', '/') + ".r");
-        if (entry != null) {
-          try {
-            RCodeInfo rci = new RCodeInfo(reader.getInputStream(entry));
-            if (rci.isClass()) {
-              return rci.getTypeInfo();
-            }
-          } catch (InvalidRCodeException | IOException caught) {
-            // Nothing
-          }
-        }
-      } else {
-        Path rCode = ppEntry.toPath().resolve(fileName.replace('.', '/') + ".r");
-        if (rCode.toFile().exists())
-          return parseRCode(rCode.toFile());
-      }
-    }
-
-    return null;
-  }
-
   public Path getPctIncludeFile(InputFile file) {
     String relPath = getRelativePathToSourceDirs(file);
     if (Strings.isNullOrEmpty(relPath))
