@@ -102,16 +102,15 @@ public class MethodCallNode extends ExpressionNode {
   }
 
   private void compute() {
-    // Default
-    ProgramRootNode root = getTopLevelParent();
+    var root = getTopLevelParent();
     if (root == null)
       return;
 
-    JPNode firstChild = getFirstChild();
-    if (firstChild instanceof SystemHandleNode) {
-      handleSystemHandleNode((SystemHandleNode) firstChild, root);
-    } else if (firstChild instanceof FieldRefNode) {
-      handleFieldRefNode((FieldRefNode) firstChild, root);
+    var firstChild = getFirstChild();
+    if (firstChild instanceof SystemHandleNode sysHdlNode) {
+      handleSystemHandleNode(sysHdlNode, root);
+    } else if (firstChild instanceof FieldRefNode fieldRefNode) {
+      handleFieldRefNode(fieldRefNode, root);
     } else if (firstChild.isIExpression()) {
       handleExpression(firstChild.asIExpression(), root);
     } else {
