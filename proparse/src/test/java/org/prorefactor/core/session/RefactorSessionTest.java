@@ -132,7 +132,9 @@ public class RefactorSessionTest {
     session.injectSignature(sig04, "bar\\test04");
 
     assertEquals(session.getMainBlockSignature("foo/bar/test01"), sig01);
-    assertNull(session.getMainBlockSignature("foo/bar/test01.p"));
+    assertEquals(session.getMainBlockSignature("foo/bar/test01.p"), sig01);
+    // Side effect: this works too...
+    assertEquals(session.getMainBlockSignature("foo/bar/test01.w"), sig01);
     assertEquals(session.getMainBlockSignature("test02"), sig02);
     assertEquals(session.getMainBlockSignature("test03"), sig03);
     assertEquals(session.getMainBlockSignature("bar/test04"), sig04);

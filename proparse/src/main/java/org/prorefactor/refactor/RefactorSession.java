@@ -292,7 +292,12 @@ public class RefactorSession implements IProparseEnvironment {
   public IMethodElement getMainBlockSignature(String procName) {
     if (procName == null)
       return null;
-    return mainBlockSignatureMap.get(procName);
+    var tmp = procName.replace('\\', '/');
+    var lastSlash = tmp.lastIndexOf('/');
+    var lastDot = tmp.lastIndexOf('.');
+    if (lastDot > lastSlash)
+      tmp = tmp.substring(0, lastDot);
+    return mainBlockSignatureMap.get(tmp);
   }
 
   public List<String> getAllClassesFromPackage(String pkgName) {
