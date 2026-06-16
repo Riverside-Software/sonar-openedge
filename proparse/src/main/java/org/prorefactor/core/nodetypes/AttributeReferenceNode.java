@@ -84,7 +84,8 @@ public class AttributeReferenceNode extends ExpressionNode {
       property = typeInfo == null ? null : typeInfo.lookupProperty(root.getTypeInfoProvider(), attributeName);
       var v1 = (typeInfo != null) && (property == null) ? typeInfo.lookupVariable(attributeName) : null;
       variable = v1 == null ? null : Pair.of(typeInfo, v1);
-    } else if (dataType.getPrimitive() == PrimitiveDataType.HANDLE) {
+    } else {
+      // Resolve datatype directly with the attribute name
       returnDataType = getStandardAttributeDataType(attributeName.toUpperCase());
     }
   }
