@@ -64,12 +64,12 @@ public interface IProparseEnvironment {
   ITypeInfo getTypeInfoCI(String clz);
 
   /**
-   * Return TypeInfo object from a class name (case insensitive search)
+   * Return main block signature of a procedure
    */
-  IMethodElement getMainBlockSignature(String rcodeName);
+  IMethodElement getMainBlockSignature(String procName);
 
   /**
-   * Return Signature map
+   * Return signature map
    */
   Map<String, IMethodElement> getMainBlockSignatures();
 
