@@ -20,6 +20,8 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 import org.prorefactor.treeparser.ContextQualifier;
 import org.prorefactor.treeparser.Primitive;
+import org.prorefactor.treeparser.symbols.FieldBuffer;
+import org.prorefactor.treeparser.symbols.Variable;
 
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.ITypeInfo;
@@ -97,11 +99,21 @@ public class FieldRefNode extends ExpressionNode {
    */
   @Override
   public DataType getDataType() {
-    if (getSymbol() instanceof Primitive) {
-      DataType dataType = ((Primitive) getSymbol()).getDataType();
+    if (getSymbol() instanceof Primitive prim) {
+      DataType dataType = prim.getDataType();
       return dataType == null ? DataType.NOT_COMPUTED : dataType;
     }
     return DataType.NOT_COMPUTED;
+  }
+
+  @Override
+  public int getExtent() {
+    if (getSymbol() instanceof Variable v) {
+      return v.getExtent();
+    } else if (getSymbol() instanceof FieldBuffer fb) {
+      return fb.getExtent();
+    }
+    return 0;
   }
 
   /**

@@ -27,6 +27,13 @@ public interface IExpression {
     return DataType.NOT_COMPUTED;
   }
 
+  /**
+   * @return -1 if undetermined array, &gt; 0 if fixed array, or 0 otherwise
+   */
+  default int getExtent() {
+    return 0;
+  }
+
   default JPNode asJPNode() {
     return null;
   }

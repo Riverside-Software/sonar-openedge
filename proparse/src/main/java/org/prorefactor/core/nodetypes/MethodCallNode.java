@@ -35,6 +35,7 @@ public class MethodCallNode extends ExpressionNode {
   private boolean computed = false;
   private Pair<ITypeInfo, IMethodElement> method = null;
   private DataType returnDataType = DataType.NOT_COMPUTED;
+  private int returnExtent = 0;
 
   public MethodCallNode(ProToken t, JPNode parent, int num, boolean hasChildren, String methodName) {
     super(t, parent, num, hasChildren);
@@ -51,26 +52,31 @@ public class MethodCallNode extends ExpressionNode {
       method = typeInfo == null ? null : getObjectMethod(root.getTypeInfoProvider(),
           this.findDirectChild(ABLNodeType.METHOD_PARAM_LIST), typeInfo, methodName);
       returnDataType = method == null ? DataType.NOT_COMPUTED : method.getO2().getReturnType();
+      returnExtent = method == null ? 0 : method.getO2().getExtent();
     } else if (node.getFirstChild().getNodeType() == ABLNodeType.SUPER) {
       ITypeInfo info = root.getEnvironment().getTypeInfo(root.getClassName());
       info = info == null ? null : root.getEnvironment().getTypeInfo(info.getParentTypeName());
       method = info == null ? null : getObjectMethod(root.getTypeInfoProvider(),
           this.findDirectChild(ABLNodeType.METHOD_PARAM_LIST), info, methodName);
       returnDataType = method == null ? DataType.NOT_COMPUTED : method.getO2().getReturnType();
+      returnExtent = method == null ? 0 : method.getO2().getExtent();
     } else {
       returnDataType = node.getMethodDataType(methodName.toUpperCase());
+      returnExtent = 0;
     }
   }
 
   private void handleFieldRefNode(FieldRefNode node, ProgramRootNode root) {
     if (node.isStaticReference()) {
-      method = getObjectMethod(root.getTypeInfoProvider(), findDirectChild(ABLNodeType.METHOD_PARAM_LIST), node.getStaticReference(),
-          methodName);
+      method = getObjectMethod(root.getTypeInfoProvider(), findDirectChild(ABLNodeType.METHOD_PARAM_LIST),
+          node.getStaticReference(), methodName);
       returnDataType = method == null ? DataType.NOT_COMPUTED : method.getO2().getReturnType();
+      returnExtent = method == null ? 0 : method.getO2().getExtent();
     } else if ((node.getSymbol() instanceof Event)
         && ("publish".equalsIgnoreCase(methodName) || "subscribe".equalsIgnoreCase(methodName))) {
       // Events only have Publish / Subscribe
       returnDataType = DataType.VOID;
+      returnExtent = 0;
     } else if (node.isIExpression()) {
       handleExpression(node.asIExpression(), root);
     }
@@ -83,8 +89,10 @@ public class MethodCallNode extends ExpressionNode {
       method = typeInfo == null ? null : getObjectMethod(getTopLevelParent().getTypeInfoProvider(),
           findDirectChild(ABLNodeType.METHOD_PARAM_LIST), typeInfo, methodName);
       returnDataType = method == null ? DataType.NOT_COMPUTED : method.getO2().getReturnType();
+      returnExtent = method == null ? 0 : method.getO2().getExtent();
     } else if (dataType.getPrimitive() == PrimitiveDataType.HANDLE) {
       returnDataType = getStandardMethodDataType(methodName.toUpperCase());
+      returnExtent = 0;
     }
   }
 
@@ -95,8 +103,10 @@ public class MethodCallNode extends ExpressionNode {
         && (nextChild.getNodeType() == ABLNodeType.LEFTPAREN)) {
       if (root.getTypeInfo() == null) {
         returnDataType = new DataType(root.getRootScope().getClassName());
+        returnExtent = 0;
       } else {
         returnDataType = new DataType(root.getTypeInfo().getTypeName());
+        returnExtent = 0;
       }
     }
   }
@@ -133,6 +143,15 @@ public class MethodCallNode extends ExpressionNode {
       computed = true;
     }
     return returnDataType;
+  }
+
+  @Override
+  public synchronized int getExtent() {
+    if (!computed) {
+      compute();
+      computed = true;
+    }
+    return returnExtent;
   }
 
   public synchronized IMethodElement getMethodElement() {

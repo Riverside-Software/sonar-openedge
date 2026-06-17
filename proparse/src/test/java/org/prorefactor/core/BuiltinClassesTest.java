@@ -33,6 +33,7 @@ import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.ITypeInfo;
+import eu.rssw.pct.elements.ITypeInfo.ParameterDescriptor;
 import eu.rssw.pct.elements.ParameterMode;
 import eu.rssw.pct.mapping.OpenEdgeVersion;
 
@@ -86,13 +87,17 @@ public class BuiltinClassesTest {
     var info41 = provider117.apply("Progress.ApplicationServer.AgentManager");
     assertNotNull(info41);
     assertNull(info41.getMethod(provider117, "PushProfilerData",
-        new DataType[] {DataType.CHARACTER, DataType.INTEGER, DataType.LONGCHAR},
-        new ParameterMode[] {ParameterMode.INPUT, ParameterMode.INPUT, ParameterMode.INPUT}));
+        new ParameterDescriptor[] {
+            new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT),
+            new ParameterDescriptor(DataType.INTEGER, 0, ParameterMode.INPUT),
+            new ParameterDescriptor(DataType.LONGCHAR, 0, ParameterMode.INPUT)}));
     var info42 = provider122.apply("Progress.ApplicationServer.AgentManager");
     assertNotNull(info42);
     assertNotNull(info42.getMethod(provider122, "PushProfilerData",
-        new DataType[] {DataType.CHARACTER, DataType.INTEGER, DataType.LONGCHAR},
-        new ParameterMode[] {ParameterMode.INPUT, ParameterMode.INPUT, ParameterMode.INPUT}));
+        new ParameterDescriptor[] {
+            new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT),
+            new ParameterDescriptor(DataType.INTEGER, 0, ParameterMode.INPUT),
+            new ParameterDescriptor(DataType.LONGCHAR, 0, ParameterMode.INPUT)}));
 
     var info51 = provider117.apply("Progress.Reflect.Property");
     assertNotNull(info51);
@@ -154,16 +159,24 @@ public class BuiltinClassesTest {
   public void test0() throws IOException {
     Files.createDirectories(Path.of("target/dump"));
     try (var output = Files.newBufferedWriter(Path.of("target/dump/V117.txt"))) {
-      BuiltinClasses.getBuiltinClasses(OpenEdgeVersion.V117).stream().sorted((a, b) -> a.getTypeName().compareTo(b.getTypeName())).forEach(classConsumer(output));
+      BuiltinClasses.getBuiltinClasses(OpenEdgeVersion.V117).stream() //
+        .sorted((a, b) -> a.getTypeName().compareTo(b.getTypeName())) //
+        .forEach(classConsumer(output));
     }
     try (var output = Files.newBufferedWriter(Path.of("target/dump/V122.txt"))) {
-      BuiltinClasses.getBuiltinClasses(OpenEdgeVersion.V122).stream().sorted((a, b) -> a.getTypeName().compareTo(b.getTypeName())).forEach(classConsumer(output));
+      BuiltinClasses.getBuiltinClasses(OpenEdgeVersion.V122).stream() //
+        .sorted((a, b) -> a.getTypeName().compareTo(b.getTypeName())) //
+        .forEach(classConsumer(output));
     }
     try (var output = Files.newBufferedWriter(Path.of("target/dump/V128.txt"))) {
-      BuiltinClasses.getBuiltinClasses(OpenEdgeVersion.V128).stream().sorted((a, b) -> a.getTypeName().compareTo(b.getTypeName())).forEach(classConsumer(output));
+      BuiltinClasses.getBuiltinClasses(OpenEdgeVersion.V128).stream() //
+        .sorted((a, b) -> a.getTypeName().compareTo(b.getTypeName())) //
+        .forEach(classConsumer(output));
     }
     try (var output = Files.newBufferedWriter(Path.of("target/dump/V130.txt"))) {
-      BuiltinClasses.getBuiltinClasses(OpenEdgeVersion.V130).stream().sorted((a, b) -> a.getTypeName().compareTo(b.getTypeName())).forEach(classConsumer(output));
+      BuiltinClasses.getBuiltinClasses(OpenEdgeVersion.V130).stream() //
+        .sorted((a, b) -> a.getTypeName().compareTo(b.getTypeName())) //
+        .forEach(classConsumer(output));
     }
     assertTrue(Files.exists(Path.of("target/dump/V117.txt")));
     assertTrue(Files.exists(Path.of("target/dump/V122.txt")));

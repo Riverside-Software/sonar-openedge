@@ -38,6 +38,7 @@ public class AttributeReferenceNode extends ExpressionNode {
   private Pair<ITypeInfo, IPropertyElement> property = null;
   private Pair<ITypeInfo, IVariableElement> variable = null;
   private DataType returnDataType = DataType.NOT_COMPUTED;
+  private int returnExtent = 0;
 
   public AttributeReferenceNode(ProToken t, JPNode parent, int num, boolean hasChildren, String attributeName) {
     super(t, parent, num, hasChildren);
@@ -104,10 +105,13 @@ public class AttributeReferenceNode extends ExpressionNode {
       handleExpression(firstChild.asIExpression(), root);
     }
 
-    if (property != null)
+    if (property != null) {
       returnDataType = property.getO2().getVariable().getDataType();
-    else if (variable != null)
+      returnExtent = property.getO2().getVariable().getExtent();
+    } else if (variable != null) {
       returnDataType = variable.getO2().getDataType();
+      returnExtent = variable.getO2().getExtent();
+    }
   }
 
   public synchronized ITypeInfo getTypeInfo() {
@@ -130,6 +134,15 @@ public class AttributeReferenceNode extends ExpressionNode {
       computed = true;
     }
     return returnDataType;
+  }
+
+  @Override
+  public synchronized int getExtent() {
+    if (!computed) {
+      compute();
+      computed = true;
+    }
+    return returnExtent;
   }
 
   public synchronized IPropertyElement getPropertyElement() {

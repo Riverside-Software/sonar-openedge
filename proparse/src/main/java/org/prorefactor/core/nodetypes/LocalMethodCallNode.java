@@ -69,9 +69,14 @@ public class LocalMethodCallNode extends ExpressionNode {
   }
 
   @Override
-  public DataType getDataType() {
-    IMethodElement tmp = getMethodElement();
+  public synchronized DataType getDataType() {
+    var tmp = getMethodElement();
     return tmp == null ? DataType.NOT_COMPUTED : tmp.getReturnType();
   }
 
+  @Override
+  public synchronized int getExtent() {
+    var tmp = getMethodElement();
+    return tmp == null ? 0 : tmp.getExtent();
+  }
 }

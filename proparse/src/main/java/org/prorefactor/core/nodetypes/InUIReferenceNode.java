@@ -33,4 +33,8 @@ public class InUIReferenceNode extends ExpressionNode {
     return getDirectChildren().get(0).asIExpression().getDataType();
   }
 
+  @Override
+  public int getExtent() {
+    return getDirectChildren().get(0).asIExpression().getExtent();
+  }
 }
