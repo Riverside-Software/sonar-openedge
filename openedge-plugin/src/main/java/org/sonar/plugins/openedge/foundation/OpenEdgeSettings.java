@@ -796,8 +796,10 @@ public class OpenEdgeSettings {
   }
 
   private RefactorSession getProparseSession() {
-    if (defaultSession == null)
+    if (defaultSession == null) {
       defaultSession = createProparseSession();
+      initProparseSession();
+    }
 
     return defaultSession;
   }
@@ -820,59 +822,9 @@ public class OpenEdgeSettings {
     }
 
     var ppSettings = createProparseSettings();
-    var session = new RefactorSession(ppSettings, sch, encoding());
     // Important: all builtin classes are injected when RefactorSession is created
     // This means there's no need to inject these classes from the various caches
-
-    // .Net catalog, property manually added in Eclipse
-    // Based on the old format the catalog.json
-    var assemblyCatalog = config.get(Constants.ASSEMBLY_CATALOG);
-    if (assemblyCatalog.isPresent()) {
-      try (var reader = new FileReader(assemblyCatalog.get())) {
-        session.injectClassesFromCatalog(reader);
-      } catch (IOException | JsonParseException caught) {
-        LOG.error("Unable to read assembly catalog '" + assemblyCatalog.get() + "'", caught);
-      }
-    }
-
-    // .Net catalog, automatically added in the SonarLint language server
-    // I think this is the new format of catalog.json
-    var dotNetCatalog = config.get(Constants.DOTNET_CATALOG);
-    if (dotNetCatalog.isPresent()) {
-      // First try to read from SonarLint cache
-      List<ITypeInfo> list = cache == null ? null : cache.getCatalogCache(dotNetCatalog.get());
-      if (list == null) {
-        long startTime = System.currentTimeMillis();
-        try (Reader reader = new FileReader(dotNetCatalog.get())) {
-          list = RefactorSession.getClassesFromDotNetCatalog(reader);
-          if ((cache != null) && (list != null)) {
-            cache.addCatalogCache(dotNetCatalog.get(), list);
-          }
-          LOG.info("Read .Net catalog in {} ms", System.currentTimeMillis() - startTime);
-        } catch (IOException | JsonParseException caught) {
-          LOG.error("Unable to read .Net catalog '" + dotNetCatalog.get() + "'", caught);
-        }
-      }
-      if (list != null) {
-        for (ITypeInfo typeInfo : list) {
-          session.injectClassInfo(typeInfo);
-        }
-      }
-    }
-
-    if (runtime.getProduct() == SonarProduct.SONARQUBE) {
-      // Parse entire build directory if not in SonarLint
-      parseBuildDirectory();
-      // Parse class documentation
-      parseClassDocumentation();
-    } else if (runtime.getProduct() == SonarProduct.SONARLINT) {
-      initializePropathBinaryCache();
-      initializeBuildBinaryCache();
-      initializeProlibCache();
-      initializeRCodeCache();
-    }
-
-    return session;
+    return new RefactorSession(ppSettings, sch, encoding());
   }
 
   private IProparseSettings createProparseSettings() {
@@ -920,6 +872,59 @@ public class OpenEdgeSettings {
     ppSettings.setRequireFullName(config.getBoolean(Constants.REQUIRE_FULL_NAMES).orElse(false));
 
     return ppSettings;
+  }
+
+  private void initProparseSession() {
+    // .Net catalog, property manually added in Eclipse
+    // Based on the old format the catalog.json
+    var assemblyCatalog = config.get(Constants.ASSEMBLY_CATALOG);
+    if (assemblyCatalog.isPresent()) {
+      try (var reader = new FileReader(assemblyCatalog.get())) {
+        defaultSession.injectClassesFromCatalog(reader);
+      } catch (IOException | JsonParseException caught) {
+        LOG.error("Unable to read assembly catalog '" + assemblyCatalog.get() + "'", caught);
+      }
+    }
+
+    // .Net catalog, automatically added in the SonarLint language server in VS Code
+    var dotNetCatalog = config.get(Constants.DOTNET_CATALOG);
+    if (dotNetCatalog.isPresent()) {
+      readDotNetCatalog(dotNetCatalog.get());
+    }
+
+    if (runtime.getProduct() == SonarProduct.SONARQUBE) {
+      // Parse entire build directory if not in SonarLint
+      parseBuildDirectory();
+      // Parse class documentation
+      parseClassDocumentation();
+    } else if (runtime.getProduct() == SonarProduct.SONARLINT) {
+      initializePropathBinaryCache();
+      initializeBuildBinaryCache();
+      initializeProlibCache();
+      initializeRCodeCache();
+    }
+  }
+
+  private void readDotNetCatalog(String dotNetCatalog) {
+    // First try to read from SonarLint cache
+    List<ITypeInfo> list = cache == null ? null : cache.getCatalogCache(dotNetCatalog);
+    if (list == null) {
+      long startTime = System.currentTimeMillis();
+      try (Reader reader = new FileReader(dotNetCatalog)) {
+        list = RefactorSession.getClassesFromDotNetCatalog(reader);
+        if ((cache != null) && (list != null)) {
+          cache.addCatalogCache(dotNetCatalog, list);
+        }
+        LOG.info("Read .Net catalog in {} ms", System.currentTimeMillis() - startTime);
+      } catch (IOException | JsonParseException caught) {
+        LOG.error("Unable to read .Net catalog '" + dotNetCatalog + "'", caught);
+      }
+    }
+    if (list != null) {
+      for (ITypeInfo typeInfo : list) {
+        defaultSession.injectClassInfo(typeInfo);
+      }
+    }
   }
 
   public static List<ITypeInfo> readPackageAsProxy(Path rootPath, String fileName, Kryo kryo) {
