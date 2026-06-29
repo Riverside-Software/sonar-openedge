@@ -1248,6 +1248,7 @@ public class Lexer implements IPreprocessor {
         && (tokenStartPos.line > 0)) {
       loc.add(tokenStartPos.line);
     }
+    var incStack = prepro.getIncludeStack();
     return new ProToken.Builder(type, text) //
       .setWritable(writableTokens) //
       .setFileIndex(tokenStartPos.file) //
@@ -1261,6 +1262,7 @@ public class Lexer implements IPreprocessor {
       .setMacroSourceNum(tokenStartPos.sourceNum) //
       .setAnalyzeSuspend(getCurrentAnalyzeSuspend()) //
       .setNestedComments(nestedComment) //
+      .setIncludeStack(incStack) //
       .build();
   }
 

@@ -27,6 +27,7 @@ import java.util.Map;
 
 import org.antlr.v4.runtime.misc.IntervalSet;
 import org.prorefactor.core.ProToken;
+import org.prorefactor.proparse.TextRange;
 
 /**
  * Catch preprocessor events in order to generate a macro tree.
@@ -37,6 +38,7 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
   // AppBuilder managed is read-only by default - Keep track of editable code sections
   private boolean appBuilderCode = false;
   private final Map<Integer, IntervalSet> appBuilderSections = new HashMap<>();
+  private final Deque<TextRange> incPos = new LinkedList<>();
 
   /* Temp stack of scopes, just used during tree creation */
   private Deque<Scope> scopeStack = new LinkedList<>();
@@ -55,6 +57,10 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
     currRef = root;
     currInclude = root;
     scopeStack.addFirst(new Scope(root));
+  }
+
+  public TextRange[] getIncludeStack() {
+    return incPos.toArray(new TextRange[0]);
   }
 
   public IncludeRef getMacroGraph() {
@@ -99,7 +105,8 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
 
   @Override
   public void include(int line, int column, int endLine, int endColumn, int currentFile, String incFile) {
-    IncludeRef newRef = new IncludeRef(currRef, line, column, endLine, endColumn, currentFile);
+    incPos.addLast(new TextRange(currInclude.getFileIndex(), line, column, endLine, endColumn));
+    var newRef = new IncludeRef(currRef, line, column, endLine, endColumn, currentFile);
     scopeStack.addFirst(new Scope(newRef));
     currRef.macroEventList.add(newRef);
     currInclude = newRef;
@@ -130,6 +137,7 @@ public class PreprocessorEventListener implements IPreprocessorEventListener {
   @Override
   public void includeEnd() {
     scopeStack.removeFirst();
+    incPos.removeLast();
     currInclude = scopeStack.getFirst().includeRef;
     currRef = currRef.getParent();
   }

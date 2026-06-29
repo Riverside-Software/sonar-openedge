@@ -270,4 +270,7 @@ public class ABLLexer implements TokenSource, IPreprocessor {
   // End of IPreprocessor implementation
   // ***********************************
 
+  public TextRange[] getIncludeStack() {
+    return ((PreprocessorEventListener) lstListener).getIncludeStack();
+  }
 }

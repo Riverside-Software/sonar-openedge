@@ -16,6 +16,7 @@ package org.prorefactor.core;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
@@ -29,6 +30,7 @@ import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.MacroDef;
 import org.prorefactor.macrolevel.NamedMacroRef;
+import org.prorefactor.proparse.TextRange;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.AbstractProparseTest;
@@ -288,6 +290,22 @@ public class PreprocessorDirectiveTest extends AbstractProparseTest {
     // Second is inc2.i, at line 2 (in inc.i)
     assertEquals(((IncludeRef) unit.getMacroSourceArray()[2]).getFileRefName(), "preprocessor/preprocessor14-02.i");
     assertEquals(((IncludeRef) unit.getMacroSourceArray()[2]).getPosition().getLine(), 2);
+
+    var list = unit.getTopNode().query(ABLNodeType.MESSAGE);
+    assertEquals(list.size(), 4);
+    var m1 = list.get(0);
+    assertEquals(m1.getToken().getIncludeStack().length, 0);
+    var m2 = list.get(1);
+    assertEquals(m2.getToken().getIncludeStack().length, 1);
+    assertEquals(m2.getToken().getIncludeStack()[0], new TextRange(0, 4, 0, 4, 36));
+    assertEquals(m2.getToken().getIncludeStack()[0].hashCode(), 28748475);
+    var m3 = list.get(2);
+    assertEquals(m3.getToken().getIncludeStack().length, 2);
+    assertEquals(m3.getToken().getIncludeStack()[0], new TextRange(0, 4, 0, 4, 36));
+    assertEquals(m3.getToken().getIncludeStack()[1], new TextRange(1, 2, 0, 2, 34));
+    assertNotEquals(m3.getToken().getIncludeStack()[0], m3.getToken().getIncludeStack()[1]);
+    var m4 = list.get(3);
+    assertEquals(m4.getToken().getIncludeStack().length, 0);
   }
 
   @Test
