@@ -19,7 +19,6 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
@@ -51,7 +50,10 @@ public class AliasesTest extends AbstractProparseTest {
 
   @Test
   public void test01() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/data/aliases.p"), session);
+    String code = """
+        find first foo.customer.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     assertNull(unit.getRootScope());
     unit.treeParser01();

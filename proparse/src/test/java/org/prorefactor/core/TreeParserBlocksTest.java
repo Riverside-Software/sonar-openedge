@@ -21,7 +21,6 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,7 +49,23 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
 
   @Test
   public void test01() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test01.p"), session);
+    ParseUnit unit = getParseUnit("""
+        def var zz1 as int.
+        def var zz2 as int.
+        def var zz3 as int.
+        @MyAnnotation.
+        @MyAnnotation2(a = b).
+        message zz1.
+        message zz2.
+
+        procedure p1.
+          display zz1.
+          display zz2.
+        end procedure.
+
+        message zz3.
+        @AnotherAnnotation.
+        """, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -151,7 +166,19 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
 
   @Test
   public void test02() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test02.p"), session);
+    ParseUnit unit = getParseUnit("""
+        if true then
+          message "xx".
+        else
+          message "yy".
+
+        if true then do:
+          message "xx".
+        end.
+        else do:
+          message "yy".
+        end.
+        """, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -235,7 +262,31 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
 
   @Test
   public void test03() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test03.p"), session);
+    ParseUnit unit = getParseUnit("""
+        def var zz as int.
+
+        procedure p1:
+          do zz = 1 to 10:
+            do zz = 2 to 20:
+              display "xyz".
+              do zz = 3 to 30:
+                message "abc".
+              end.
+            end.
+            message "xyz".
+          end.
+        end procedure.
+
+        on write of customer do:
+          message "Test".
+          display "Test2".
+        end.
+
+        do zz = 1 to 10:
+          create customer.
+          create customer.
+        end.
+        """, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -325,7 +376,20 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
 
   @Test
   public void test04() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test04.p"), session);
+    ParseUnit unit = getParseUnit("""
+        /* Forward declare doubler() */
+        FUNCTION doubler RETURNS INTEGER (INPUT parm1 AS INTEGER) FORWARD.
+
+        /* Reference doubler() */
+        DISPLAY "doubler(0)=" doubler(0).
+        DISPLAY "doubler(1)=" doubler(1).
+        DISPLAY "doubler(2)=" doubler(2).
+
+        /* Define doubler() */
+        FUNCTION doubler RETURNS INTEGER (INPUT parm1 AS INTEGER):
+          RETURN (2 * parm1).
+        END FUNCTION.
+        """, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -370,7 +434,23 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
 
   @Test
   public void executionGraphTest01() {
-    var unit = getParseUnit(new File("src/test/resources/treeparser05/test01.p"), session);
+    var unit = getParseUnit("""
+        def var zz1 as int.
+        def var zz2 as int.
+        def var zz3 as int.
+        @MyAnnotation.
+        @MyAnnotation2(a = b).
+        message zz1.
+        message zz2.
+
+        procedure p1.
+          display zz1.
+          display zz2.
+        end procedure.
+
+        message zz3.
+        @AnotherAnnotation.
+        """, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -413,7 +493,19 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
 
   @Test
   public void executionGraphTest02() {
-    var unit = getParseUnit(new File("src/test/resources/treeparser05/test02.p"), session);
+    var unit = getParseUnit("""
+        if true then
+          message "xx".
+        else
+          message "yy".
+
+        if true then do:
+          message "xx".
+        end.
+        else do:
+          message "yy".
+        end.
+        """, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -446,7 +538,31 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
 
   @Test
   public void executionGraphTest03() {
-    var unit = getParseUnit(new File("src/test/resources/treeparser05/test03.p"), session);
+    var unit = getParseUnit("""
+        def var zz as int.
+
+        procedure p1:
+          do zz = 1 to 10:
+            do zz = 2 to 20:
+              display "xyz".
+              do zz = 3 to 30:
+                message "abc".
+              end.
+            end.
+            message "xyz".
+          end.
+        end procedure.
+
+        on write of customer do:
+          message "Test".
+          display "Test2".
+        end.
+
+        do zz = 1 to 10:
+          create customer.
+          create customer.
+        end.
+        """, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -483,7 +599,17 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
 
   @Test
   public void executionGraphTest05() {
-    var unit = getParseUnit(new File("src/test/resources/treeparser05/test05.p"), session);
+    var unit = getParseUnit("""
+        if true then do:
+          message "xx".
+        end.
+        else if false then do:
+          message "yy".
+        end.
+        finally:
+          message "zz".
+        end finally.
+        """, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -516,7 +642,12 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
 
   @Test
   public void executionGraphTest06() {
-    var unit = getParseUnit(new File("src/test/resources/treeparser05/test06.p"), session);
+    var unit = getParseUnit("""
+        if true then
+          if true then do:
+            message "xx".
+          end.
+        """, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -556,7 +687,13 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
   @Test
   public void test05() {
     // Only annotations
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test07.p"), session);
+    ParseUnit unit = getParseUnit("""
+        @Annotation1.
+        @Annotation2.
+        @Annotation3.
+        @Annotation4.
+        @Annotation5.
+        """, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -580,7 +717,16 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
   @Test
   public void test06() {
     // Only annotations
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test08.p"), session);
+    ParseUnit unit = getParseUnit("""
+        @Annotation1.
+        procedure p1:
+         @Annotation2.
+         @Annotation3.
+         message "hello".
+         @Annotation4.
+         @Annotation5.
+        end procedure.
+        """, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -608,7 +754,23 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
   @Test
   public void test09() {
     // Only annotations
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser05/test09.p"), session);
+    ParseUnit unit = getParseUnit("""
+        def var x1 as Progress.Lang.Object.
+
+        if true then // +1
+          x1 = new Object().
+        else if true then // +1
+          x1 = new Object().
+        else // +1
+          x1 = new Object().
+
+        if true then // +1
+          x1 = dynamic-new ('Progress.Lang.Object') ().
+        else if true then // +1
+          x1 = dynamic-new 'Progress.Lang.Object' ().
+        else // +1
+          x1 = dynamic-new ('Progress.Lang.Object') ().
+        """, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -653,7 +815,34 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
 
   @Test
   public void testFinally01() {
-    var unit = getParseUnit(new File("src/test/resources/treeparser05/test10.p"), session);
+    var unit = getParseUnit("""
+        function foo logical private ( ) forward.
+
+        define variable vl as logical.
+        vl = foo().
+
+        function foo return logical private ():
+           define variable hq as handle no-undo.
+           create query hq.
+           return ?. // 'finally' statement is executed before leaving function
+           finally:
+              delete object hq.
+           end finally.
+        end function.
+
+        function foo2 return logical private ():
+          do while true:
+            do while true:
+              message "xx".
+              return ?. // Go to finally
+            end.
+          end.
+          message "xx".
+          finally:
+            delete object hq.
+          end finally.
+        end function.
+        """, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -693,7 +882,21 @@ public class TreeParserBlocksTest extends AbstractProparseTest {
 
   @Test
   public void testFinally02() {
-    var unit = getParseUnit(new File("src/test/resources/treeparser05/test11.p"), session);
+    var unit = getParseUnit("""
+        function foo logical private ( ) forward.
+
+        define variable vl as logical.
+        vl = foo().
+
+        function foo return logical private ():
+           define variable hq as handle no-undo.
+           create query hq.
+           quit. // 'finally' statement is not executed
+           finally:
+              delete object hq.
+           end finally.
+        end function.
+        """, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -723,7 +926,18 @@ System.out.println(g1.toMermaidString());
   @Test
   public void testReturnNoFinally01() {
     // Return without FINALLY
-    var unit = getParseUnit(new File("src/test/resources/treeparser05/test12.p"), session);
+    var unit = getParseUnit("""
+        function foo logical private ( ) forward.
+
+        define variable vl as logical.
+        vl = foo().
+
+        function foo return logical private ():
+           define variable hq as handle no-undo.
+           create query hq.
+           return ?.
+        end function.
+        """, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -750,7 +964,15 @@ System.out.println(g1.toMermaidString());
   @Test
   public void testReturn() {
     // Return without FINALLY
-    var unit = getParseUnit(new File("src/test/resources/treeparser05/test13.p"), session);
+    var unit = getParseUnit("""
+        define variable i1 as integer no-undo.
+
+        do i1 = 1 to 10:
+          if i1 then
+            return.
+        end.
+        message "Hello".
+        """, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());

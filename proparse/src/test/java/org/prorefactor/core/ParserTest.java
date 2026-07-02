@@ -65,7 +65,23 @@ public class ParserTest extends AbstractProparseTest {
   @Test
   public void testNameDot01() {
     // Issue #897
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "namedot01.p"), session);
+    String code = """
+        DEFINE TEMP-TABLE tt
+          FIELD fld1 AS CHAR.
+
+        // Space between table name and dot ? Sure, no problem...
+        FIND tt WHERE tt  .fld1 = "1".
+        FIND tt WHERE "1" = tt .fld1 .
+        FIND tt WHERE "1" = tt  .fld1 .fld1. // Last .fld1 has to be merged in tt.fld1.
+        FIND tt WHERE "1" = tt.fld1. fld1. // But not here
+        // Comments on top of that ? Hold my beer...
+        FIND tt WHERE tt /* my eyes are bleeding */ /* yes */ .fld1 = "1".
+        // Has to work on DB tables too
+        FIND customer WHERE customer .name = "1".
+        // And fully qualified too
+        FIND sports2000   .customer WHERE sports2000  .customer /* foo */   .name = "1".
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
 
@@ -112,7 +128,12 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testAscending01() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "ascending01.p"), session);
+    String code = """
+        DEFINE TEMP-TABLE tt1 FIELD f1 AS CHAR INDEX i1 IS PRIMARY f1 ASC.
+        DEFINE TEMP-TABLE tt2 FIELD f1 AS CHAR INDEX i1 IS PRIMARY f1 ASCEN.
+        DEFINE TEMP-TABLE tt3 FIELD f1 AS CHAR INDEX i1 IS PRIMARY f1 ASCENDING.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
 
@@ -128,7 +149,26 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testDynamicFunction01() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "dynfunc01.cls"), session);
+    String code = """
+        CLASS TestClass:
+
+          METHOD VOID m1():
+            DYNAMIC-FUNCTION('foo' IN m2():m3()).
+            DYNAMIC-FUNCTION('foo' IN m2():m3(), 1).
+            DYNAMIC-FUNCTION('foo' IN m2():m3(), 1, 2, " ").
+          END METHOD.
+
+          METHOD TestClass m2():
+            RETURN THIS-OBJECT.
+          END METHOD.
+
+          METHOD HANDLE m3():
+            RETURN ?.
+          END METHOD.
+
+        END CLASS.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
 
@@ -138,7 +178,12 @@ public class ParserTest extends AbstractProparseTest {
   // SQL not recognized anymore
   @Test(enabled = false)
   public void testAscending02() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "ascending02.p"), session);
+    String code = """
+        SELECT * FROM customer BY custnum ASC.
+        SELECT * FROM customer BY custnum ASCEN.
+        SELECT * FROM customer BY custnum ASCENDING.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
 
@@ -154,7 +199,12 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testAscending03() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "ascending03.p"), session);
+    String code = """
+        MESSAGE ASC('A') + ASC   /*   XXXX */ /* ZZZZ
+
+        */  ('B').
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
 
@@ -169,7 +219,15 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testLogical01() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "logical01.p"), session);
+    String code = """
+        DEFINE TEMP-TABLE tt1 FIELD f1 AS LOG.
+        DEFINE TEMP-TABLE tt2 FIELD f1 AS LOGI.
+        DEFINE TEMP-TABLE tt3 FIELD f1 AS LOGICAL.
+        DEFINE VARIABLE xxx1 AS LOG.
+        DEFINE VARIABLE xxx2 AS LOGI.
+        DEFINE VARIABLE xxx2 AS LOGICAL.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
 
@@ -188,7 +246,10 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testLogical02() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "logical02.p"), session);
+    String code = """
+        MESSAGE STRING(LOG(123)).
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
 
@@ -200,7 +261,20 @@ public class ParserTest extends AbstractProparseTest {
   @Test(enabled = false)
   public void testObjectInDynamicFunction() {
     // Issue https://github.com/Riverside-Software/sonar-openedge/issues/673
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "objindynfunc.cls"), session);
+    String code = """
+        class Test:
+
+          method public void method1():
+            define variable obj as Progress.Lang.Object no-undo.
+
+            dynamic-function(obj:getString(toString())).
+            dynamic-function('foobar' in obj:getHandle()).
+            dynamic-function('foobar' in obj:getHandle(toString())).
+          end.
+
+        end.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
 
@@ -209,7 +283,15 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testGetCodepage() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "getcodepage.p"), session);
+    String code = """
+        DEFINE VARIABLE xxx AS LONGCHAR.
+
+        MESSAGE GET-CODEPAGE(xxx).
+        MESSAGE GET-CODEPAGES(xxx).
+        MESSAGE GET-CODEPAGE.
+        MESSAGE GET-CODEPAGES.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
 
@@ -251,7 +333,19 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testInputFunction() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "inputfunc.p"), session);
+    String code = """
+        define variable fillIn1 as int view-as fill-in.
+        define variable fillIn2 as int view-as fill-in.
+        define frame frm1 fillIn1 fillIn2.
+
+        on leave of fillIn1 in frame frm1 do:
+          input fillIn2 no-error.
+          if input frame frm1 fill1 eq '' then do:
+            // Something
+          end.
+        end.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.ON).size(), 1);
@@ -290,7 +384,28 @@ public class ParserTest extends AbstractProparseTest {
    */
   @Test
   public void tesTTIndex01() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "ttindex01.p"), session);
+    String code = """
+        define temp-table tt01
+          field fld1 as char
+          field fld2 as char
+          field fld3 as char
+          field fld4 as char
+          index idx1 is primary unique fld1
+          index idx2 fld1 fld2
+          index idx3 fld2 fld3 fld4.
+
+        define temp-table tt02 like customer.
+        define temp-table tt03 like customer use-index Comments use-index CountryPost.
+        define temp-table tt04 like customer use-index comments
+          index idx1 EmailAddress.
+        define temp-table tt05 like customer index idx1 emailaddress.
+
+        define temp-table tt06 like tt01.
+        define temp-table tt07 like tt01 use-index idx1 use-index idx2.
+        define temp-table tt08 like tt01 use-index idx1 index idx4 fld2.
+        define temp-table tt09 like tt01 index idx4 fld2.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
 
@@ -345,7 +460,20 @@ public class ParserTest extends AbstractProparseTest {
    */
   @Test
   public void testRecordNameNode() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "recordName.p"), session);
+    String code = """
+        define temp-table tt01
+          field fld1 as char
+          index idx1 is primary unique fld1.
+
+        define buffer tt02 for tt01.
+        define buffer tt03 for customer.
+
+        find first customer.
+        find first tt01.
+        find first tt02.
+        find first tt03.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
 
@@ -369,7 +497,29 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testPackagePrivate() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "package.cls"), session);
+    String code = """
+        class MyPackage.Foobar:
+          define package-protected event NewCustomer
+            signature void ( input custName as character ).
+          define package-private variable v1 as int.
+          define package-protected property v2 as int get.
+          define public property v3 as int package-private get. package-protected set.
+
+          constructor public foobar():
+            //
+          end constructor.
+
+          method package-protected void m1() :
+            //
+          end method.
+
+          method package-private void m1() :
+            //
+          end method.
+
+        end class.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 4);
@@ -378,7 +528,22 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testTriggerInClass() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "TriggerInClass.cls"), session);
+    String code = """
+        class package.foobar:
+
+          define private static property prop1 as int64 no-undo get.
+
+          on 'entry':u anywhere do:
+            // Yes, we can add triggers...
+          end.
+
+          method private static int64 xxx(zz as int64):
+            //
+          end method.
+
+        end class.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
@@ -494,7 +659,20 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testShortMaxK01() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "maxk.p"), session);
+    String code = """
+        // Two parameters required, otherwise max-k stays at very low value
+        xxx:ADD-NEW-FIELD('WebToHdlr', 'CHAR').
+
+        DEFINE NEW GLOBAL SHARED VARIABLE GATEWAY_INTERFACE AS character NO-UNDO.
+
+        DEFINE NEW GLOBAL SHARED VARIABLE SERVER_SOFTWARE   AS character FORMAT "x(20)":U NO-UNDO.
+        DEFINE NEW GLOBAL SHARED VARIABLE SERVER_PROTOCOL   AS character NO-UNDO.
+        DEFINE NEW GLOBAL SHARED VARIABLE SERVER_NAME       AS character FORMAT "x(40)":U NO-UNDO.
+
+        FUNCTION getEnv                RETURNS CHARACTER
+          (INPUT p_name                 AS CHARACTER) in web-utilities-hdl.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.enableProfiler();
     unit.parse();
     assertFalse(unit.hasSyntaxError());
@@ -512,7 +690,20 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testAmbiguityReport() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "maxk.p"), session);
+    String code = """
+        // Two parameters required, otherwise max-k stays at very low value
+        xxx:ADD-NEW-FIELD('WebToHdlr', 'CHAR').
+
+        DEFINE NEW GLOBAL SHARED VARIABLE GATEWAY_INTERFACE AS character NO-UNDO.
+
+        DEFINE NEW GLOBAL SHARED VARIABLE SERVER_SOFTWARE   AS character FORMAT "x(20)":U NO-UNDO.
+        DEFINE NEW GLOBAL SHARED VARIABLE SERVER_PROTOCOL   AS character NO-UNDO.
+        DEFINE NEW GLOBAL SHARED VARIABLE SERVER_NAME       AS character FORMAT "x(40)":U NO-UNDO.
+
+        FUNCTION getEnv                RETURNS CHARACTER
+          (INPUT p_name                 AS CHARACTER) in web-utilities-hdl.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.reportAmbiguity();
     unit.parse();
     assertFalse(unit.hasSyntaxError());
@@ -566,7 +757,14 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testNamedMember() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "namedMember01.p"), session);
+    String code = """
+        DEFINE VARIABLE b1 AS HANDLE.
+        CREATE BUFFER b1 FOR TABLE "SalesRep".
+        b1:BUFFER-CREATE().
+        ASSIGN b1::RepName = 'A'.
+        ASSIGN b1::MonthQuota(1) = 1000.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     assertFalse(unit.getTopNode().query(ABLNodeType.NAMED_MEMBER).isEmpty());
@@ -577,7 +775,12 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testDirective() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "directive.p"), session);
+    String code = """
+        {&_proparse_ prolint-nowarn(something)}
+        {&_proparse_ prolint-nowarn(shared)}
+        DEFINE NEW GLOBAL SHARED VARIABLE shared_e AS INTEGER NO-UNDO.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
 
@@ -619,7 +822,43 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testGenerics01() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "generics01.p"), session);
+    String code = """
+        var Progress.Collections.List<Progress.Lang.Object> thelist.
+        var Progress.Collections.IIterator<Progress.Lang.Object> iterator.
+        var Progress.Lang.Object president1.
+        var Progress.Lang.Object president2.
+        var HashMap<Object, Object> map1.
+
+        // Create the list
+        thelist = new Progress.Collections.List<Progress.Lang.Object>().
+
+        // Add 3 elements to the list
+        thelist:Add(new Progress.Lang.Object("George")).
+        thelist:Add(new Progress.Lang.Object ("John")).
+        thelist:Add(new Progress.Lang.Object("Thomas")).
+
+        // Retrieve the first element from the list
+        president1 = thelist:Get(1).
+        message president1:ToString().
+
+        // Replace the first element in the list with a fully named president.
+        thelist:Set(1, new Progress.Lang.Object("George Washington")).
+        president2 = thelist:Get(1).
+        message president2:ToString().
+
+        // Remove the second president from the list
+        thelist:RemoveAt(2).
+
+        // Print out the number of presidents in the list
+        message thelist:Count.
+
+        // Iterate over the entries in the list
+        iterator = thelist:GetIterator().
+        repeat while iterator:MoveNext():
+          message iterator:Current:ToString().
+        end.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
 
@@ -627,7 +866,20 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testExpressionEngine01() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "expression01.p"), session);
+    String code = """
+        def var x  as int.
+        def var x1 as int.
+        def var x2 as int.
+        def var x3 as int.
+
+        x1 + x2 + x3.
+        x1 + x2 * x3.
+        x1 = x2 = x3.
+        // Perfectly valid code... Should be reported by a rule
+        x1 + x2 = x3.
+        x1 < x2 or x3 > x2 or x1 + x2 * x3 = x3.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
 
@@ -795,8 +1047,18 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testDbQualifierSports2000() {
+    String code = """
+        define buffer bcust for customer.
+        find customer. // Has to work whatever the case
+        find SPOrts2000.customer.
+        // Looks weird to me, but this is valid syntax
+        find sports2000.bcust. // Works with database name
+        find SPOrts2000.bcust. // Works with database name
+        // Note: FIND aliasName.customer works
+        // But FIND aliasName.bufferName doesn't work
+        """;
     // Standard schema, lower-case database name
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "dbqualifier01.p"), session);
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
 
@@ -852,9 +1114,19 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testDbQualifierSP2K() throws IOException {
+    String code = """
+        define buffer bcust for customer.
+        find SP2K.customer. // Has to work whatever the case
+        find sp2K.customer.
+        // Looks weird to me, but this is valid syntax
+        find SP2K.bcust. // Works with database name
+        find sp2K.bcust. // Works with database name
+        // Note: FIND aliasName.customer works
+        // But FIND aliasName.bufferName doesn't work
+        """;
     RefactorSession session2 = new RefactorSession(new UnitTestProparseSettings(), new SP2KSchema());
 
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "dbqualifier02.p"), session2);
+    ParseUnit unit = getParseUnit(code, session2);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
 
@@ -910,7 +1182,13 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testEnum01() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "enum01.cls"), session);
+    String code = """
+        enum rssw.enum01:
+           define enum val1 = 1.
+           define enum val2 = 2.
+        end enum.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getSupport().getClassName(), "rssw.enum01");
@@ -921,7 +1199,12 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testEnum02() {
-    var unit = getParseUnit(new File(SRC_DIR, "enum02.cls"), session);
+    String code = """
+        enum rssw.enum02:
+
+        end enum.
+        """;
+    var unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getSupport().getClassName(), "rssw.enum02");
@@ -932,7 +1215,13 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testEntered01() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "entered01.p"), session);
+    String code = """
+        find first SalesRep.
+        if SalesRep.MonthQuota[1] entered then do:
+          //
+        end.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 3);
@@ -940,7 +1229,13 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testElvis01() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "elvis01.p"), session);
+    String code = """
+        def var xx as Progress.Lang.Object.
+        xx = new Progress.Lang.Object().
+        message xx?:toString().
+        message xx?:previous-sibling.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 4);
@@ -954,7 +1249,12 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testElvis02() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "elvis02.p"), session);
+    String code = """
+        for each customer where customer.name eq ?:
+          display customer.
+        end.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 2);
@@ -982,7 +1282,20 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testAccumulateSum01() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "accumulate01.p"), session);
+    String code = """
+        // SUM and TOTAL are identical
+
+        FOR EACH Customer NO-LOCK BREAK BY state:
+          ACCUMULATE Customer.CreditLimit (TOTAL BY state).
+          DISPLAY state  SKIP "Total: " ACCUM TOTAL Customer.CreditLimit.
+        END.
+
+        FOR EACH Customer NO-LOCK BREAK BY state:
+          ACCUMULATE Customer.CreditLimit (SUM BY state).
+          DISPLAY state  SKIP "Sum: " ACCUM SUM Customer.CreditLimit.
+        END.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 6);
@@ -994,7 +1307,13 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testAccumulateSum02() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "accumulate02.p"), session);
+    String code = """
+        FOR EACH Customer NO-LOCK BREAK BY state:
+          accumulate Customer.CreditLimit (TOTAL max avg BY state).
+          display accum avg Customer.CreditLimit.
+        END.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 3);
@@ -1002,38 +1321,95 @@ public class ParserTest extends AbstractProparseTest {
     assertEquals(node1.getFirstChild().getNodeType(), ABLNodeType.AVG);
   }
 
-  public void testAggregate(String name, int statements) {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, name), session);
+  @Test
+  public void testAggregate01() {
+    String code = """
+        VAR INTEGER numCustomers.
+
+        AGGREGATE numCustomers = COUNT(CustNum) FOR Customer.
+        AGGREGATE numCustomers = COUNT(Customer.CustNum) FOR Customer.
+        AGGREGATE numCustomers = COUNT(sp2k.customer.CustNum) FOR Customer.
+
+        MESSAGE "Number of customers: " numCustomers
+          VIEW-AS ALERT-BOX.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
-    assertEquals(unit.getTopNode().queryStateHead().size(), statements);
+    assertEquals(unit.getTopNode().queryStateHead().size(), 5);
     JPNode node1 = unit.getTopNode().query(ABLNodeType.AGGREGATE).get(0);
     assertNotNull(node1);
   }
 
   @Test
-  public void testAggregate01() {
-    testAggregate("aggregate01.p", 5);
-  }
-
-  @Test
   public void testAggregate02() {
-    testAggregate("aggregate02.p", 3);
+    String code = """
+        VAR INTEGER numCustomers.
+
+        AGGREGATE numCustomers = Count(CustNum) FOR Customer
+          WHERE Country EQ 'USA' AND City EQ 'Boston'.
+
+        MESSAGE "Number of customers: " numCustomers
+          VIEW-AS ALERT-BOX.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 3);
+    JPNode node1 = unit.getTopNode().query(ABLNodeType.AGGREGATE).get(0);
+    assertNotNull(node1);
   }
 
   @Test
   public void testAggregate03() {
-    testAggregate("aggregate03.p", 3);
+    String code = """
+        VAR DECIMAL avgBalance.
+
+        AGGREGATE avgBalance = AVERAGE(Balance) FOR Customer
+          WHERE Country EQ 'USA' AND City EQ 'Chicago'.
+
+        MESSAGE "Average balance: " avgBalance
+          VIEW-AS ALERT-BOX.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 3);
+    JPNode node1 = unit.getTopNode().query(ABLNodeType.AGGREGATE).get(0);
+    assertNotNull(node1);
   }
 
   @Test
   public void testAggregate04() {
-    testAggregate("aggregate04.p", 3);
+    String code = """
+        VAR DECIMAL totalBalance.
+
+        AGGREGATE totalBalance = TOTAL(Balance) FOR Customer
+          WHERE Country EQ 'USA' AND City EQ 'Los Angeles'.
+
+        MESSAGE "Total balance: " totalBalance
+          VIEW-AS ALERT-BOX.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead().size(), 3);
+    JPNode node1 = unit.getTopNode().query(ABLNodeType.AGGREGATE).get(0);
+    assertNotNull(node1);
   }
 
   @Test
   public void testInClassStatement() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "FormStmtInClass.cls"), session);
+    String code = """
+        class package.FormStmtInClass:
+          def var cc as char.
+          form header cc.
+          constructor FormStmtInClass():
+            // do something
+          end constructor.
+        end class.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 4);
@@ -1044,7 +1420,22 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test(enabled = false)
   public void testDotComment01() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "comHandle01.p"), session);
+    String code = """
+        define variable hExcel as com-handle.
+        define variable hWorkbook as com-handle.
+        define variable hWorksheet as com-handle.
+
+        create "Excel.Application" hExcel.
+        hExcel:visible = yes.
+        hWorkbook = hExcel:Workbooks:Add().
+        hWorkSheet = hExcel:WorkSheets(1).
+        hExcel:Worksheets(1):Cells(1, 1)  = "XXX".
+        .hExcel:Worksheets(1):Cells(1, 2) = "YYY".
+        hExcel:Worksheets(1):Cells(1, 3)  = "ZZZ".
+        .hExcel:Application:Workbooks:close() no-error.
+        release object hExcel.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 10);
@@ -1052,7 +1443,16 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testVarName() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "var_name01.p"), session);
+    String code = """
+        define temp-table tt1 no-undo
+          field fld1 as integer
+          field var  as charater
+          index idx1 is primary unique fld1.
+
+        define variable var as char no-undo.
+        var = 'abc'.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
 
     // Temp-table tt1 should be there
@@ -1073,7 +1473,11 @@ public class ParserTest extends AbstractProparseTest {
     // This procedure doesn't compile, but Proparse still accepts it. Not particularly correct,
     // but that won't be fixed for now. In order to be aware of this behavior, we keep this unit test.
     // The Regex ID is considered a field buffer (abbreviated) pointing to a DB table
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "require.p"), session);
+    String code = """
+        using System.Text.RegularExpressions.Regex from assembly.
+        message Regex:Escape("test").
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 2);
@@ -1088,8 +1492,12 @@ public class ParserTest extends AbstractProparseTest {
     // This procedure doesn't compile, but Proparse still accepts it. Not particularly correct,
     // but that won't be fixed for now. In order to be aware of this behavior, we keep this unit test.
     // The Regex ID is considered a field buffer (abbreviated) pointing to a DB table
+    String code = """
+        using System.Text.RegularExpressions.Regex from assembly.
+        message Regex:Escape("test").
+        """;
     ((ProparseSettings) session.getProparseSettings()).setRequireFullName(true);
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "require.p"), session);
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 2);
@@ -1100,7 +1508,11 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testRequire02() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "require02.p"), session);
+    String code = """
+        find first custom.
+        display custom.addre.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 2);
@@ -1111,8 +1523,12 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testRequire02Bis() {
+    String code = """
+        find first custom.
+        display custom.addre.
+        """;
     ((ProparseSettings) session.getProparseSettings()).setRequireFullName(true);
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "require02.p"), session);
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 2);
@@ -1123,7 +1539,13 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testTempTableWithLabel() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "ttwithlabel.p"), session);
+    String code = """
+        define temp-table tt1 label "lbl1"
+          field id as int
+          index ix is unique id.
+        define temp-table tt2 like tt1 label 'xyz'.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().queryStateHead().size(), 2);
@@ -1138,7 +1560,19 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testPublishFrom() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "publishFrom.cls"), session);
+    String code = """
+        class package.publishFrom:
+
+          method void test01():
+            define variable hp as handle no-undo.
+            // Ensure that the from option is just "hp" and not "hp(?)"
+            // (?) has to be the parameter of the publish statement
+            publish 'xxx' from hp ( ? ).
+          end method.
+
+        end class.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().query(ABLNodeType.PUBLISH).size(), 1);
@@ -1217,7 +1651,18 @@ public class ParserTest extends AbstractProparseTest {
 
   @Test
   public void testEventScope() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "eventScope.cls"), session);
+    String code = """
+        class TooManyParams:
+
+          define public event event01 signature void ( input sender as Progress.Lang.Object, input e as Progress.Lang.Object ).
+          define public event event02 signature void ( input sender as Progress.Lang.Object, input e as Progress.Lang.Object ).
+          define public event event03 signature void ( input sender as Progress.Lang.Object, input e as Progress.Lang.Object, input xyz as int ).
+
+          define public property prop01 as integer get. set.
+
+        end class.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertEquals(unit.getRootScope().getRoutine().getParameters().size(), 0);
     assertEquals(unit.getRootScope().getVariables().size(), 1);

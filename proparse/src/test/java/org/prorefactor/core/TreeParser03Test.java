@@ -22,7 +22,6 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -87,7 +86,22 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test01() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test01.p"), session);
+    var code = """
+        /* Check that the order of creation of symbols is OK.
+         * At one point, the new symbol was being added before the end
+         * of the statement, and the LIKE was referring to itself, so
+         * the datatype was not getting set, and an assertion was thrown.
+         */
+        def var redundant as integer.
+        procedure redundantProcedure:
+          def var redundant like redundant.
+        end.
+        def var redundant2 as Progress.Lang.Object.
+        def var redundant3 like redundant2.
+        def var redundant4 as Object.
+        def var redundant5 like redundant4.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -99,7 +113,16 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test02() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test02.p"), session);
+    var code = """
+        /* Check that an INPUT field can be referenced immediately after it's
+         * declared, for example, in a VALIDATE phrase.
+         */
+        display
+           "Hello" @ customer.name
+             validate(input customer.name = "world!", "Must be world!")
+           .
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -111,7 +134,14 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test03() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test03.p"), session);
+    var code = """
+        define temp-table myTT no-undo
+         field fld1 as character
+         index idx1 is primary unique fld1.
+        define temp-table myTT2 no-undo like myTT use-index fld1.
+        define temp-table myTT3 no-undo like myTT use-index idx1.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -140,7 +170,14 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test04() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test04.cls"), session);
+    var code = """
+        class test04:
+          define private variable xx as int.
+          define protected static variable yy as int.
+          define public non-serializable variable zz as int.
+        end class.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -159,7 +196,68 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test05() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test05.p"), session);
+    var code = """
+        function f1 returns int (a as int) forwards.
+        function f2 returns int (a as int, b as int) forwards.
+        function f3 returns int (a as int) forwards.
+        function f4 returns int () forwards.
+
+        // Renaming first parameter
+        function f1 returns int (zz as int):
+          display zz.
+        end function.
+
+        // Renaming second parameter
+        function f2 returns int (a as int, zz as int):
+          display zz.
+        end function.
+
+        // No parameter here, so it inherits from FORWARDS definition
+        function f3 returns int ():
+          display a.
+        end function.
+
+        // No parameter at all
+        function f4 returns int ():
+
+        end function.
+
+        // Brackets are optional
+        function f5 returns int:
+
+        end function.
+
+        define temp-table tt1 field fld1 as char.
+        define dataset ds1 for tt1.
+        function f6 returns int(input-output dataset ds1):
+
+        end function.
+
+        function f7 returns int(input-output xx as decimal):
+
+        end function.
+
+        function f8 returns int(output xx as decimal):
+
+        end function.
+
+        message "Hello world!".
+
+        define temp-table ttCustomer no-undo like customer.
+        define dataset ds1 for ttCustomer.
+        function f9 returns int
+            ( prm1 like customer.custnum,
+              input table ttCustomer,
+              output table-handle h1,
+              input dataset ds1,
+              input dataset-handle h2 ) forwards.
+
+        // Inherits from FORWARDS declaration
+        function f9 returns int ():
+          return 1.
+        end function.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -280,7 +378,12 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test06() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test06.p"), session);
+    var code = """
+        repeat with frame f1:
+          message "xx".
+        end.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -293,7 +396,18 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test07() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test07.cls"), session);
+    var code = """
+        CLASS cls01:
+
+           DEFINE PUBLIC PROPERTY cNextSalesRepName AS CHARACTER
+            GET ():
+              RETURN cNextSalesRepName.
+            END GET.
+            PRIVATE SET.
+
+        END CLASS.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -307,7 +421,14 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test08() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test08.p"), session);
+    var code = """
+        on assign of customer.custnum old value xx as int
+        do:
+          message xx.
+          return.
+        end.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -323,7 +444,10 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test09() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test09.p"), session);
+    var code = """
+        trigger procedure for assign new value xxx as character initial 'zzz' old value xxx2 initial 'zzz2'.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -352,7 +476,16 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test11() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test11.cls"), session);
+    var code = """
+        class cls11:
+
+          method public void foo1(output ipPrm like customer.custnum):
+            return.
+          end method.
+
+        end class.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -382,7 +515,36 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test12() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test12.cls"), session);
+    var code = """
+        class cls12:
+
+          method public cls12 foo1():
+            message "xxx".
+            return.
+          end method.
+
+          method public Progress.Lang.Object foo2():
+            message "xxx".
+            return.
+          end method.
+
+          method public int foo3():
+            message "xxx".
+            return.
+          end method.
+
+          method public ch foo4():
+            message "xxx".
+            return.
+          end method.
+
+          define public event NewCustomer1 signature void ( input pcCustName as character ).
+          define public event NewCustomer2 signature void ( input pcCustName as character ).
+          define private event NewCustomer3 void ( input pcCustName as character ).
+
+        end class.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -422,7 +584,14 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test13() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test13.p"), session);
+    var code = """
+        define variable xxx as char no-undo.
+        define variable yyy as char no-undo.
+        define variable lb as longchar.
+        copy-lob from lb to filename xxx.
+        copy-lob from lb to yyy.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -440,7 +609,14 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test14() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test14.p"), session);
+    var code = """
+        define variable xxx as character initial "Hello".
+        overlay(xxx, 1, 3) = "foo".
+        substring(xxx, 1, 3) = "foo".
+        entry(1, xxx) = "foo".
+        message xxx.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -455,7 +631,18 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test15() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test15.p"), session);
+    var code = """
+        define variable v1 as character.
+
+        function Dummy return character (input p1 as character) forward.
+
+        define variable v2 as character.
+
+        function Dummy return character (input p1 as character):
+          return "".
+        end function.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -476,7 +663,22 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test16() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test16.cls"), session);
+    var code = """
+        CLASS test16:
+
+            DEFINE VARIABLE hInstance AS HANDLE NO-UNDO.
+
+            // Variable picVariable is visible in the root symbol scope !!!
+            // Should not be attached there...
+            FUNCTION Dummy RETURN LOGICAL (INPUT picVariable AS CHARACTER) IN hInstance.
+
+            METHOD PUBLIC VOID DoIt(INPUT picVariable AS CHARACTER):
+                MESSAGE picVariable.
+            END METHOD.
+
+        END CLASS.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -507,7 +709,23 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test17() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test17.p"), session);
+    var code = """
+        DEFINE VARIABLE hMenuItem AS HANDLE NO-UNDO.
+
+        CREATE MENU-ITEM hMenuItem
+          ASSIGN LABEL  = "XXX".
+
+        DEFINE VARIABLE hQuery  AS HANDLE NO-UNDO.
+        DEFINE VARIABLE hbCust  AS HANDLE NO-UNDO.
+
+        OPEN QUERY hQuery FOR EACH customer NO-LOCK WHERE customer.balance = 0.
+        CREATE BROWSE hbCust
+           ASSIGN QUERY = QUERY hQuery:HANDLE.
+
+        DEFINE VARIABLE hSock AS HANDLE NO-UNDO.
+        CREATE SOCKET hSock.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -532,7 +750,22 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test18() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test18.p"), session);
+    var code = """
+        using Progress.Lang.Object.
+        define input parameter prm1 as integer.
+        define input parameter prm2 as integer initial 0 no-undo.
+        define input parameter prm3 as int.
+        define input parameter prm4 as int initial 0 no-undo.
+        define input parameter prm5 as in initial 0 no-undo. // That works too...
+        define input parameter prm6 as char.
+        define input parameter prm7 as longchar.
+        // Shouldn't appear here, but just for tests...
+        define input parameter prm8 as handle to unsigned-short.
+        define input parameter prm9 as class Progress.Lang.Object.
+        define input parameter prm10 as Progress.Lang.Object no-undo.
+        define input parameter prm11 as Object no-undo.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -569,7 +802,17 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test19() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test19.p"), session);
+    var code = """
+        // REFUP qualifier should be applied to xxx1
+        def var xxx1 as logical no-undo.
+        run bar.p asynchronous event-procedure "bar" (output xxx1).
+
+        procedure bar:
+           define input parameter xxx as logical no-undo.
+           message xxx.
+        end procedure.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -584,7 +827,19 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test20() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test20.p"), session);
+    var code = """
+        /* hello.p
+         * Do not change this file.
+         * It is used within multiple tests.
+         */
+
+        DO:
+          DISPLAY "Hello world!".
+        END.
+
+        RETURN.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().query(ABLNodeType.DISPLAY).size(), 1);
@@ -594,7 +849,71 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test21() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test21.p"), session);
+    var code = """
+        {&_proparse_ prolint-nowarn(noundo)}
+        DEFINE VARIABLE myInt AS INTEGER.
+
+        PROCEDURE myProc1:
+          DEFINE INPUT PARAMETER p1 AS LOGICAL.
+        END.
+
+        PROCEDURE myProc2 EXTERNAL "whatever.dll":
+          DEFINE INPUT PARAMETER p2 AS LONG.
+        END.
+
+
+        /* Test for  U N D O  statement. */
+        DEFINE VARIABLE myChar AS CHARACTER.
+        DEFINE VARIABLE myChar2 AS CHARACTER.
+        DEFINE VARIABLE myChar3 AS CHARACTER.
+        DO:
+          myChar3 = "".
+          DO:
+            myChar = "".
+            UNDO, LEAVE.
+            myChar2 = "".
+          END.
+        END.
+
+
+        /* U N D O  statement tests for named block and OUTPUT val */
+        DEFINE VARIABLE myChar10 AS CHARACTER.
+        DEFINE VARIABLE myChar11 AS CHARACTER.
+        my-block:
+        DO:
+          RUN changeVal(OUTPUT myChar10).
+          DO:
+            RUN changeVal(OUTPUT myChar11).
+            UNDO my-block, LEAVE.
+          END.
+        END.
+
+        PROCEDURE changeVal:
+          DEFINE OUTPUT PARAMETER changed AS CHARACTER.
+        END.
+
+
+        /* This should remain UNDO */
+        DEFINE VARIABLE c1 AS CHARACTER.
+
+        /* This var should be UNDO           */
+        /* with this two line comment.       */
+        DEFINE VARIABLE c2 AS CHARACTER.
+
+        DEFINE /* UNDOable */ VARIABLE c3 AS CHARACTER.
+
+        DEFINE VARIABLE c4 AS CHARACTER. /* not no-undo */
+
+        /* This comment does not change UNDO for the next define,
+           because of the blank line between the comment and the statement.
+        */
+
+        DEFINE VARIABLE c5 AS CHARACTER.
+
+        DEFINE VARIABLE c6 AS CHARACTER.
+        /* Comment on line after does not change UNDO for previous statement. */
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     JPNode node = unit.getTopNode().findDirectChild(ABLNodeType.DEFINE);
@@ -607,7 +926,18 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test22() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test22.cls"), session);
+    var code = """
+        class test22:
+          define private property yyy as Progress.Lang.Object get. set.
+
+          constructor test22():
+            this-object:yyy = new Progress.Lang.Object().
+            this-object:yyy:toString().
+          end constructor.
+
+        end class.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -624,7 +954,24 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test23() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test23.cls"), session);
+    var code = """
+        class test23:
+          define private property xxx as Progress.Lang.Object get. set.
+          define variable yyy as Progress.Lang.Object no-undo.
+
+          method public void foo(xxx as Progress.Lang.Object):
+            this-object:xxx = new Progress.Lang.Object().
+            xxx = new Progress.Lang.Object().
+          end method.
+
+          method public void bar(poData as Progress.Lang.Object, cValue as character):
+            this-object:yyy = poData.
+            this-object:yyy:SomeProp = cValue.
+          end method.
+
+        end class.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -673,7 +1020,18 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test24() {
-    var unit = getParseUnit(new File("src/test/resources/treeparser03/test24.cls"), session);
+    var code = """
+        class test23:
+          define private variable xxx as System.Windows.Forms.SaveFileDialog no-undo.
+
+          method public void foo():
+            define variable oDialogResult as DialogResult no-undo.
+            wait-for this-object:xxx:ShowDialog () set oDialogResult .
+          end method.
+
+        end class.
+        """;
+    var unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -1151,7 +1509,17 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void testParameterAs() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test25.p"), session);
+    var code = """
+        define variable x1 as integer.
+        define variable x2 as integer.
+        define variable x3 as integer.
+        define variable x4 as integer.
+        define variable x5 as integer.
+        define variable x6 as integer.
+
+        System.Math:Max(input x1 * x2 as unsigned-byte, output x3 + x4 as unsigned-byte, input-output x5 / x6).
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -1193,7 +1561,14 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void testAssignmentList() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test26.p"), session);
+    var code = """
+        define temp-table tt1 field x1 as int field x2 as int.
+
+        prompt-for tt1.x1.
+        create tt1.
+        assign tt1 except x2.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -1203,7 +1578,27 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void testBufferCompare() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test27.p"), session);
+    var code = """
+        define temp-table tt1
+          field x1 as int
+          field x2 as int.
+        define buffer b1 for tt1.
+        define buffer b2 for tt1.
+        define buffer b3 for tt1 fields x1.
+        define variable logVar as logical no-undo.
+        find first b1.
+        find last b2.
+        buffer-compare b1 except b1.x2 to b2 save result in logVar.
+        buffer-compare b1 using b1.x2 to b2.
+        buffer-copy b1 except b1.x2 to b2.
+        buffer-copy b1 using b1.x2 to b2.
+        raw-transfer b1 to b2.
+        raw-transfer buffer b1 to buffer b2.
+        define variable xraw as raw.
+        raw-transfer b1 to xraw.
+        raw-transfer b1 to field xraw.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -1218,7 +1613,17 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void testChoose() {
-    var unit = getParseUnit(new File("src/test/resources/treeparser03/test28.p"), session);
+    var code = """
+        FORM "Title" WITH FRAME frm1.
+        DEFINE VARIABLE menu AS CHARACTER NO-UNDO EXTENT 4 FORMAT "x(7)" INITIAL [ "AAA", "BBB", "CCC", "DDD" ].
+        REPEAT:
+          VIEW FRAME frm1.
+          DISPLAY menu WITH FRAME f-menu CENTERED.
+          HIDE MESSAGE.
+          CHOOSE FIELD menu GO-ON (F5) AUTO-RETURN WITH FRAME f-menu.
+        END.
+        """;
+    var unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -1233,7 +1638,12 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void testLexAt() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test29.p"), session);
+    var code = """
+        DEFINE VARIABLE x1 AS CHARACTER   NO-UNDO VIEW-AS FILL-IN.
+        DEFINE VARIABLE x2 AS CHARACTER   NO-UNDO VIEW-AS FILL-IN.
+        DISPLAY x1 @ x2.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -1255,7 +1665,14 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void testDefBrowseDisplay() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test30.p"), session);
+    var code = """
+        DEFINE TEMP-TABLE tt1 FIELD fld1 AS INT FIELD fld2 AS INT FIELD fld3 AS CHAR EXTENT 10.
+        DEFINE QUERY q1 FOR tt1.
+        DEFINE BROWSE b1 QUERY q1 DISPLAY tt1.fld1 ENABLE tt1.fld1 WITH 10 DOWN.
+        DEFINE QUERY q2 FOR tt1.
+        DEFINE BROWSE b2 QUERY q2 DISPLAY tt1 EXCEPT tt1.fld3[2 FOR 4] WITH 10 DOWN.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -1265,7 +1682,13 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void testParameters() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test31.p"), session);
+    var code = """
+        DEFINE INPUT  PARAMETER prm1 AS INTEGER     NO-UNDO.
+        DEFINE INPUT  PARAMETER prm2 LIKE prm1 INITIAL 2.
+        DEFINE INPUT  PARAMETER TABLE-HANDLE prm3.
+        DEFINE INPUT  PARAMETER DATASET-HANDLE prm4.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -1290,7 +1713,33 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void testEntered() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test32.p"), session);
+    var code = """
+        DEFINE TEMP-TABLE tt1
+          FIELD fld1 AS CHAR
+          FIELD fld2 AS CHAR
+          FIELD fld3 AS CHAR.
+
+        DEFINE VARIABLE new-max NO-UNDO LIKE tt1.fld3.
+
+        FOR EACH tt1:
+          DISPLAY tt1.fld1 tt1.fld2 tt1.fld3
+            LABEL "Current credit limit"
+            WITH FRAME a 1 DOWN ROW 1.
+          SET new-max LABEL "New credit limit"
+            WITH SIDE-LABELS NO-BOX ROW 10 FRAME b.
+          IF new-max ENTERED THEN DO:
+            IF new-max <> tt1.fld3 THEN DO:
+              DISPLAY "Changing Credit Limit of" tt1.fld1 SKIP
+                "from" tt1.fld3 "to" new-max
+                WITH FRAME c ROW 15 NO-LABELS.
+              tt1.fld3 = new-max.
+              NEXT.
+            END.
+          END.
+          DISPLAY "No Change In Credit Limit" WITH FRAME d ROW 15.
+        END.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -1307,7 +1756,13 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void testImgLike() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test33.p"), session);
+    var code = """
+        DEFINE IMAGE img01 FILE "xxx.bmp".
+        DEFINE IMAGE img02 LIKE img01.
+        DEFINE RECTANGLE rect01 SIZE .4 BY 5 EDGE-PIXELS 2.
+        DEFINE RECTANGLE rect02 LIKE rect01.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -1341,7 +1796,36 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void testImportExport() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test34.p"), session);
+    var code = """
+        define temp-table tt1
+         field fld1 as char
+         field fld2 as char
+         field fld3 as char
+         field fld4 as char extent 2.
+        def var xx as char.
+
+        create tt1.
+        import tt1.
+        import tt1 except fld3.
+        import tt1.fld1 tt1.fld2 tt1.fld4[1].
+        export tt1 except fld2.
+
+        form tt1.fld1 colon 10 tt1.fld2 colon 50 with side-labels 1 down centered.
+        form tt1 except tt1.fld1.
+
+        insert tt1.
+        insert tt1 except fld2.
+
+        prompt-for tt1.
+        prompt-for tt1 except fld2.
+
+        set tt1.
+        set tt1 except fld2.
+
+        update tt1.
+        update tt1 except fld2.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -1351,7 +1835,20 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void testExternalDataTypes() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test35.p"), session);
+    var code = """
+        procedure p1 external "kernel32.dll":
+          define input parameter prm1 as blob.
+          define input parameter prm2 as clob.
+          define input parameter prm3 as byte.
+          define input parameter prm4 as short.
+          define input parameter prm5 as float.
+          define input parameter prm6 as double.
+          define input parameter prm7 as unsigned-short.
+          define input parameter prm8 as unsigned-byte.
+          define input parameter prm9 as unsigned-integer.
+        end procedure.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -1373,7 +1870,14 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void testSuper01() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test36.p"), session);
+    var code = """
+        DEFINE VARIABLE lcFoo AS CHARACTER  NO-UNDO.
+        assign lcFoo = super().
+        assign lcFoo = super(1).
+        assign lcFoo = super(1, 2, 'abc').
+        message super.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -1389,7 +1893,25 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void testSuper02() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test36.cls"), session);
+    var code = """
+        class rssw.Test36:
+
+          constructor Test36():
+            super().
+          end constructor.
+
+          constructor Test36(xx as int):
+            super(xx).
+          end constructor.
+
+          method public void method1():
+            define variable lcFoo as character no-undo.
+            assign lcFoo = super:method1().
+          end method.
+
+        end class.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -1412,7 +1934,33 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void testThisObject01() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test37.cls"), session);
+    var code = """
+        class rssw.Test37:
+
+          constructor Test37():
+            this-object(1).
+          end constructor.
+
+          constructor Test37(xx as int):
+            this-object(xx, 2).
+          end constructor.
+
+          constructor Test37(xx as int, yy as int):
+            super(xx, yy).
+          end constructor.
+
+          method public void method1():
+            define variable lcFoo as character no-undo.
+            assign lcFoo = this-object:method2().
+          end method.
+
+          method public void method2():
+            // Nothing here
+          end method.
+
+        end class.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -1435,7 +1983,19 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void testTempTableNoUndo01() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test38.p"), session);
+    var code = """
+        DEFINE TEMP-TABLE tta FIELD i AS INTEGER.
+        DEFINE TEMP-TABLE ttb UNDO FIELD i AS INTEGER.
+        DEFINE TEMP-TABLE ttc NO-UNDO FIELD i AS INTEGER.
+
+        DEFINE TEMP-TABLE ttd LIKE tta.
+        DEFINE TEMP-TABLE tte LIKE ttb.
+        DEFINE TEMP-TABLE ttf LIKE ttc.
+
+        DEFINE TEMP-TABLE ttg NO-UNDO LIKE tta.
+        DEFINE TEMP-TABLE tth UNDO LIKE ttc.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -1469,7 +2029,29 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void testTTAsParameter() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test39.p"), session);
+    var code = """
+        define temp-table tt1 no-undo field fld1 as char field fld2 as int.
+        define temp-table tt2 like tt1.
+        procedure p1:
+          define input parameter table for tt1.
+          define output parameter table for tt2.
+        end.
+        function f1 returns integer (input table for tt1):
+
+        end.
+
+        define dataset ds1 for tt1.
+        function f2 returns integer
+           (i1 as int,
+            i2 like customer.custnum,
+            table tt1,
+            table-handle h1,
+            dataset ds1,
+            dataset-handle h2):
+
+        end function.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -1537,7 +2119,16 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test40() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test40.p"), session);
+    var code = """
+        define temp-table tt1 field fld1 as datetime.
+        define variable zz3 as date.
+        define stream s1.
+        define frame f1 xx like tt1.fld1.
+        update yy as integer.
+        display zz as decimal.
+        display zz2 like zz.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -1560,7 +2151,16 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test41() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test41.p"), session);
+    var code = """
+        VAR INTEGER numCustomers.
+
+        AGGREGATE numCustomers = COUNT(CustNum) FOR Customer.
+        AGGREGATE numCustomers = TOTAL(Customer.CustNum) FOR Customer.
+        AGGREGATE numCustomers = AVERAGE(sp2k.customer.CustNum) FOR Customer.
+
+        MESSAGE "Number of customers: " numCustomers VIEW-AS ALERT-BOX.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -1589,7 +2189,13 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test42() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test42.p"), session);
+    var code = """
+        define query qry for customer.
+        open query qry for each customer.
+        get first qry. // Missing lock as it's not specified in the open query statement
+        get next qry. // Ditto
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -1654,7 +2260,20 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void testArrayRefInFrame() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/arrayRefInFrame.p"), session);
+    var code = """
+        define variable a1 as char extent 1.
+        define variable b1 as char.
+        define variable a2 as char extent 1.
+        define variable b2 as char.
+
+        form a1[1] b1 with frame det.
+        display
+           "a" @ a1[1]
+           "b" @ b1.
+        message
+           a2 b2.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
@@ -1722,7 +2341,28 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test43() {
-    var unit = getParseUnit(new File("src/test/resources/treeparser03/test43.cls"), session);
+    var code = """
+        class test43:
+
+          method public void foo1(output ipPrm like customer.custnum):
+            return.
+          end method.
+
+          method public int foo2():
+            return 0.
+          end method.
+
+          method public int foo2(input xx as int):
+            return 0.
+          end method.
+
+          method public int foo2(input xx as int, input yy as char):
+            return 0.
+          end method.
+
+        end class.
+        """;
+    var unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertNotNull(unit.getTopNode());
@@ -1740,7 +2380,14 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test44() {
-    var unit = getParseUnit(new File("src/test/resources/treeparser03/test44.p"), session);
+    var code = """
+        def var v1 as integer.
+
+        procedure foo1:
+          def var v2 as character.
+        end.
+        """;
+    var unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertNotNull(unit.getTopNode());
@@ -2048,7 +2695,26 @@ public class TreeParser03Test extends AbstractProparseTest {
 
   @Test
   public void test45() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/treeparser03/test45.p"), session);
+    var code = """
+        DEFINE TEMP-TABLE tt1 FIELD fld1 AS INT FIELD fld2 AS INT FIELD fld3 AS CHAR EXTENT 10.
+        DEFINE QUERY q1 FOR tt1.
+        DEFINE BROWSE b1 QUERY q1 DISPLAY tt1.fld1 ENABLE tt1.fld1 WITH 10 DOWN.
+
+        DEFINE FRAME f1 b1
+          WITH SIDE-LABELS AT ROW 2 COLUMN 2.
+
+        DEFINE STREAM sin.
+        DEFINE BUFFER buf1 FOR tt1.
+
+
+        APPLY "VALUE-CHANGED" TO BROWSE b1.
+        APPLY "VALUE-CHANGED" TO QUERY q1.
+        APPLY "VALUE-CHANGED" TO TEMP-TABLE tt1.
+        APPLY "VALUE-CHANGED" TO FRAME f1.
+        APPLY "VALUE-CHANGED" TO STREAM sin.
+        APPLY "VALUE-CHANGED" TO BUFFER buf1.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
