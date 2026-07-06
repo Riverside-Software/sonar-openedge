@@ -15,31 +15,15 @@
  ********************************************************************************/
 package org.prorefactor.core.schema;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class Index implements IIndex {
-  private final ITable table;
+public class IndexField implements IIndexField {
+  private final IIndex index;
   private final String name;
-  private final boolean unique;
-  private final boolean primary;
+  private final boolean ascending;
 
-  private final List<IIndexField> fields = new ArrayList<>();
-  
-  public Index(ITable table, String name, boolean unique, boolean primary) {
-    this.table = table;
+  public IndexField(IIndex index, String name, boolean ascending) {
+    this.index = index;
     this.name = name;
-    this.unique = unique;
-    this.primary = primary;
-  }
-
-  public void addField(IIndexField field) {
-    fields.add(field);
-  }
-
-  @Override
-  public ITable getTable() {
-    return table;
+    this.ascending= ascending;
   }
 
   @Override
@@ -48,17 +32,13 @@ public class Index implements IIndex {
   }
 
   @Override
-  public boolean isUnique() {
-    return unique;
+  public IIndex getIndex() {
+    return index;
   }
 
   @Override
-  public boolean isPrimary() {
-    return primary;
+  public boolean isAscending() {
+    return ascending;
   }
 
-  @Override
-  public List<IIndexField> getFields() {
-    return fields;
-  }
 }

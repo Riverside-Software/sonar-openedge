@@ -75,7 +75,7 @@ public class MetaSchemaProvider {
           throw new IOException("Invalid file format: " + line);
         var i = new Index(currTable, lst.get(0).substring(1), lst.get(1).indexOf('U') > -1, lst.get(1).indexOf('P') > -1);
         for (int zz = 2; zz < lst.size(); zz++) {
-          i.addField(currTable.lookupField(lst.get(zz).substring(1)));
+          i.addField(new IndexField(i, lst.get(zz).substring(1), lst.get(zz).charAt(0) == 'A'));
         }
         currTable.add(i);
       }

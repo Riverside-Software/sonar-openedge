@@ -15,9 +15,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.IIndex;
+import org.prorefactor.core.schema.IIndexField;
 import org.prorefactor.core.schema.ITable;
+import org.prorefactor.core.schema.IndexField;
 
 import eu.rssw.pct.elements.IIndexComponentElement;
 import eu.rssw.pct.elements.IIndexElement;
@@ -25,13 +26,13 @@ import eu.rssw.pct.elements.IIndexElement;
 public class RCodeTTIndexWrapper implements IIndex {
   private final ITable table;
   private final IIndexElement index;
-  private final List<IField> fields = new ArrayList<>();
+  private final List<IIndexField> fields = new ArrayList<>();
 
   public RCodeTTIndexWrapper(ITable table, IIndexElement index) {
     this.table = Objects.requireNonNull(table);
     this.index = Objects.requireNonNull(index);
     for (IIndexComponentElement fld : index.getIndexComponents()) {
-      fields.add(table.getFieldPosOrder().get(fld.getFieldPosition()));
+      fields.add(new IndexField(this, fld.getName(), fld.isAscending()));
     }
   }
 
@@ -60,7 +61,7 @@ public class RCodeTTIndexWrapper implements IIndex {
   }
 
   @Override
-  public List<IField> getFields() {
+  public List<IIndexField> getFields() {
     return Collections.unmodifiableList(fields);
   }
 }

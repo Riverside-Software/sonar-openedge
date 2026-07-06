@@ -15,12 +15,8 @@
  ********************************************************************************/
 package org.prorefactor.core.schema;
 
-import java.util.List;
-
-public interface IIndex {
+public interface IIndexField {
   String getName();
-  ITable getTable();
-  boolean isUnique();
-  boolean isPrimary();
-  List<IIndexField> getFields();
+  IIndex getIndex();
+  boolean isAscending();
 }
