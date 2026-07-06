@@ -19,11 +19,11 @@
  */
 package org.sonar.plugins.openedge.api.objects;
 
+import java.util.Objects;
+
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.treeparser.Primitive;
-
-import com.google.common.base.Preconditions;
 
 import eu.rssw.antlr.database.objects.Field;
 import eu.rssw.pct.elements.DataType;
@@ -34,10 +34,8 @@ public class FieldWrapper implements IField {
   private final String lcName;
 
   public FieldWrapper(ITable table, Field field) {
-    Preconditions.checkNotNull(table);
-    Preconditions.checkNotNull(field);
-    this.table = table;
-    this.field = field;
+    this.table = Objects.requireNonNull(table);
+    this.field = Objects.requireNonNull(field);
     this.lcName = field.getName().toLowerCase();
   }
 

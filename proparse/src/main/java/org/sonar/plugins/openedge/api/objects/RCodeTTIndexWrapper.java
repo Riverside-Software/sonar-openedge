@@ -13,12 +13,11 @@ package org.sonar.plugins.openedge.api.objects;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.IIndex;
 import org.prorefactor.core.schema.ITable;
-
-import com.google.common.base.Preconditions;
 
 import eu.rssw.pct.elements.IIndexComponentElement;
 import eu.rssw.pct.elements.IIndexElement;
@@ -29,10 +28,8 @@ public class RCodeTTIndexWrapper implements IIndex {
   private final List<IField> fields = new ArrayList<>();
 
   public RCodeTTIndexWrapper(ITable table, IIndexElement index) {
-    Preconditions.checkNotNull(table);
-    Preconditions.checkNotNull(index);
-    this.table = table;
-    this.index = index;
+    this.table = Objects.requireNonNull(table);
+    this.index = Objects.requireNonNull(index);
     for (IIndexComponentElement fld : index.getIndexComponents()) {
       fields.add(table.getFieldPosOrder().get(fld.getFieldPosition()));
     }
