@@ -99,7 +99,7 @@
       <plugin>
         <groupId>org.sonarsource.sonar-packaging-maven-plugin</groupId>
         <artifactId>sonar-packaging-maven-plugin</artifactId>
-        <version>1.23.0.740</version>
+        <version>1.25.1.3002</version>
         <extensions>true</extensions>
         <configuration>
           <pluginKey>${sonar.pluginKey}</pluginKey>
@@ -122,7 +122,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.5.2</version>
+        <version>3.6.2</version>
         <configuration>
           <transformers>
             <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
