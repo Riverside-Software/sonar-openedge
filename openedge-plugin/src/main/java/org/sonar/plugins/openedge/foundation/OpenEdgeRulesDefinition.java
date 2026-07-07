@@ -22,7 +22,8 @@ package org.sonar.plugins.openedge.foundation;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
@@ -56,13 +57,16 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     this.runtime = runtime;
   }
 
+  @SuppressWarnings("rawtypes")
   @Override
   public void define(Context context) {
     var repository = context //
       .createRepository(Constants.STD_REPOSITORY_KEY, Constants.LANGUAGE_KEY) //
       .setName(REPOSITORY_NAME);
     var annotationLoader = new AnnotationBasedRulesDefinition(repository, Constants.LANGUAGE_KEY, runtime);
-    annotationLoader.addRuleClasses(false, Arrays.asList(BasicChecksRegistration.ppCheckClasses()));
+    List<Class> list = new ArrayList<>();
+    list.addAll(BasicChecksProvider.ppCheckClasses());
+    annotationLoader.addRuleClasses(false, list);
 
     if (runtime.getProduct() == SonarProduct.SONARQUBE) {
       try (var input = this.getClass().getResourceAsStream("/rules/compiler-warnings.json");
@@ -83,13 +87,14 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     }
     repository.done();
 
-    var repository2 = context //
+    var dbRepository = context //
       .createRepository(Constants.STD_DB_REPOSITORY_KEY, Constants.DB_LANGUAGE_KEY) //
       .setName(REPOSITORY_NAME);
-    var annotationLoader2 = new AnnotationBasedRulesDefinition(repository2, Constants.DB_LANGUAGE_KEY, runtime);
-    annotationLoader2.addRuleClasses(false, Arrays.asList(BasicChecksRegistration.dbCheckClasses()));
-
-    repository2.done();
+    var annotationLoader2 = new AnnotationBasedRulesDefinition(dbRepository, Constants.DB_LANGUAGE_KEY, runtime);
+    list = new ArrayList<>();
+    list.addAll(BasicChecksProvider.dbCheckClasses());
+    annotationLoader2.addRuleClasses(false, list);
+    dbRepository.done();
   }
 
   public static int[] getWarningMsgList() {
@@ -111,8 +116,7 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     setupDocumentation(rule, def.key);
     rule.setCleanCodeAttribute(Constants.lookupCleanCodeAttribute(def.cleanCodeAttribute));
     for (var impact : def.impacts) {
-      rule.addDefaultImpact(Constants.lookupSoftwareQuality(impact.quality),
-          Constants.lookupSeverity(impact.severity));
+      rule.addDefaultImpact(Constants.lookupSoftwareQuality(impact.quality), Constants.lookupSeverity(impact.severity));
     }
 
     return rule;
@@ -126,7 +130,7 @@ public class OpenEdgeRulesDefinition implements RulesDefinition {
     } catch (IOException caught) {
       rule.setHtmlDescription("<p>Invalid description</p>");
     }
-  } 
+  }
 
   private static final class RuleDefinition {
     String key;

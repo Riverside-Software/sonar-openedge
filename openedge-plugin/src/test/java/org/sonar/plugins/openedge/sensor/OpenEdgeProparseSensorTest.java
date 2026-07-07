@@ -21,11 +21,11 @@ package org.sonar.plugins.openedge.sensor;
 
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.BASEDIR;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.CLS_TESTCLASS;
+import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_INVALID;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_TEST1;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_TEST2;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_TEST3;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_TEST3_I;
-import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_INVALID;
 import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_TEST3_I1;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -39,6 +39,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.List;
 
 import org.prorefactor.refactor.settings.ProparseSettings.OperatingSystem;
 import org.sonar.api.batch.fs.InputFile.Type;
@@ -51,13 +52,14 @@ import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.measures.CoreMetrics;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.OpenEdgePluginTest;
-import org.sonar.plugins.openedge.api.CheckRegistration;
 import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck;
 import org.sonar.plugins.openedge.checks.ClumsySyntax;
 import org.sonar.plugins.openedge.checks.IntegerRule;
 import org.sonar.plugins.openedge.checks.LineNumberRule;
-import org.sonar.plugins.openedge.checks.TestChecksRegistration;
-import org.sonar.plugins.openedge.foundation.BasicChecksRegistration;
+import org.sonar.plugins.openedge.foundation.BasicChecksProvider;
+import org.sonar.plugins.openedge.foundation.CheckRegistrar;
+import org.sonar.plugins.openedge.foundation.LicenseRegistrar;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeMetrics;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
@@ -79,7 +81,7 @@ public class OpenEdgeProparseSensorTest {
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
+    OpenEdgeComponents components = new OpenEdgeComponents(context.config(), new CheckRegistrar(), new LicenseRegistrar());
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -105,7 +107,7 @@ public class OpenEdgeProparseSensorTest {
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
+    OpenEdgeComponents components = new OpenEdgeComponents(context.config(), new CheckRegistrar(), new LicenseRegistrar());
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -116,16 +118,21 @@ public class OpenEdgeProparseSensorTest {
 
   @Test
   public void testRules() throws Exception {
-    SensorContextTester context = TestProjectSensorContext.createContext();
-    ActiveRulesBuilder rulesBuilder = new ActiveRulesBuilder();
-    rulesBuilder.addRule(new NewActiveRule.Builder().setRuleKey(
-        RuleKey.of(Constants.STD_REPOSITORY_KEY, ClumsySyntax.class.getCanonicalName())).setLanguage(
-            Constants.LANGUAGE_KEY).build());
+    var context = TestProjectSensorContext.createContext();
+    var rulesBuilder = new ActiveRulesBuilder();
+    var activeRule = new NewActiveRule.Builder() //
+      .setRuleKey(RuleKey.of(Constants.STD_REPOSITORY_KEY, ClumsySyntax.class.getCanonicalName())) //
+      .setLanguage(Constants.LANGUAGE_KEY) //
+      .build();
+    rulesBuilder.addRule(activeRule);
     context.setActiveRules(rulesBuilder.build());
+
+    var licRegistrar = new LicenseRegistrar();
+    var checkRegistrar = new CheckRegistrar(new BasicChecksProvider());
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(),
-        new CheckRegistration[] {new BasicChecksRegistration()}, null);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), checkRegistrar,
+        licRegistrar);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -136,8 +143,7 @@ public class OpenEdgeProparseSensorTest {
   public void testComplexity() throws Exception {
     var context = TestProjectSensorContext.createContext();
     var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    var components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(),
-        new CheckRegistration[] {new TestChecksRegistration()}, null);
+    var components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), new CheckRegistrar(), new LicenseRegistrar());
     var sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -161,16 +167,27 @@ public class OpenEdgeProparseSensorTest {
 
   @Test
   public void testSonarQubeRule() throws Exception {
-    SensorContextTester context = TestProjectSensorContext.createContext();
-    ActiveRulesBuilder rulesBuilder = new ActiveRulesBuilder();
-    rulesBuilder.addRule(new NewActiveRule.Builder().setRuleKey(
-        RuleKey.of(Constants.STD_REPOSITORY_KEY, IntegerRule.class.getCanonicalName())).setLanguage(
-            Constants.LANGUAGE_KEY).build());
+    var context = TestProjectSensorContext.createContext();
+    var rulesBuilder = new ActiveRulesBuilder();
+    var activeRule = new NewActiveRule.Builder() //
+      .setRuleKey(RuleKey.of(Constants.STD_REPOSITORY_KEY, IntegerRule.class.getCanonicalName())) //
+      .setLanguage(Constants.LANGUAGE_KEY) //
+      .build();
+    rulesBuilder.addRule(activeRule);
     context.setActiveRules(rulesBuilder.build());
+
+    var licRegistrar = new LicenseRegistrar();
+    var checkRegistrar = new CheckRegistrar(new CheckRegistrar.CheckProvider() {
+      @SuppressWarnings("rawtypes")
+      public List<Class<? extends OpenEdgeCheck>> getChecks() {
+        return List.of(IntegerRule.class);
+      }
+    });
+
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(),
-        new CheckRegistration[] {new TestChecksRegistration()}, null);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), checkRegistrar,
+        licRegistrar);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -181,17 +198,28 @@ public class OpenEdgeProparseSensorTest {
 
   @Test
   public void testSonarLintRule() throws Exception {
-    SensorContextTester context = TestProjectSensorContext.createContext().setRuntime(
+    var context = TestProjectSensorContext.createContext().setRuntime(
         OpenEdgePluginTest.SONARLINT_RUNTIME);
-    ActiveRulesBuilder rulesBuilder = new ActiveRulesBuilder();
-    rulesBuilder.addRule(new NewActiveRule.Builder().setRuleKey(
-        RuleKey.of(Constants.STD_REPOSITORY_KEY, IntegerRule.class.getCanonicalName())).setLanguage(
-            Constants.LANGUAGE_KEY).build());
+    var rulesBuilder = new ActiveRulesBuilder();
+    var activeRule = new NewActiveRule.Builder() //
+      .setRuleKey(RuleKey.of(Constants.STD_REPOSITORY_KEY, IntegerRule.class.getCanonicalName())) //
+      .setLanguage(Constants.LANGUAGE_KEY) //
+      .build();
+    rulesBuilder.addRule(activeRule);
     context.setActiveRules(rulesBuilder.build());
+
+    var licRegistrar = new LicenseRegistrar();
+    var checkRegistrar = new CheckRegistrar(new CheckRegistrar.CheckProvider() {
+      @SuppressWarnings("rawtypes")
+      public List<Class<? extends OpenEdgeCheck>> getChecks() {
+        return List.of(IntegerRule.class);
+      }
+    });
+
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARLINT_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(),
-        new CheckRegistration[] {new TestChecksRegistration()}, null);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), checkRegistrar,
+        licRegistrar);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -203,7 +231,7 @@ public class OpenEdgeProparseSensorTest {
 
   @Test
   public void testNoIssueOnNonOEFiles() throws Exception {
-    SensorContextTester context = TestProjectSensorContext.createContext();
+    var context = TestProjectSensorContext.createContext();
     var rulesBuilder = new ActiveRulesBuilder();
     rulesBuilder.addRule(new NewActiveRule.Builder() //
       .setRuleKey(RuleKey.of(Constants.STD_REPOSITORY_KEY, LineNumberRule.class.getCanonicalName())) //
@@ -211,10 +239,19 @@ public class OpenEdgeProparseSensorTest {
       .setParam("fileNums", "0,10;1,1;2,1") //
       .build());
     context.setActiveRules(rulesBuilder.build());
+
+    var licRegistrar = new LicenseRegistrar();
+    var checkRegistrar = new CheckRegistrar(new CheckRegistrar.CheckProvider() {
+      @SuppressWarnings("rawtypes")
+      public List<Class<? extends OpenEdgeCheck>> getChecks() {
+        return List.of(LineNumberRule.class);
+      }
+    });
+
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(),
-        new CheckRegistration[] {new TestChecksRegistration()}, null);
+    OpenEdgeComponents components = new OpenEdgeComponents(OpenEdgePluginTest.SETTINGS.asConfig(), checkRegistrar,
+        licRegistrar);
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -233,7 +270,7 @@ public class OpenEdgeProparseSensorTest {
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
+    OpenEdgeComponents components = new OpenEdgeComponents(context.config(), new CheckRegistrar(), new LicenseRegistrar());
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -326,12 +363,12 @@ public class OpenEdgeProparseSensorTest {
       .setLanguage(Constants.LANGUAGE_KEY) //
       .setType(Type.MAIN) //
       .setCharset(Charset.defaultCharset()) //
-      .setContents(Files.readString(Path.of(BASEDIR,  "src/procedures/test5.p")))
+      .setContents(Files.readString(Path.of(BASEDIR, "src/procedures/test5.p"))) //
       .build());
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
+    OpenEdgeComponents components = new OpenEdgeComponents(context.config(), new CheckRegistrar(), new LicenseRegistrar());
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -348,15 +385,15 @@ public class OpenEdgeProparseSensorTest {
     SensorContextTester context = TestProjectSensorContext.createContext(settings);
 
     context.fileSystem().add(TestInputFileBuilder.create(BASEDIR, "src/procedures/test5.p") //
-        .setLanguage(Constants.LANGUAGE_KEY) //
-        .setType(Type.MAIN) //
-        .setCharset(Charset.defaultCharset()) //
-        .setContents(Files.readString(Path.of(BASEDIR,  "src/procedures/test5.p")))
-        .build());
+      .setLanguage(Constants.LANGUAGE_KEY) //
+      .setType(Type.MAIN) //
+      .setCharset(Charset.defaultCharset()) //
+      .setContents(Files.readString(Path.of(BASEDIR, "src/procedures/test5.p"))) //
+      .build());
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
+    OpenEdgeComponents components = new OpenEdgeComponents(context.config(), new CheckRegistrar(), new LicenseRegistrar());
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -372,7 +409,7 @@ public class OpenEdgeProparseSensorTest {
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
+    OpenEdgeComponents components = new OpenEdgeComponents(context.config(), new CheckRegistrar(), new LicenseRegistrar());
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -389,7 +426,7 @@ public class OpenEdgeProparseSensorTest {
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARLINT_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
+    OpenEdgeComponents components = new OpenEdgeComponents(context.config(), new CheckRegistrar(), new LicenseRegistrar());
     OpenEdgeProparseSensor sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -404,7 +441,7 @@ public class OpenEdgeProparseSensorTest {
 
     var context = TestProjectSensorContext.createContext(settings);
     var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    var components = new OpenEdgeComponents(context.config());
+    var components = new OpenEdgeComponents(context.config(), new CheckRegistrar(), new LicenseRegistrar());
     var sensor = new OpenEdgeProparseSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -419,7 +456,7 @@ public class OpenEdgeProparseSensorTest {
 
     var context = TestProjectSensorContext.createContext(settings);
     var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    var components = new OpenEdgeComponents(context.config());
+    var components = new OpenEdgeComponents(context.config(), new CheckRegistrar(), new LicenseRegistrar());
     var sensor = new OpenEdgeProparseSensor(oeSettings, components);
 
     var dotProparseDir = context.fileSystem().baseDirPath().resolve(".proparse");
@@ -439,7 +476,7 @@ public class OpenEdgeProparseSensorTest {
 
     var context = TestProjectSensorContext.createContext(settings);
     var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    var components = new OpenEdgeComponents(context.config());
+    var components = new OpenEdgeComponents(context.config(), new CheckRegistrar(), new LicenseRegistrar());
     var sensor = new OpenEdgeProparseSensor(oeSettings, components);
 
     var dotProparseDir = context.fileSystem().baseDirPath().resolve(".proparse");
@@ -461,7 +498,7 @@ public class OpenEdgeProparseSensorTest {
     var settings = new MapSettings();
     var context = TestProjectSensorContext.createContext(settings);
     var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    var components = new OpenEdgeComponents(context.config());
+    var components = new OpenEdgeComponents(context.config(), new CheckRegistrar(), new LicenseRegistrar());
     var sensor = new OpenEdgeProparseSensor(oeSettings, components);
 
     sensor.execute(context);

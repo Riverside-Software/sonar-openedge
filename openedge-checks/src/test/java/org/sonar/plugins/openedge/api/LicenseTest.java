@@ -5,8 +5,6 @@ import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 
 import org.sonar.api.SonarProduct;
-import org.sonar.plugins.openedge.api.LicenseRegistration.License;
-import org.sonar.plugins.openedge.api.LicenseRegistration.LicenseType;
 import org.testng.annotations.Test;
 
 public class LicenseTest {

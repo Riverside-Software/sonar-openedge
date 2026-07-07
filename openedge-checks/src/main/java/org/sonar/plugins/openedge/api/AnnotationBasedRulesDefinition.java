@@ -46,6 +46,8 @@ import org.sonar.api.server.rule.RulesDefinitionAnnotationLoader;
 import org.sonar.api.utils.AnnotationUtils;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
+import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck;
+import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonar.plugins.openedge.api.model.CWE;
 import org.sonar.plugins.openedge.api.model.CleanCode;
 import org.sonar.plugins.openedge.api.model.Impact;
@@ -108,15 +110,14 @@ public class AnnotationBasedRulesDefinition {
   }
 
   @SuppressWarnings("rawtypes")
-  public void addRuleClasses(Iterable<Class> ruleClasses) {
+  public void addRuleClasses(List<Class> ruleClasses) {
     addRuleClasses(true, ruleClasses);
   }
 
   @SuppressWarnings("rawtypes")
-  public void addRuleClasses(boolean failIfNoExplicitKey, Iterable<Class> ruleClasses) {
+  public void addRuleClasses(boolean failIfNoExplicitKey, List<Class> ruleClasses) {
     new RulesDefinitionAnnotationLoader().load(repository, Iterables.toArray(ruleClasses, Class.class));
-    List<NewRule> newRules = Lists.newArrayList();
-    for (Class<?> ruleClass : ruleClasses) {
+    for (var ruleClass : ruleClasses) {
       NewRule rule = newRule(ruleClass, failIfNoExplicitKey);
       rule.setTemplate(AnnotationUtils.getAnnotation(ruleClass, RuleTemplate.class) != null);
       setupDocumentation(rule, ruleClass);
@@ -127,7 +128,6 @@ public class AnnotationBasedRulesDefinition {
       } catch (RuntimeException e) {
         throw new IllegalArgumentException("Could not setup SQALE model on " + ruleClass, e);
       }
-      newRules.add(rule);
     }
   }
 

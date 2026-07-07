@@ -19,47 +19,40 @@
  */
 package org.sonar.plugins.openedge.foundation;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.sonar.plugins.openedge.api.CheckRegistration;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.sonar.api.scanner.ScannerSide;
+import org.sonar.api.server.ServerSide;
+import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonar.plugins.openedge.checks.ClumsySyntax;
 import org.sonar.plugins.openedge.checks.LargeTransactionScope;
 import org.sonar.plugins.openedge.checks.NoOpDatabaseRule;
+import org.sonar.plugins.openedge.foundation.CheckRegistrar.CheckProvider;
+import org.sonarsource.api.sonarlint.SonarLintSide;
 
-public class BasicChecksRegistration implements CheckRegistration {
-  private static final Logger LOG = LoggerFactory.getLogger(BasicChecksRegistration.class);
+@ScannerSide
+@SonarLintSide
+@ServerSide
+public class BasicChecksProvider implements CheckProvider {
 
-  /**
-   * Register the classes that will be used to instantiate checks during analysis.
-   */
+  static List<Class<? extends OpenEdgeProparseCheck>> ppCheckClasses() {
+    return List.of(LargeTransactionScope.class, ClumsySyntax.class);
+  }
+
+  static List<Class<? extends OpenEdgeDumpFileCheck>> dbCheckClasses() {
+    return List.of(NoOpDatabaseRule.class);
+  }
+
+  @SuppressWarnings("rawtypes")
   @Override
-  public void register(Registrar registrar) {
-    LOG.debug("Registering {}", registrar.getClass().getCanonicalName());
+  public List<Class<? extends OpenEdgeCheck>> getChecks() {
+    List<Class<? extends OpenEdgeCheck>> list = new ArrayList<>();
+    list.addAll(ppCheckClasses());
+    list.addAll(dbCheckClasses());
 
-    for (Class<? extends OpenEdgeProparseCheck> clz : ppCheckClasses()) {
-      registrar.registerParserCheck(clz);
-    }
-    for (Class<? extends OpenEdgeDumpFileCheck> clz : dbCheckClasses()) {
-      registrar.registerDumpFileCheck(clz);
-    }
+    return list;
   }
-
-  /**
-   * Lists all the proparse checks provided by the plugin
-   */
-  @SuppressWarnings("unchecked")
-  public static Class<? extends OpenEdgeProparseCheck>[] ppCheckClasses() {
-    return new Class[] {LargeTransactionScope.class, ClumsySyntax.class};
-  }
-
-  /**
-   * Lists all the DB checks provided by the plugin
-   */
-  @SuppressWarnings("unchecked")
-  public static Class<? extends OpenEdgeDumpFileCheck>[] dbCheckClasses() {
-    return new Class[] {NoOpDatabaseRule.class};
-  }
-
 }

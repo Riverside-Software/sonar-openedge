@@ -19,12 +19,22 @@
  */
 package org.sonar.plugins.openedge.api;
 
-import org.prorefactor.proparse.antlr4.ProparseListener;
+public enum LicenseType {
+  EVALUATION(3),
+  COMMERCIAL(1),
+  PARTNER(2);
 
-public interface TreeParserRegistration {
-  void register(Registrar registrar);
+  private final int value;
 
-  interface Registrar {
-    public void registerTreeParser(Class<? extends ProparseListener> listener);
+  LicenseType(int value) {
+    this.value = value;
+  }
+
+  public static LicenseType get(int value) {
+    for (var lic : LicenseType.values()) {
+      if (value == lic.value)
+        return lic;
+    }
+    return EVALUATION;
   }
 }

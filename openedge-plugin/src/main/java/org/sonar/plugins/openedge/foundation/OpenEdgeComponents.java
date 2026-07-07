@@ -20,18 +20,12 @@
 package org.sonar.plugins.openedge.foundation;
 
 import java.lang.reflect.Field;
-import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-import org.prorefactor.proparse.antlr4.ProparseListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.CoreProperties;
@@ -46,13 +40,8 @@ import org.sonar.api.scanner.ScannerSide;
 import org.sonar.api.server.ServerSide;
 import org.sonar.api.utils.MessageException;
 import org.sonar.check.RuleProperty;
-import org.sonar.plugins.openedge.api.CheckRegistration;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.InvalidLicenseException;
-import org.sonar.plugins.openedge.api.LicenseRegistration;
-import org.sonar.plugins.openedge.api.LicenseRegistration.License;
-import org.sonar.plugins.openedge.api.LicenseRegistration.LicenseType;
-import org.sonar.plugins.openedge.api.TreeParserRegistration;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck.CheckType;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
@@ -71,9 +60,8 @@ public class OpenEdgeComponents {
   private final Map<ActiveRule, OpenEdgeDumpFileCheck> dfChecksMap = new HashMap<>();
 
   private final Configuration config;
-  private final CheckRegistrar checkRegistrar = new CheckRegistrar();
-  private final LicenseRegistrar licenseRegistrar = new LicenseRegistrar();
-  private final TreeParserRegistrar parserRegistrar = new TreeParserRegistrar();
+  private final CheckRegistrar checkRegistrar;
+  private final LicenseRegistrar licenseRegistrar;
 
   private boolean initialized = false;
   private String analytics = "";
@@ -81,65 +69,10 @@ public class OpenEdgeComponents {
   private int ncLocL2 = 0;
   private Map<String, List<String>> includeDependencies = new HashMap<>();
 
-  public OpenEdgeComponents() {
-    this(null, null, null, null);
-  }
-
-  public OpenEdgeComponents(Configuration config) {
-    this(config, null, null, null);
-  }
-
-  public OpenEdgeComponents(CheckRegistration[] checkRegistrars) {
-    this(null, checkRegistrars, null, null);
-  }
-
-  public OpenEdgeComponents(Configuration config, CheckRegistration[] checkRegistrars) {
-    this(config, checkRegistrars, null, null);
-  }
-
-  public OpenEdgeComponents(CheckRegistration[] checkRegistrars, LicenseRegistration[] licRegistrars) {
-    this(null, checkRegistrars, licRegistrars, null);
-  }
-
-  public OpenEdgeComponents(Configuration config, CheckRegistration[] checkRegistrars, LicenseRegistration[] licRegistrars) {
-    this(config, checkRegistrars, licRegistrars, null);
-  }
-
-  public OpenEdgeComponents(CheckRegistration[] checkRegistrars, LicenseRegistration[] licRegistrars,
-      TreeParserRegistration[] tpRegistrars) {
-    this(null, checkRegistrars, licRegistrars, tpRegistrars);
-  }
-
-  public OpenEdgeComponents(Configuration config, CheckRegistration[] checkRegistrars, LicenseRegistration[] licRegistrars,
-      TreeParserRegistration[] tpRegistrars) {
+  public OpenEdgeComponents(Configuration config, CheckRegistrar checkRegistrar, LicenseRegistrar licenseRegistrar) {
     this.config = config;
-    if (checkRegistrars != null) {
-      for (CheckRegistration registration : checkRegistrars) {
-        registration.register(checkRegistrar);
-      }
-    }
-    if (licRegistrars != null) {
-      for (LicenseRegistration registration : licRegistrars) {
-        registration.register(licenseRegistrar);
-      }
-    }
-    if (tpRegistrars != null) {
-      for (TreeParserRegistration registration : tpRegistrars) {
-        registration.register(parserRegistrar);
-      }
-    }
-  }
-
-  public Iterable<Class<? extends ProparseListener>> getProparseListeners() {
-    return Collections.unmodifiableList(parserRegistrar.allListeners);
-  }
-
-  public Collection<License> getLicenses() {
-    return licenseRegistrar.getLicenses();
-  }
-
-  public License getLicense(SonarProduct product, String permId, String repoName) {
-    return licenseRegistrar.getLicense(product, permId, repoName);
+    this.checkRegistrar = checkRegistrar;
+    this.licenseRegistrar = licenseRegistrar;
   }
 
   public void init(SensorContext context) {
@@ -230,11 +163,11 @@ public class OpenEdgeComponents {
     String clsName = rule.templateRuleKey() == null ? ruleKey.rule() : rule.templateRuleKey();
 
     try {
-      Class<? extends OpenEdgeCheck<?>> clz = checkRegistrar.getCheck(clsName);
+      var clz = checkRegistrar.getCheck(clsName);
       if (clz == null)
         return null;
-      OpenEdgeCheck<?> check = clz.getConstructor().newInstance();
-      check.setContext(ruleKey, context, getLicense(product, permId, ruleKey.repository()));
+      var check = clz.getConstructor().newInstance();
+      check.setContext(ruleKey, context, licenseRegistrar.getLicense(product, permId, ruleKey.repository()));
       configureFields(rule, check);
       check.initialize();
 
@@ -309,106 +242,6 @@ public class OpenEdgeComponents {
 
   public String getServerId() {
     return config == null ? "" : config.get(CoreProperties.SERVER_ID).orElse("");
-  }
-
-  private static class LicenseRegistrar implements LicenseRegistration.Registrar {
-    private final Collection<License> licenses = new ArrayList<>();
-
-    @Override
-    public void registerLicense(int version, String permanentId, SonarProduct product, String customerName, String salt,
-        String repoName, LicenseRegistration.LicenseType type, byte[] signature, long expirationDate, long lines) {
-      if (Strings.isNullOrEmpty(repoName))
-        return;
-      LOG.debug("Found {} license - Permanent ID '{}' - Customer '{}' - Repository '{}' - Expiration date {}",
-          type.toString(), permanentId, customerName, repoName,
-          DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(expirationDate)));
-      // Only one license per product/ repository / permID
-      License existingLic = hasRegisteredLicense(product, repoName, permanentId);
-      License newLic = new License.Builder().setVersion(version).setPermanentId(permanentId).setProduct(
-          product).setCustomerName(customerName).setSalt(salt).setRepositoryName(repoName).setType(type).setSignature(
-              signature).setExpirationDate(expirationDate).setLines(lines).build();
-      if (existingLic == null) {
-        licenses.add(newLic);
-      } else if (existingLic.getExpirationDate() < newLic.getExpirationDate()) {
-        licenses.remove(existingLic);
-        licenses.add(newLic);
-      }
-    }
-
-    private Collection<License> getLicenses() {
-      return licenses;
-    }
-
-    private License hasRegisteredLicense(SonarProduct product, String repoName, String permId) {
-      if ((permId == null) || (repoName == null))
-        return null;
-      for (License lic : licenses) {
-        if (((lic.getType() == LicenseType.COMMERCIAL) || (lic.getType() == LicenseType.PARTNER))
-            && (lic.getProduct() == product) && repoName.equals(lic.getRepositoryName())
-            && permId.equals(lic.getPermanentId()))
-          return lic;
-      }
-      return null;
-    }
-
-    private License getLicense(SonarProduct product, String permId, String repoName) {
-      if ((permId == null) || (repoName == null))
-        return null;
-      // TODO Remove this code when old licenses are not used anymore
-      String miniPermId = (permId.indexOf('-') == 8) && (permId.length() >= 20)
-          ? permId.substring(permId.indexOf('-') + 1) : permId;
-
-      Optional<License> srch = licenses.stream() //
-        .filter(lic -> (lic.getType() == LicenseType.COMMERCIAL) || (lic.getType() == LicenseType.PARTNER)) //
-        .filter(lic -> lic.getProduct() == product) //
-        .filter(lic -> repoName.equals(lic.getRepositoryName())) //
-        .filter(lic -> (lic.getVersion() >= 3 && permId.equals(lic.getPermanentId()))
-            || miniPermId.equals(lic.getPermanentId())).findFirst();
-      if (srch.isPresent())
-        return srch.get();
-      srch = licenses.stream() //
-        .filter(lic -> lic.getType() == LicenseType.EVALUATION) //
-        .filter(lic -> lic.getProduct() == product) //
-        .filter(lic -> repoName.equals(lic.getRepositoryName())) //
-        .filter(lic -> (lic.getVersion() >= 3 && permId.equals(lic.getPermanentId()))
-            || miniPermId.equals(lic.getPermanentId())).findFirst();
-      if (srch.isPresent())
-        return srch.get();
-
-      return null;
-    }
-  }
-
-  private static class CheckRegistrar implements CheckRegistration.Registrar {
-    private final Collection<Class<? extends OpenEdgeCheck<?>>> allChecks = new ArrayList<>();
-
-    @Override
-    public void registerParserCheck(Class<? extends OpenEdgeProparseCheck> check) {
-      allChecks.add(check);
-    }
-
-    @Override
-    public void registerDumpFileCheck(Class<? extends OpenEdgeDumpFileCheck> check) {
-      allChecks.add(check);
-    }
-
-    public Class<? extends OpenEdgeCheck<?>> getCheck(String className) {
-      for (Class<? extends OpenEdgeCheck<?>> clz : allChecks) {
-        if (clz.getCanonicalName().equalsIgnoreCase(className)) {
-          return clz;
-        }
-      }
-      return null;
-    }
-  }
-
-  private static class TreeParserRegistrar implements TreeParserRegistration.Registrar {
-    private final List<Class<? extends ProparseListener>> allListeners = new ArrayList<>();
-
-    @Override
-    public void registerTreeParser(Class<? extends ProparseListener> listener) {
-      allListeners.add(listener);
-    }
   }
 
 }

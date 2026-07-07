@@ -10,6 +10,8 @@ import java.util.List;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.plugins.openedge.OpenEdgePluginTest;
+import org.sonar.plugins.openedge.foundation.CheckRegistrar;
+import org.sonar.plugins.openedge.foundation.LicenseRegistrar;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContextExtra;
@@ -23,7 +25,7 @@ public class OpenEdgeDependenciesTest {
 
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
+    OpenEdgeComponents components = new OpenEdgeComponents(context.config(), new CheckRegistrar(), new LicenseRegistrar());
     OpenEdgeDependenciesSensor sensor = new OpenEdgeDependenciesSensor(oeSettings, components);
     sensor.execute(context);
 
