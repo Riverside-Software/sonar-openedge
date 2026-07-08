@@ -33,7 +33,11 @@ public class LineNumberRule extends OpenEdgeProparseCheck {
   // Test rule which reports issues on file num/line num. List is passed as parameter as a list of
   // file num,line num with semicolon separator, e.g. 0,5;3,4 for line 5 of main file, and line 4 of file #3
   @RuleProperty
-  public String fileNums = "";
+  private String fileNums = "";
+
+  public void setFileNums(String fileNums) {
+    this.fileNums = fileNums;
+  }
 
   @Override
   public void execute(InputFile file, ParseUnit unit) {

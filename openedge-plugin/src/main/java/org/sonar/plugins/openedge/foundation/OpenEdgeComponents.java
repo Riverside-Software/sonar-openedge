@@ -20,6 +20,8 @@
 package org.sonar.plugins.openedge.foundation;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -188,42 +190,39 @@ public class OpenEdgeComponents {
         throw MessageException.of("The field " + param
             + " does not exist or is not annotated with @RuleProperty in the class " + check.getClass().getName());
       }
-      if (Strings.nullToEmpty(activeRule.param(param)).trim().length() > 0) {
-        configureField(check, field, activeRule.param(param));
+      var method = getSetter(check, field);
+      if (method == null) {
+        throw MessageException.of(
+            "The setter for " + param + " does not exist in the class " + check.getClass().getName());
+      }
+      if (!Strings.nullToEmpty(activeRule.param(param)).trim().isEmpty()) {
+        configureField(check, field, method, activeRule.param(param));
       }
     }
   }
 
-  private static void configureField(Object check, Field field, String value) {
+  private static void configureField(Object check, Field field, Method method, String value) {
+    Object val = null;
     try {
-      field.setAccessible(true);
-
       if (field.getType().equals(String.class)) {
-        field.set(check, value);
-      } else if (int.class == field.getType()) {
-        field.setInt(check, Integer.parseInt(value));
-      } else if (short.class == field.getType()) {
-        field.setShort(check, Short.parseShort(value));
-      } else if (long.class == field.getType()) {
-        field.setLong(check, Long.parseLong(value));
-      } else if (double.class == field.getType()) {
-        field.setDouble(check, Double.parseDouble(value));
-      } else if (boolean.class == field.getType()) {
-        field.setBoolean(check, Boolean.parseBoolean(value));
-      } else if (byte.class == field.getType()) {
-        field.setByte(check, Byte.parseByte(value));
-      } else if (Integer.class == field.getType()) {
-        field.set(check, Integer.parseInt(value));
-      } else if (Long.class == field.getType()) {
-        field.set(check, Long.parseLong(value));
-      } else if (Double.class == field.getType()) {
-        field.set(check, Double.parseDouble(value));
-      } else if (Boolean.class == field.getType()) {
-        field.set(check, Boolean.parseBoolean(value));
+        val = value;
+      } else if ((int.class == field.getType()) || (Integer.class == field.getType())) {
+        val = Integer.parseInt(value);
+      } else if ((short.class == field.getType()) || (Short.class == field.getType())) {
+        val = Short.parseShort(value);
+      } else if ((long.class == field.getType()) || (Long.class == field.getType())) {
+        val = Long.parseLong(value);
+      } else if ((double.class == field.getType()) || (Double.class == field.getType())) {
+        val = Double.parseDouble(value);
+      } else if ((boolean.class == field.getType()) || (Boolean.class == field.getType())) {
+        val = Boolean.parseBoolean(value);
+      } else if ((byte.class == field.getType()) || (Byte.class == field.getType())) {
+        val = Byte.parseByte(value);
       } else {
         throw MessageException.of("The type of the field " + field + " is not supported: " + field.getType());
       }
-    } catch (IllegalAccessException e) {
+      method.invoke(check, val);
+    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
       throw MessageException.of(
           "Can not set the value of the field " + field + " in the class: " + check.getClass().getName(), e);
     }
@@ -238,6 +237,16 @@ public class OpenEdgeComponents {
       }
     }
     return null;
+  }
+
+  private static Method getSetter(Object check, Field field) {
+    var setterName = "set" + field.getName().substring(0, 1).toUpperCase()
+        + (field.getName().length() > 1 ? field.getName().substring(1) : "");
+    try {
+      return check.getClass().getMethod(setterName, field.getType());
+    } catch (NoSuchMethodException caught) {
+      return null;
+    }
   }
 
   public String getServerId() {
