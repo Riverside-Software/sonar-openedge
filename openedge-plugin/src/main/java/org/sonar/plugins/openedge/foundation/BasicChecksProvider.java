@@ -24,13 +24,13 @@ import java.util.List;
 
 import org.sonar.api.scanner.ScannerSide;
 import org.sonar.api.server.ServerSide;
+import org.sonar.plugins.openedge.api.CheckProvider;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeDumpFileCheck;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeProparseCheck;
 import org.sonar.plugins.openedge.checks.ClumsySyntax;
 import org.sonar.plugins.openedge.checks.LargeTransactionScope;
 import org.sonar.plugins.openedge.checks.NoOpDatabaseRule;
-import org.sonar.plugins.openedge.foundation.CheckRegistrar.CheckProvider;
 import org.sonarsource.api.sonarlint.SonarLintSide;
 
 @ScannerSide

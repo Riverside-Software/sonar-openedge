@@ -52,6 +52,7 @@ import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.measures.CoreMetrics;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.OpenEdgePluginTest;
+import org.sonar.plugins.openedge.api.CheckProvider;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck;
 import org.sonar.plugins.openedge.checks.ClumsySyntax;
@@ -177,7 +178,7 @@ public class OpenEdgeProparseSensorTest {
     context.setActiveRules(rulesBuilder.build());
 
     var licRegistrar = new LicenseRegistrar();
-    var checkRegistrar = new CheckRegistrar(new CheckRegistrar.CheckProvider() {
+    var checkRegistrar = new CheckRegistrar(new CheckProvider() {
       @SuppressWarnings("rawtypes")
       public List<Class<? extends OpenEdgeCheck>> getChecks() {
         return List.of(IntegerRule.class);
@@ -209,7 +210,7 @@ public class OpenEdgeProparseSensorTest {
     context.setActiveRules(rulesBuilder.build());
 
     var licRegistrar = new LicenseRegistrar();
-    var checkRegistrar = new CheckRegistrar(new CheckRegistrar.CheckProvider() {
+    var checkRegistrar = new CheckRegistrar(new CheckProvider() {
       @SuppressWarnings("rawtypes")
       public List<Class<? extends OpenEdgeCheck>> getChecks() {
         return List.of(IntegerRule.class);
@@ -241,7 +242,7 @@ public class OpenEdgeProparseSensorTest {
     context.setActiveRules(rulesBuilder.build());
 
     var licRegistrar = new LicenseRegistrar();
-    var checkRegistrar = new CheckRegistrar(new CheckRegistrar.CheckProvider() {
+    var checkRegistrar = new CheckRegistrar(new CheckProvider() {
       @SuppressWarnings("rawtypes")
       public List<Class<? extends OpenEdgeCheck>> getChecks() {
         return List.of(LineNumberRule.class);

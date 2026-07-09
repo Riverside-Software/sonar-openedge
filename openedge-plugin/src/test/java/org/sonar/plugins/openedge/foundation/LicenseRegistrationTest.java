@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.sonar.api.SonarProduct;
 import org.sonar.plugins.openedge.api.License;
+import org.sonar.plugins.openedge.api.LicenseProvider;
 import org.sonar.plugins.openedge.api.LicenseType;
 import org.testng.annotations.Test;
 
@@ -50,7 +51,7 @@ public class LicenseRegistrationTest {
       .setExpirationDate(1735693261000L) //
       .setLines(1000L) //
       .build();
-    var registrar = new LicenseRegistrar(new LicenseRegistrar.LicenseProvider() {
+    var registrar = new LicenseRegistrar(new LicenseProvider() {
       public List<License> getLicenses() {
         return List.of(lic01);
       }
@@ -90,7 +91,7 @@ public class LicenseRegistrationTest {
       .setExpirationDate(2735693261000L) //
       .setLines(2000L) //
       .build();
-    var registrar = new LicenseRegistrar(new LicenseRegistrar.LicenseProvider() {
+    var registrar = new LicenseRegistrar(new LicenseProvider() {
       public List<License> getLicenses() {
         return List.of(lic01, lic02);
       }
@@ -131,7 +132,7 @@ public class LicenseRegistrationTest {
       .setExpirationDate(2735693261000L) //
       .setLines(2000L) //
       .build();
-    var registrar = new LicenseRegistrar(new LicenseRegistrar.LicenseProvider() {
+    var registrar = new LicenseRegistrar(new LicenseProvider() {
       public List<License> getLicenses() {
         return List.of(lic02, lic01);
       }
@@ -176,7 +177,7 @@ public class LicenseRegistrationTest {
       .setExpirationDate(2735693261000L) //
       .setLines(2000L) //
       .build();
-    var registrar = new LicenseRegistrar(new LicenseRegistrar.LicenseProvider() {
+    var registrar = new LicenseRegistrar(new LicenseProvider() {
       public List<License> getLicenses() {
         return List.of(lic01, lic02);
       }

@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.scanner.ScannerSide;
 import org.sonar.api.server.ServerSide;
+import org.sonar.plugins.openedge.api.CheckProvider;
 import org.sonar.plugins.openedge.api.checks.OpenEdgeCheck;
 import org.sonarsource.api.sonarlint.SonarLintSide;
 
@@ -54,8 +55,4 @@ public class CheckRegistrar {
     return null;
   }
 
-  public static interface CheckProvider {
-    @SuppressWarnings("rawtypes")
-    public List<Class<? extends OpenEdgeCheck>> getChecks();
-  }
 }

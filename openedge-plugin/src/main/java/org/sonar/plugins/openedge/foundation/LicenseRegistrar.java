@@ -36,6 +36,7 @@ import org.sonar.api.SonarProduct;
 import org.sonar.api.scanner.ScannerSide;
 import org.sonar.api.server.ServerSide;
 import org.sonar.plugins.openedge.api.License;
+import org.sonar.plugins.openedge.api.LicenseProvider;
 import org.sonar.plugins.openedge.api.LicenseType;
 import org.sonarsource.api.sonarlint.SonarLintSide;
 
@@ -114,7 +115,4 @@ public class LicenseRegistrar {
       .orElse(null);
   }
 
-  public static interface LicenseProvider {
-    public List<License> getLicenses();
-  }
 }
