@@ -17,6 +17,8 @@ package org.prorefactor.core;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
@@ -579,6 +581,33 @@ public class PreprocessorDirectiveTest extends AbstractProparseTest {
     assertEquals(tok.getNodeType(), ABLNodeType.WS);
     tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.VIEWAS);
+  }
+
+  @Test
+  public void test26() {
+    var unit = getParseUnit(new File(SRC_DIR + "/preprocessor26.p"), session);
+    var src = unit.preprocess();
+    var tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPSCOPEDDEFINE);
+    var macroGraph = unit.getMacroGraph();
+    assertTrue(macroGraph.getFileRefName().isBlank());
+    var macroDefList = macroGraph.macroEventList.stream().filter(MacroDef.class::isInstance).map(MacroDef.class::cast).toList();
+    assertEquals(macroDefList.size(), 1);
+    var def1 = macroDefList.get(0);
+    assertEquals(def1.getName(), "foo");
+    assertEquals(def1.getValue(), "'Foo' BAR");
+    var macroRefList = macroGraph.macroEventList.stream().filter(NamedMacroRef.class::isInstance).map(NamedMacroRef.class::cast).toList();
+    assertEquals(macroRefList.size(), 1);
+    assertNotNull(macroRefList.get(0).getMacroDef());
+    assertEquals(macroGraph.getIncludeChildren().size(), 1);
+    var inc01 = macroGraph.getIncludeChildren().get(0);
+    assertEquals(inc01.getFileRefName(), "preprocessor/preprocessor26.i");
+    var macroRefList2 = inc01.macroEventList.stream().filter(NamedMacroRef.class::isInstance).map(NamedMacroRef.class::cast).toList();
+    assertEquals(macroRefList2.size(), 1);
+    assertNull(macroRefList2.get(0).getMacroDef()); // Reference to arg number #1
+    assertEquals(inc01.getIncludeChildren().size(), 1);
+    var inc02 = inc01.getIncludeChildren().get(0);
+    assertEquals(inc02.getFileRefName(), "preprocessor/preprocessor26-02.i");
   }
 
   /**
