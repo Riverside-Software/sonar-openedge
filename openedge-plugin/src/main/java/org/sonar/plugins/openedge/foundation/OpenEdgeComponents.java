@@ -184,19 +184,19 @@ public class OpenEdgeComponents {
   }
 
   private static void configureFields(ActiveRule activeRule, Object check) {
-    for (String param : activeRule.params().keySet()) {
-      Field field = getField(check, param);
+    for (var entry : activeRule.params().entrySet()) {
+      Field field = getField(check, entry.getKey());
       if (field == null) {
-        throw MessageException.of("The field " + param
+        throw MessageException.of("The field " + entry.getKey()
             + " does not exist or is not annotated with @RuleProperty in the class " + check.getClass().getName());
       }
       var method = getSetter(check, field);
       if (method == null) {
         throw MessageException.of(
-            "The setter for " + param + " does not exist in the class " + check.getClass().getName());
+            "The setter for " + entry.getKey() + " does not exist in the class " + check.getClass().getName());
       }
-      if (!Strings.nullToEmpty(activeRule.param(param)).trim().isEmpty()) {
-        configureField(check, field, method, activeRule.param(param));
+      if (!Strings.nullToEmpty(entry.getValue()).trim().isEmpty()) {
+        configureField(check, field, method, entry.getValue());
       }
     }
   }
