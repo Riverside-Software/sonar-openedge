@@ -27,7 +27,9 @@ import org.sonar.api.config.PropertyDefinition.ConfigScope;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.decorator.CommonDBMetricsDecorator;
 import org.sonar.plugins.openedge.decorator.CommonMetricsDecorator;
-import org.sonar.plugins.openedge.foundation.BasicChecksRegistration;
+import org.sonar.plugins.openedge.foundation.BasicChecksProvider;
+import org.sonar.plugins.openedge.foundation.CheckRegistrar;
+import org.sonar.plugins.openedge.foundation.LicenseRegistrar;
 import org.sonar.plugins.openedge.foundation.OpenEdge;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeDB;
@@ -60,8 +62,8 @@ public class OpenEdgePlugin implements Plugin {
     context.addExtensions(OpenEdge.class, OpenEdgeDB.class, OpenEdgeSettings.class);
 
     // Profile and rules
-    context.addExtensions(OpenEdgeRulesDefinition.class, BasicChecksRegistration.class, OpenEdgeMetrics.class,
-        OpenEdgeComponents.class);
+    context.addExtensions(OpenEdgeRulesDefinition.class, BasicChecksProvider.class, OpenEdgeMetrics.class,
+        OpenEdgeComponents.class, LicenseRegistrar.class, CheckRegistrar.class);
 
     // Syntax highlight and simple CPD
     if (context.getRuntime().getProduct() == SonarProduct.SONARQUBE) {

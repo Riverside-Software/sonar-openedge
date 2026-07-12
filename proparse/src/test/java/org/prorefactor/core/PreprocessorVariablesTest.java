@@ -29,7 +29,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 public class PreprocessorVariablesTest extends AbstractProparseTest {
-  private final static String SRC_DIR = "src/test/resources/data/preprocessor";
+  private static final String SRC_DIR = "src/test/resources/data/preprocessor";
 
   private RefactorSession session;
 
@@ -40,7 +40,10 @@ public class PreprocessorVariablesTest extends AbstractProparseTest {
 
   @Test
   public void test03() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor03.p"), session);
+    String code = """
+        { preprocessor/preprocessor03-01.i "ABC" "DEF" "preprocessor03-02" }
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     testVariable(unit.getTopNode(), "var01");
@@ -65,7 +68,48 @@ public class PreprocessorVariablesTest extends AbstractProparseTest {
 
   @Test
   public void test04() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor04.p"), session);
+    String code = """
+        &IF INTEGER("{&TOKEN}") = 0 &THEN
+         DEFINE VARIABLE var01 AS INT NO-UNDO.
+        &ENDIF
+
+        &IF INTEGER("{&TOKEN}") = 1 &THEN
+         DEFINE VARIABLE var02 AS INT NO-UNDO.
+        &ENDIF
+
+        &IF INTEGER("       	    ") = 0 &THEN
+         DEFINE VARIABLE var03 AS INT NO-UNDO.
+        &ENDIF
+
+        &IF INTEGER("50-") = -50 &THEN
+         DEFINE VARIABLE var04 AS INT NO-UNDO.
+        &ENDIF
+
+        &IF INTEGER("50-") = -51 &THEN
+         DEFINE VARIABLE var05 AS INT NO-UNDO.
+        &ENDIF
+
+        &IF INTEGER("+60") = 60 &THEN
+         DEFINE VARIABLE var06 AS INT NO-UNDO.
+        &ENDIF
+
+        &IF INTEGER("+60") = 61 &THEN
+         DEFINE VARIABLE var07 AS INT NO-UNDO.
+        &ENDIF
+
+        &IF INTEGER("   +60") = 60 &THEN
+         DEFINE VARIABLE var08 AS INT NO-UNDO.
+        &ENDIF
+
+        &IF INTEGER("   -70") = -70 &THEN
+         DEFINE VARIABLE var09 AS INT NO-UNDO.
+        &ENDIF
+
+        &IF INTEGER("   70-   ") = -70 &THEN
+         DEFINE VARIABLE var10 AS INT NO-UNDO.
+        &ENDIF
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     testVariable(unit.getTopNode(), "var01");
@@ -82,7 +126,11 @@ public class PreprocessorVariablesTest extends AbstractProparseTest {
 
   @Test
   public void test06() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor06.p"), session);
+    String code = """
+        &scoped-define XXX "~~~n":U
+        message "Test" + XXX.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     Assert.assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 1);
@@ -90,7 +138,16 @@ public class PreprocessorVariablesTest extends AbstractProparseTest {
 
   @Test
   public void test08() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor08.p"), session);
+    String code = """
+        &IF {&XXX} EQ 123 &THEN
+        DEFINE VARIABLE xxx AS INT.
+        &ENDIF
+
+        &IF 123 EQ {&XXX} &THEN
+        DEFINE VARIABLE yyy AS INT.
+        &ENDIF
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     Assert.assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 0);
@@ -107,8 +164,12 @@ public class PreprocessorVariablesTest extends AbstractProparseTest {
 
   @Test
   public void test26() {
-    // '&message' without message shouldn't throw exception 
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor26.p"), session);
+    // '&message' without message shouldn't throw exception
+    String code = """
+        &message
+        message \"xxx\".
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     Assert.assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.MESSAGE).size(), 1);

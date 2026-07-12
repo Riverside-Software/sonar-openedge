@@ -10,11 +10,11 @@
  *******************************************************************************/ 
 package org.sonar.plugins.openedge.api.objects;
 
+import java.util.Objects;
+
 import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.treeparser.Primitive;
-
-import com.google.common.base.Preconditions;
 
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IVariableElement;
@@ -25,10 +25,8 @@ public class RCodeTTFieldWrapper implements IField {
   private final String lcName;
 
   public RCodeTTFieldWrapper(ITable table, IVariableElement field) {
-    Preconditions.checkNotNull(table);
-    Preconditions.checkNotNull(field);
-    this.table = table;
-    this.field = field;
+    this.table = Objects.requireNonNull(table);
+    this.field = Objects.requireNonNull(field);
     this.lcName = field.getName().toLowerCase();
   }
 

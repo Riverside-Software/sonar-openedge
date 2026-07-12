@@ -1279,5 +1279,22 @@ public class ExpressionEngineTest extends AbstractProparseTest {
 
   } 
 
+  @Test
+  public void testScreenValue() {
+    var code = """
+        define variable x1 as character no-undo.
+        define variable x2 as character format "X(25)":U label "X2" view-as fill-in native size 32.57 by .81 font 16 no-undo.
+        str = x2:screen-value.
+        """;
+    var unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+
+    var list1 = unit.getTopNode().query(ABLNodeType.ATTRIBUTE_REF);
+    assertEquals(list1.size(), 1);
+    var attr1 = (AttributeReferenceNode) list1.get(0);
+    assertEquals(attr1.getAttributeName(), "screen-value");
+    assertEquals(attr1.getDataType(), DataType.CHARACTER);
+  }
 
 }

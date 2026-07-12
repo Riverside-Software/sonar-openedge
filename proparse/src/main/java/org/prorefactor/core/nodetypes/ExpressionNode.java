@@ -27,6 +27,7 @@ import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.IPropertyElement;
 import eu.rssw.pct.elements.ITypeInfo;
+import eu.rssw.pct.elements.ITypeInfo.ParameterDescriptor;
 import eu.rssw.pct.elements.IVariableElement;
 import eu.rssw.pct.elements.ParameterMode;
 
@@ -743,8 +744,8 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
     }
   }
 
-  private static ParameterMode[] readParameterModes(List<JPNode> paramItems) {
-    var modes = new ParameterMode[paramItems.size()];
+  private static ParameterDescriptor[] readParameters(List<JPNode> paramItems) {
+    var params = new ParameterDescriptor[paramItems.size()];
     var zz = 0;
     for (var ch : paramItems) {
       var pm = ParameterMode.INPUT;
@@ -752,23 +753,19 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
       if (!ch.getFirstChild().isIExpression()) {
         pm = parameterModeFromNodeType(ch.getFirstChild().getNodeType());
       }
-      modes[zz++] = pm;
-    }
-
-    return modes;
-  }
-
-  private static DataType[] readDataTypes(List<JPNode> paramItems) {
-    var params = new DataType[paramItems.size()];
-    var zz = 0;
-    for (var ch : paramItems) {
       var dt = DataType.UNKNOWN;
       for (var ch2 : ch.getDirectChildren()) {
         if ((dt == DataType.UNKNOWN) && ch2.isIExpression()) {
           dt = ch2.asIExpression().getDataType();
         }
       }
-      params[zz++] = dt;
+      Integer extent = null;
+      for (var ch2 : ch.getDirectChildren()) {
+        if ((extent == null) && ch2.isIExpression()) {
+          extent = ch2.asIExpression().getExtent();
+        }
+      }
+      params[zz++] = new ParameterDescriptor(dt, extent == null ? 0 : extent, pm);
     }
 
     return params;
@@ -777,19 +774,15 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
   static Pair<ITypeInfo, IMethodElement> getObjectConstructor(Function<String, ITypeInfo> provider, JPNode node,
       ITypeInfo info) {
     var paramItems = node.getDirectChildren(ABLNodeType.PARAMETER_ITEM);
-    var params = readDataTypes(paramItems);
-    var modes = readParameterModes(paramItems);
 
-    return info == null ? null : info.getConstructor(provider, params, modes);
+    return info == null ? null : info.getConstructor(provider, readParameters(paramItems));
   }
 
   static Pair<ITypeInfo, IMethodElement> getObjectMethod(Function<String, ITypeInfo> provider, JPNode node,
       ITypeInfo info, String methodName) {
     var paramItems = node.getDirectChildren(ABLNodeType.PARAMETER_ITEM);
-    var params = readDataTypes(paramItems);
-    var modes = readParameterModes(paramItems);
 
-    return info == null ? null : info.getMethod(provider, methodName, params, modes);
+    return info == null ? null : info.getMethod(provider, methodName, readParameters(paramItems));
   }
 
   static ParameterMode parameterModeFromNodeType(ABLNodeType nodeType) {

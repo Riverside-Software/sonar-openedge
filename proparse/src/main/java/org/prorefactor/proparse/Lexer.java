@@ -1189,6 +1189,13 @@ public class Lexer implements IPreprocessor {
   }
 
   private void appendToEOL() {
+    // A '{' encountered while gathering this text can trigger an immediate, nested include expansion
+    // (see ppGetChar()), which transparently switches currentInput to a deeper include file. A newline
+    // coming from such a nested include (e.g. its own trailing newline) is not the end of the
+    // directive's line, so we only honor '\n' as a stop condition once we're back to the include depth
+    // that was active when this directive started (or shallower, e.g. if that starting include file
+    // itself hit EOF in the meantime).
+    int startIncludeDepth = includeVector.size();
     boolean stop = false;
     // As with the other "append" functions, the caller is responsible for calling getChar() after this
     while (!stop) {
@@ -1207,7 +1214,7 @@ public class Lexer implements IPreprocessor {
       } else {
         append();
         // Unescaped newline character or escaped newline where previous char is not tilde
-        if ((currChar == '\n') && (!wasEscape || !currText.toString().endsWith("~\n"))) {
+        if ((currChar == '\n') && (includeVector.size() <= startIncludeDepth) && (!wasEscape || !currText.toString().endsWith("~\n"))) {
           // We do not call getChar() here. That is because we cannot
           // get the next character until after any &glob, &scoped, or &undefine
           // have been dealt with. The next character might be a '{' which in
@@ -1248,6 +1255,7 @@ public class Lexer implements IPreprocessor {
         && (tokenStartPos.line > 0)) {
       loc.add(tokenStartPos.line);
     }
+    var incStack = prepro.getIncludeStack();
     return new ProToken.Builder(type, text) //
       .setWritable(writableTokens) //
       .setFileIndex(tokenStartPos.file) //
@@ -1261,6 +1269,7 @@ public class Lexer implements IPreprocessor {
       .setMacroSourceNum(tokenStartPos.sourceNum) //
       .setAnalyzeSuspend(getCurrentAnalyzeSuspend()) //
       .setNestedComments(nestedComment) //
+      .setIncludeStack(incStack) //
       .build();
   }
 

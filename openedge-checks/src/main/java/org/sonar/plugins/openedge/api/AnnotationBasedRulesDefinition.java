@@ -19,6 +19,11 @@
  */
 package org.sonar.plugins.openedge.api;
 
+import static org.sonar.api.server.rule.RuleDescriptionSection.RuleDescriptionSectionKeys.HOW_TO_FIX_SECTION_KEY;
+import static org.sonar.api.server.rule.RuleDescriptionSection.RuleDescriptionSectionKeys.INTRODUCTION_SECTION_KEY;
+import static org.sonar.api.server.rule.RuleDescriptionSection.RuleDescriptionSectionKeys.RESOURCES_SECTION_KEY;
+import static org.sonar.api.server.rule.RuleDescriptionSection.RuleDescriptionSectionKeys.ROOT_CAUSE_SECTION_KEY;
+
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.nio.charset.StandardCharsets;
@@ -57,17 +62,10 @@ import org.sonar.plugins.openedge.api.model.SqaleConstantRemediation;
 import org.sonar.plugins.openedge.api.model.SqaleLinearRemediation;
 import org.sonar.plugins.openedge.api.model.SqaleLinearWithOffsetRemediation;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicates;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
-import static org.sonar.api.server.rule.RuleDescriptionSection.RuleDescriptionSectionKeys.HOW_TO_FIX_SECTION_KEY;
-import static org.sonar.api.server.rule.RuleDescriptionSection.RuleDescriptionSectionKeys.INTRODUCTION_SECTION_KEY;
-import static org.sonar.api.server.rule.RuleDescriptionSection.RuleDescriptionSectionKeys.RESOURCES_SECTION_KEY;
-import static org.sonar.api.server.rule.RuleDescriptionSection.RuleDescriptionSectionKeys.ROOT_CAUSE_SECTION_KEY;
 
 /**
  * Utility class which helps setting up an implementation of {@link RulesDefinition} with a list of rule classes
@@ -108,15 +106,14 @@ public class AnnotationBasedRulesDefinition {
   }
 
   @SuppressWarnings("rawtypes")
-  public void addRuleClasses(Iterable<Class> ruleClasses) {
+  public void addRuleClasses(List<Class> ruleClasses) {
     addRuleClasses(true, ruleClasses);
   }
 
   @SuppressWarnings("rawtypes")
-  public void addRuleClasses(boolean failIfNoExplicitKey, Iterable<Class> ruleClasses) {
+  public void addRuleClasses(boolean failIfNoExplicitKey, List<Class> ruleClasses) {
     new RulesDefinitionAnnotationLoader().load(repository, Iterables.toArray(ruleClasses, Class.class));
-    List<NewRule> newRules = Lists.newArrayList();
-    for (Class<?> ruleClass : ruleClasses) {
+    for (var ruleClass : ruleClasses) {
       NewRule rule = newRule(ruleClass, failIfNoExplicitKey);
       rule.setTemplate(AnnotationUtils.getAnnotation(ruleClass, RuleTemplate.class) != null);
       setupDocumentation(rule, ruleClass);
@@ -127,11 +124,9 @@ public class AnnotationBasedRulesDefinition {
       } catch (RuntimeException e) {
         throw new IllegalArgumentException("Could not setup SQALE model on " + ruleClass, e);
       }
-      newRules.add(rule);
     }
   }
 
-  @VisibleForTesting
   NewRule newRule(Class<?> ruleClass, boolean failIfNoExplicitKey) {
     var ruleAnnotation = AnnotationUtils.getAnnotation(ruleClass, org.sonar.check.Rule.class);
     if (ruleAnnotation == null) {

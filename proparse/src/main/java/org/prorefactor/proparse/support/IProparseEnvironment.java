@@ -19,11 +19,13 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.prorefactor.core.schema.ISchema;
 import org.prorefactor.proparse.classdoc.ClassDocumentation;
 import org.prorefactor.refactor.settings.IProparseSettings;
 
+import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.ITypeInfo;
 
 /**
@@ -37,7 +39,7 @@ public interface IProparseEnvironment {
   void injectClassesFromCatalog(Reader reader);
 
   /**
-   * File encoding 
+   * File encoding
    */
   Charset getCharset();
 
@@ -62,12 +64,22 @@ public interface IProparseEnvironment {
   ITypeInfo getTypeInfoCI(String clz);
 
   /**
+   * Return main block signature of a procedure
+   */
+  IMethodElement getMainBlockSignature(String procName);
+
+  /**
+   * Return signature map
+   */
+  Map<String, IMethodElement> getMainBlockSignatures();
+
+  /**
    * Return all class names from a given package name
    */
   List<String> getAllClassesFromPackage(String pkgName);
 
   /**
-   * Add a given TypeInfo object 
+   * Add a given TypeInfo object
    */
   void injectTypeInfo(ITypeInfo unit);
 

@@ -27,6 +27,8 @@ import static org.sonar.plugins.openedge.utils.TestProjectSensorContext.PROC_TES
 import org.sonar.api.batch.sensor.highlighting.TypeOfText;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.plugins.openedge.OpenEdgePluginTest;
+import org.sonar.plugins.openedge.foundation.CheckRegistrar;
+import org.sonar.plugins.openedge.foundation.LicenseRegistrar;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
@@ -40,7 +42,7 @@ public class OpenEdgeCodeColorizerTest {
     SensorContextTester context = TestProjectSensorContext.createContext();
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
+    OpenEdgeComponents components = new OpenEdgeComponents(context.config(), new CheckRegistrar(), new LicenseRegistrar());
     OpenEdgeCodeColorizer sensor = new OpenEdgeCodeColorizer(oeSettings, components);
     sensor.execute(context);
 

@@ -110,17 +110,18 @@ public interface ITypeInfo {
    * Return method or constructor with the right name (for methods) and exactly the same parameters
    */
   default Pair<ITypeInfo, IMethodElement> getExactMatch(Function<String, ITypeInfo> provider, String method,
-      boolean constructor, DataType[] parameters, ParameterMode[] modes) {
+      boolean constructor, ParameterDescriptor[] parameters) {
     for (var elem : getMethods()) {
-      var c1 = constructor && elem.isConstructor() && (elem.getParameters().length == parameters.length)
-          && (elem.getParameters().length == modes.length);
-      var c2 = !constructor && !elem.isConstructor() && method.equalsIgnoreCase(elem.getName())
-          && (elem.getParameters().length == parameters.length) && (elem.getParameters().length == modes.length);
-      if (c1 || c2) {
+      var cond1 = constructor && elem.isConstructor() && (elem.getParameters().length == parameters.length);
+      var cond2 = !constructor && !elem.isConstructor() && method.equalsIgnoreCase(elem.getName())
+          && (elem.getParameters().length == parameters.length);
+      if (cond1 || cond2) {
         var match = true;
         for (int zz = 0; zz < elem.getParameters().length; zz++) {
-          match &= elem.getParameters()[zz].getDataType().equals(parameters[zz]);
-          match &= elem.getParameters()[zz].getMode().equals(modes[zz]);
+          match &= elem.getParameters()[zz].getDataType().equals(parameters[zz].getDataType());
+          match &= elem.getParameters()[zz].getMode().equals(parameters[zz].getMode());
+          match &= ((elem.getParameters()[zz].getExtent() == 0) && (parameters[zz].getExtent() == 0))
+              || ((elem.getParameters()[zz].getExtent() != 0) && (parameters[zz].getExtent() != 0));
         }
         if (match)
           return Pair.of(this, elem);
@@ -129,7 +130,7 @@ public interface ITypeInfo {
     if (!constructor) {
       var parent = provider.apply(getParentTypeName());
       if (parent != null)
-        return parent.getExactMatch(provider, method, constructor, parameters, modes);
+        return parent.getExactMatch(provider, method, constructor, parameters);
     }
 
     return null;
@@ -139,42 +140,45 @@ public interface ITypeInfo {
    * Return constructor with exactly the same parameters
    */
   default Pair<ITypeInfo, IMethodElement> getExactMatchConstructor(Function<String, ITypeInfo> provider,
-      DataType[] parameters, ParameterMode[] modes) {
-    return getExactMatch(provider, getTypeName(), true, parameters, modes);
+      ParameterDescriptor[] parameters) {
+    return getExactMatch(provider, getTypeName(), true, parameters);
   }
 
   /**
    * Return method with exactly the same name and parameters
    */
   default Pair<ITypeInfo, IMethodElement> getExactMatchMethod(Function<String, ITypeInfo> provider, String method,
-      DataType[] parameters, ParameterMode[] modes) {
-    return getExactMatch(provider, method, false, parameters, modes);
+      ParameterDescriptor[] parameters) {
+    return getExactMatch(provider, method, false, parameters);
   }
 
   default Pair<ITypeInfo, IMethodElement> getCompatibleMatch(Function<String, ITypeInfo> provider, String method,
-      boolean constructor, DataType[] parameters, ParameterMode[] modes) {
+      boolean constructor, ParameterDescriptor[] parameters) {
     // First, keep track of all compatible methods, and the reason why they are compatible
     // No enum for the reason as I don't want it to be public
     // 1 -> Unknown data type used, 2 -> ParameterMode difference, 3 -> Parameter datatype difference
     List<Triplet<ITypeInfo, IMethodElement, Set<Integer>>> list01 = new ArrayList<>();
     for (var elem : getMethods()) {
-      var c1 = constructor && elem.isConstructor() && (elem.getParameters().length == parameters.length)
-          && (elem.getParameters().length == modes.length);
-      var c2 = !constructor && !elem.isConstructor() && method.equalsIgnoreCase(elem.getName())
-          && (elem.getParameters().length == parameters.length) && (elem.getParameters().length == modes.length);
-      if (c1 || c2) {
+      var cond1 = constructor && elem.isConstructor() && (elem.getParameters().length == parameters.length);
+      var cond2 = !constructor && !elem.isConstructor() && method.equalsIgnoreCase(elem.getName())
+          && (elem.getParameters().length == parameters.length);
+      if (cond1 || cond2) {
         var match = true;
         Set<Integer> reason = new HashSet<>();
         for (int zz = 0; zz < elem.getParameters().length; zz++) {
-          if (parameters[zz] == DataType.UNKNOWN) {
+          if (parameters[zz].getDataType() == DataType.UNKNOWN) {
             reason.add(1);
           } else {
-            var same = elem.getParameters()[zz].getDataType().equals(parameters[zz]);
-            var compat = elem.getParameters()[zz].getDataType().isCompatible(parameters[zz], provider);
+            var extent = ((elem.getParameters()[zz].getExtent() == 0) && (parameters[zz].getExtent() == 0))
+                || ((elem.getParameters()[zz].getExtent() != 0) && (parameters[zz].getExtent() != 0));
+            var same = extent && elem.getParameters()[zz].getDataType().equals(parameters[zz].getDataType());
+            var compat = extent
+                && elem.getParameters()[zz].getDataType().isCompatible(parameters[zz].getDataType(), provider);
+
             match &= compat;
             if (!same && compat)
               reason.add(3);
-            var sameMode = elem.getParameters()[zz].getMode().equals(modes[zz]);
+            var sameMode = elem.getParameters()[zz].getMode().equals(parameters[zz].getMode());
             if (!sameMode)
               reason.add(2);
           }
@@ -186,10 +190,10 @@ public interface ITypeInfo {
     }
     if (list01.size() > 1) {
       // If multiple methods match, the following rules apply:
-      //   * If there was a null (?) parameter, then don't return anything (ambiguous)
-      //   * If matches involve only parameter mode, we return the first one (ambiguity is accepted)
-      //   * If matches involve only parameter type, we return the first one (ambiguity is accepted)
-      //   * If matches involve both parameter type and mode, we return the first one involving only mode
+      // * If there was a null (?) parameter, then don't return anything (ambiguous)
+      // * If matches involve only parameter mode, we return the first one (ambiguity is accepted)
+      // * If matches involve only parameter type, we return the first one (ambiguity is accepted)
+      // * If matches involve both parameter type and mode, we return the first one involving only mode
       var anyUnknown = list01.stream().anyMatch(it -> it.getO3().contains(1));
       var paramModeList = list01.stream().filter(it -> it.getO3().contains(2)).toList();
       var paramTypeList = list01.stream().filter(it -> it.getO3().contains(3)).toList();
@@ -209,7 +213,7 @@ public interface ITypeInfo {
       // Check parent class only when looking for methods
       var parent = provider.apply(getParentTypeName());
       if (parent != null)
-        return parent.getCompatibleMatchMethod(provider, method, parameters, modes);
+        return parent.getCompatibleMatchMethod(provider, method, parameters);
     }
 
     return null;
@@ -219,38 +223,39 @@ public interface ITypeInfo {
    * Return method with the same name and compatible parameters (CHAR / LONGCHAR for example)
    */
   default Pair<ITypeInfo, IMethodElement> getCompatibleMatchMethod(Function<String, ITypeInfo> provider, String method,
-      DataType[] parameters, ParameterMode[] modes) {
-    return getCompatibleMatch(provider, method, false, parameters, modes);
+      ParameterDescriptor[] parameters) {
+    return getCompatibleMatch(provider, method, false, parameters);
   }
 
   /**
    * Return method with the same name and compatible parameters (CHAR / LONGCHAR for example)
    */
   default Pair<ITypeInfo, IMethodElement> getCompatibleMatchConstructor(Function<String, ITypeInfo> provider,
-      DataType[] parameters, ParameterMode[] modes) {
-    return getCompatibleMatch(provider, getTypeName(), true, parameters, modes);
+      ParameterDescriptor[] parameters) {
+    return getCompatibleMatch(provider, getTypeName(), true, parameters);
   }
 
   default Pair<ITypeInfo, IMethodElement> getMethod(Function<String, ITypeInfo> provider, String method,
-      DataType[] parameters, ParameterMode[] modes) {
-    var exactMatch = getExactMatchMethod(provider, method, parameters, modes);
+      ParameterDescriptor[] parameters) {
+    var exactMatch = getExactMatchMethod(provider, method, parameters);
     if (exactMatch != null)
       return exactMatch;
-    return getCompatibleMatchMethod(provider, method, parameters, modes);
+    return getCompatibleMatchMethod(provider, method, parameters);
   }
 
-  default Pair<ITypeInfo, IMethodElement> getConstructor(Function<String, ITypeInfo> provider, DataType[] parameters,
-      ParameterMode[] modes) {
-    var exactMatch = getExactMatchConstructor(provider, parameters, modes);
+  default Pair<ITypeInfo, IMethodElement> getConstructor(Function<String, ITypeInfo> provider,
+      ParameterDescriptor[] parameters) {
+    var exactMatch = getExactMatchConstructor(provider, parameters);
     if (exactMatch != null)
       return exactMatch;
-    return getCompatibleMatchConstructor(provider, parameters, modes);
+    return getCompatibleMatchConstructor(provider, parameters);
   }
 
   /**
    * Return property by name in class hierarchy
    */
-  default Pair<ITypeInfo, IPropertyElement> lookupProperty(Function<String, ITypeInfo> typeInfoProvider, String property) {
+  default Pair<ITypeInfo, IPropertyElement> lookupProperty(Function<String, ITypeInfo> typeInfoProvider,
+      String property) {
     for (var elem : getProperties()) {
       if (property.equalsIgnoreCase(elem.getName())) {
         return Pair.of(this, elem);
@@ -364,4 +369,27 @@ public interface ITypeInfo {
     return null;
   }
 
+  public static class ParameterDescriptor {
+    private final DataType dataType;
+    private final ParameterMode mode;
+    private final int extent;
+
+    public ParameterDescriptor(DataType dataType, int extent, ParameterMode mode) {
+      this.dataType = dataType;
+      this.mode = mode;
+      this.extent = extent;
+    }
+
+    public DataType getDataType() {
+      return dataType;
+    }
+
+    public ParameterMode getMode() {
+      return mode;
+    }
+
+    public int getExtent() {
+      return extent;
+    }
+  }
 }

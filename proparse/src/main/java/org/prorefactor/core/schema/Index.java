@@ -24,7 +24,7 @@ public class Index implements IIndex {
   private final boolean unique;
   private final boolean primary;
 
-  private final List<IField> fields = new ArrayList<>();
+  private final List<IIndexField> fields = new ArrayList<>();
   
   public Index(ITable table, String name, boolean unique, boolean primary) {
     this.table = table;
@@ -33,7 +33,7 @@ public class Index implements IIndex {
     this.primary = primary;
   }
 
-  public void addField(IField field) {
+  public void addField(IIndexField field) {
     fields.add(field);
   }
 
@@ -58,7 +58,7 @@ public class Index implements IIndex {
   }
 
   @Override
-  public List<IField> getFields() {
+  public List<IIndexField> getFields() {
     return fields;
   }
 }

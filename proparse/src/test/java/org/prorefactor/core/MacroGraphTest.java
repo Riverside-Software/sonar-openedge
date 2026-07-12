@@ -198,6 +198,9 @@ public class MacroGraphTest extends AbstractProparseTest {
     assertEquals(ref.getArgNumber(2).getName(), "param2");
     assertEquals(ref.getArgNumber(2).getValue(), "value2");
     assertNull(ref.getArgNumber(3));
+    // Include children
+    assertEquals(unit.getMacroGraph().getIncludeChildren().size(), 1);
+    assertEquals(unit.getMacroGraph().getIncludeChildren().get(0).getIncludeChildren().size(), 0);
   }
 
   @Test
@@ -236,6 +239,12 @@ public class MacroGraphTest extends AbstractProparseTest {
     List<MacroEvent> list = unit.getMacroGraph().findExternalMacroReferences();
     assertNotNull(list);
     assertEquals(list.size(), 3);
+
+    // Include children
+    assertEquals(unit.getMacroGraph().getIncludeChildren().size(), 3);
+    assertEquals(unit.getMacroGraph().getIncludeChildren().get(0).getIncludeChildren().size(), 0);
+    assertEquals(unit.getMacroGraph().getIncludeChildren().get(1).getIncludeChildren().size(), 0);
+    assertEquals(unit.getMacroGraph().getIncludeChildren().get(2).getIncludeChildren().size(), 0);
 
     /* First include file */
     IncludeRef ref1 = (IncludeRef) list.get(0);

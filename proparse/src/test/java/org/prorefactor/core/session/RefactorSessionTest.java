@@ -19,6 +19,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -27,10 +28,13 @@ import java.util.function.Function;
 import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.refactor.RefactorSession;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.ITypeInfo;
+import eu.rssw.pct.elements.fixed.MethodElement;
+import eu.rssw.pct.elements.fixed.Parameter;
 
 /**
  * Test Progress built-in classes presence in the session
@@ -40,7 +44,7 @@ public class RefactorSessionTest {
 
   private RefactorSession session;
 
-  @BeforeTest
+  @BeforeMethod
   public void setUp() {
     try {
       session = new RefactorSession(new UnitTestProparseSettings(), new SportsSchema());
@@ -91,6 +95,49 @@ public class RefactorSessionTest {
 
     assertNotNull(info.lookupProperty(EMPTY_PROVIDER, "Length"));
     assertFalse(info.lookupProperty(EMPTY_PROVIDER, "Length").getO2().isStatic());
+  }
+
+  @Test
+  public void testGetSignatureNotFound() {
+    assertNull(session.getMainBlockSignature("nonexistent.p"));
+  }
+
+  @Test
+  public void testGetSignaturesEmpty() {
+    assertNotNull(session.getMainBlockSignatures());
+    assertTrue(session.getMainBlockSignatures().isEmpty());
+  }
+
+  @Test
+  public void testInjectSignatureEmptyName() {
+    session.injectSignature(null, "foo/bar/test");
+    assertTrue(session.getMainBlockSignatures().isEmpty());
+
+    var sig = new MethodElement("", false, DataType.VOID, new Parameter[] {});
+    session.injectSignature(sig, null);
+    assertTrue(session.getMainBlockSignatures().isEmpty());
+    session.injectSignature(sig, "");
+    assertTrue(session.getMainBlockSignatures().isEmpty());
+  }
+
+  @Test
+  public void testInjectSignature() {
+    var sig01 = new MethodElement("", false, DataType.VOID, new Parameter[] {});
+    session.injectSignature(sig01, "foo/bar/test01.p");
+    var sig02 = new MethodElement("", false, DataType.VOID, new Parameter[] {});
+    session.injectSignature(sig02, "test02.p");
+    var sig03 = new MethodElement("", false, DataType.VOID, new Parameter[] {});
+    session.injectSignature(sig03, "test03");
+    var sig04 = new MethodElement("", false, DataType.VOID, new Parameter[] {});
+    session.injectSignature(sig04, "bar\\test04");
+
+    assertEquals(session.getMainBlockSignature("foo/bar/test01"), sig01);
+    assertEquals(session.getMainBlockSignature("foo/bar/test01.p"), sig01);
+    // Side effect: this works too...
+    assertEquals(session.getMainBlockSignature("foo/bar/test01.w"), sig01);
+    assertEquals(session.getMainBlockSignature("test02"), sig02);
+    assertEquals(session.getMainBlockSignature("test03"), sig03);
+    assertEquals(session.getMainBlockSignature("bar/test04"), sig04);
   }
 
 }

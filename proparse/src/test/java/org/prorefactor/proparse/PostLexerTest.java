@@ -56,7 +56,11 @@ public class PostLexerTest extends AbstractProparseTest {
   @Test
   public void testPostLexer01Init() {
     // First time verifying the channel locations
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "postlexer01.p"), session);
+    String code = """
+        &if true or int(00) = 0 and (2 + 3) = 5 &then &scoped-define xx zz ~n &endif
+        "{&xx}"
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     TokenSource src = unit.preprocess();
     assertEquals(unit.getCodeSections().keySet().size(), 0);
     // &IF
@@ -96,7 +100,11 @@ public class PostLexerTest extends AbstractProparseTest {
   @Test
   public void testPostLexer01() {
     // First time verifying the channel locations
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "postlexer01.p"), session);
+    String code = """
+        &if true or int(00) = 0 and (2 + 3) = 5 &then &scoped-define xx zz ~n &endif
+        "{&xx}"
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     TokenSource src = unit.preprocess();
     // Whitespaces on hidden channel
     ProToken tok = nextVisibleToken(src);
@@ -106,7 +114,11 @@ public class PostLexerTest extends AbstractProparseTest {
 
   @Test
   public void testPostLexer02() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "postlexer02.p"), session);
+    String code = """
+        &if false &then &scoped-define xx zz ~n &else &scoped-define xx yy ~n&endif
+        "{&xx}"
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     TokenSource src = unit.preprocess();
     ProToken tok = nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
@@ -115,7 +127,11 @@ public class PostLexerTest extends AbstractProparseTest {
 
   @Test
   public void testPostLexer03() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "postlexer03.p"), session);
+    String code = """
+        &if false &then &elseif true &then &scoped-define xx zz ~n &else &scoped-define xx yy ~n &endif
+        "{&xx}"
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     TokenSource src = unit.preprocess();
     ProToken tok = nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
@@ -124,7 +140,8 @@ public class PostLexerTest extends AbstractProparseTest {
 
   @Test
   public void testPostLexer04() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "postlexer04.p"), session);
+    String code = "&GLOBAL-DEFINE AAA a'aa~n&GLOBAL-DEFINE BBB bb'b~n&GLOBAL-DEFINE EMPTY~n&GLOBAL-DEFINE NEWLINE xxx~~~nyyy~n\n\"{&AAA}{&BBB}{&EMPTY}{&NEWLINE}\"\n";
+    ParseUnit unit = getParseUnit(code, session);
     TokenSource src = unit.preprocess();
     ProToken tok = nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.QSTRING);
@@ -134,7 +151,21 @@ public class PostLexerTest extends AbstractProparseTest {
 
   @Test
   public void testPreprocessorLevel01() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "postlexer05.p"), session);
+    String code = """
+        define variable x as logical no-undo. // 0
+
+        &if true
+        &then
+
+        if x then message "test1". // 1
+        &if true
+        &then
+        if x then message "test2". // 2
+        &endif
+
+        &endif
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     TokenSource src = unit.preprocess();
 
     ProToken tok = nextToken(src, ABLNodeType.IF);
@@ -147,7 +178,24 @@ public class PostLexerTest extends AbstractProparseTest {
 
   @Test
   public void testPreprocessorLevel02() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "postlexer06.p"), session);
+    String code = """
+        define variable x as logical no-undo. // 0
+
+        &if true
+        &then
+          message "test1". // 1
+          &if false
+          &then
+            message "test2". // Not visible
+          &else
+            message "test3". // 2
+          &endif
+          message "test4". // 1
+        &endif
+
+        define variable x2 as logical no-undo. // 0
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     TokenSource src = unit.preprocess();
 
     ProToken tok = nextToken(src, ABLNodeType.DEFINE);
@@ -177,7 +225,25 @@ public class PostLexerTest extends AbstractProparseTest {
 
   @Test
   public void testPreprocessorLevel03() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "postlexer07.p"), session);
+    String code = """
+        define variable x as logical no-undo. // 0
+
+        &if true
+        &then
+          message "test1". // 1
+          &if false
+          &then
+            message "test2".
+          &elseif true &then
+            &if true &then
+              message "test3". // 3
+            &endif
+            message "test4". // 2
+          &endif
+          message "test5". // 1
+        &endif
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     TokenSource src = unit.preprocess();
 
     ProToken tok = nextToken(src, ABLNodeType.MESSAGE);
@@ -207,7 +273,63 @@ public class PostLexerTest extends AbstractProparseTest {
 
   @Test
   public void testAnalyzeSuspend() {
-    ParseUnit unit2 = getParseUnit(new File(SRC_DIR, "lexer05.p"), session);
+    String code = """
+        // Not yet in AB Code
+        MESSAGE "".
+
+        &ANALYZE-SUSPEND _VERSION-NUMBER AB_v10r12 GUI
+        &ANALYZE-RESUME
+
+        &SCOPED-DEFINE WINDOW-NAME wSettings
+        // Read-only
+        MESSAGE "".
+
+        &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS wSettings\s
+        // Editable
+        MESSAGE "".
+        &ANALYZE-RESUME
+
+        &ANALYZE-SUSPEND _UIB-PREPROCESSOR-BLOCK
+        // Read-only
+        MESSAGE "".
+        &ANALYZE-RESUME
+
+        &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _MAIN-BLOCK wSettings \s
+        // Read-only
+        MESSAGE "".
+        &ANALYZE-RESUME
+
+        &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL wSettings wSettings
+        // Editable
+        MESSAGE "".
+        &ANALYZE-RESUME
+
+        &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE disable_UI wSettings  _DEFAULT-DISABLE
+        // Read-only
+        MESSAGE "".
+        &ANALYZE-RESUME
+
+        &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE initializeObject wSettings\s
+        // Editable
+        MESSAGE "".
+        &ANALYZE-RESUME
+
+        &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE xxx wSettings  _FREEFORM
+        // Editable
+        MESSAGE "".
+        &ANALYZE-RESUME
+
+        &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION yyy getCurrent wSettings
+        // Editable\s
+        MESSAGE "".
+        &ANALYZE-RESUME
+
+        &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE zzz DataLogicProcedure  _DB-REQUIRED
+        // Editable\s
+        MESSAGE "".
+        &ANALYZE-RESUME
+        """;
+    ParseUnit unit2 = getParseUnit(code, session);
     unit2.parse();
     assertEquals(unit2.getCodeSections().keySet().size(), 1);
     assertFalse(unit2.isInEditableSection(-1, 10));
@@ -335,7 +457,11 @@ public class PostLexerTest extends AbstractProparseTest {
 
   @Test(enabled = false)
   public void testMacroExpansion() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer12.p"), session);
+    String code = """
+        &Scoped-define XXXX MESSAGE 'Hello' .
+        {&XXXX}
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     TokenSource stream = unit.preprocess();
 
     ProToken tok = (ProToken) stream.nextToken();
@@ -464,7 +590,17 @@ public class PostLexerTest extends AbstractProparseTest {
 
   @Test
   public void testProparseDirectiveLexPhase() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer15.p"), session);
+    String code = """
+        {&_proparse_ xxx}
+        custnum = 1.
+
+        {&_proparse_ xxx}
+        customer.custnum = 1.
+
+        {&_proparse_ xxx}
+        sp2k.customer.custnum = 1.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     TokenSource stream = unit.lex();
 
     ProToken tok = (ProToken) stream.nextToken();
@@ -521,7 +657,17 @@ public class PostLexerTest extends AbstractProparseTest {
 
   @Test
   public void testProparseDirectivePreprocessPhase() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer15.p"), session);
+    String code = """
+        {&_proparse_ xxx}
+        custnum = 1.
+
+        {&_proparse_ xxx}
+        customer.custnum = 1.
+
+        {&_proparse_ xxx}
+        sp2k.customer.custnum = 1.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     TokenSource src = unit.preprocess();
 
     ProToken tok = (ProToken) nextVisibleToken(src);
@@ -552,7 +698,7 @@ public class PostLexerTest extends AbstractProparseTest {
 
   @Test
   public void testHexNumbers() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer16.p"), session);
+    ParseUnit unit = getParseUnit("MESSAGE 125 0x65 0X66 0xfb 0xab -0x01.\n", session);
     TokenSource stream = unit.lex();
 
     ProToken tok = (ProToken) stream.nextToken();
@@ -599,7 +745,7 @@ public class PostLexerTest extends AbstractProparseTest {
 
   @Test
   public void testHexNumbers2() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer17.p"), session);
+    ParseUnit unit = getParseUnit("MESSAGE 125 0x2g8.\n", session);
     TokenSource stream = unit.lex();
 
     ProToken tok = (ProToken) stream.nextToken();
@@ -724,7 +870,7 @@ public class PostLexerTest extends AbstractProparseTest {
   @Test
   public void test22() throws IOException {
     RefactorSession session = new RefactorSession(new UnitTestWindowsSettings(), new SportsSchema());
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer22.p"), session);
+    ParseUnit unit = getParseUnit("&GLOBAL-DEFINE DEF1 IF TRUE THEN {&_proparse_ prolint-nowarn(use-index)} RUN Foo{1}Bar.\n{&DEF1}\n", session);
     TokenSource src = unit.preprocess();
     ProToken tok = (ProToken) nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.IF);

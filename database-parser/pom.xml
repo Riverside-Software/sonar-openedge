@@ -5,7 +5,7 @@
   <parent>
     <groupId>eu.rssw</groupId>
     <artifactId>sonar-openedge</artifactId>
-    <version>3.8.1</version>
+    <version>3.9.0</version>
   </parent>
   <groupId>eu.rssw.openedge.parsers</groupId>
   <artifactId>database-parser</artifactId>
@@ -31,12 +31,12 @@
     <dependency>
       <groupId>com.esotericsoftware</groupId>
       <artifactId>kryo</artifactId>
-      <version>5.5.0</version>
+      <version>5.6.2</version>
     </dependency>
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
-      <version>7.10.2</version>
+      <version>7.12.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>

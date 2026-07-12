@@ -16,6 +16,9 @@ package org.prorefactor.core;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
@@ -29,6 +32,7 @@ import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.macrolevel.IncludeRef;
 import org.prorefactor.macrolevel.MacroDef;
 import org.prorefactor.macrolevel.NamedMacroRef;
+import org.prorefactor.proparse.TextRange;
 import org.prorefactor.proparse.antlr4.Proparse;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.AbstractProparseTest;
@@ -48,7 +52,14 @@ public class PreprocessorDirectiveTest extends AbstractProparseTest {
 
   @Test
   public void test01() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor05.p"), session);
+    String code = """
+        { preprocessor/preprocessor05.i }
+
+        {&_proparse_prolint-nowarn(abc)}
+        {&_proparse_ prolint-nowarn(def,hij)}
+        message "truc".
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     assertEquals(unit.getTopNode().query(ABLNodeType.PROPARSEDIRECTIVE).size(), 0);
@@ -85,13 +96,23 @@ public class PreprocessorDirectiveTest extends AbstractProparseTest {
   @Test
   public void test02() {
     // Used to throw an exception, not the case anymore...
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor07.p"), session);
+    String code = """
+        &GLOBAL-DEFINE XXX {&_proparse_ prolint-nowarn(xxx)} MESSAGE "xxx".
+        {&XXX}
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
   }
 
   @Test
   public void test03() throws IOException {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor09.p"), session);
+    String code = """
+        {preprocessor/preprocessor09-1.i &varname=aaa
+                            &text1="text1 text2"
+                            &text2="aaa ""text3"" aaa"
+                            &text3="bbb 'text4' bbb"}.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     TokenSource stream = unit.preprocess();
 
     assertEquals(nextVisibleToken(stream).getType(), Proparse.DEFINE);
@@ -180,7 +201,17 @@ public class PreprocessorDirectiveTest extends AbstractProparseTest {
 
   @Test
   public void test05() throws IOException {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor11.p"), session);
+    String code = """
+        DISPLAY
+        &IF TRUE &THEN
+        "xx"
+        &IF FALSE &THEN
+        "yy"
+        &ENDIF
+        "zz"
+        &ENDIF
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     TokenSource src = unit.preprocess();
     ProToken tok = nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.DISPLAY);
@@ -216,7 +247,18 @@ public class PreprocessorDirectiveTest extends AbstractProparseTest {
 
   @Test
   public void test06() throws IOException {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor12.p"), session);
+    String code = """
+        DISPLAY
+        &IF FALSE &THEN
+        "xx"
+        &IF TRUE &THEN
+        "yy"
+        &ENDIF
+        "zz"
+        &ENDIF
+        "zz2"
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     TokenSource src = unit.preprocess();
     ProToken tok = nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.DISPLAY);
@@ -238,7 +280,17 @@ public class PreprocessorDirectiveTest extends AbstractProparseTest {
 
   @Test
   public void test07() throws IOException {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor13.p"), session);
+    String code = """
+        DISPLAY
+        &IF FALSE &THEN
+        "xx"
+        &ELSEIF FALSE &THEN
+        "yy"
+        &ELSEIF TRUE &THEN
+        "zz"
+        &ENDIF
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     TokenSource src = unit.preprocess();
     ProToken tok = nextVisibleToken(src);
     assertEquals(tok.getNodeType(), ABLNodeType.DISPLAY);
@@ -288,11 +340,34 @@ public class PreprocessorDirectiveTest extends AbstractProparseTest {
     // Second is inc2.i, at line 2 (in inc.i)
     assertEquals(((IncludeRef) unit.getMacroSourceArray()[2]).getFileRefName(), "preprocessor/preprocessor14-02.i");
     assertEquals(((IncludeRef) unit.getMacroSourceArray()[2]).getPosition().getLine(), 2);
+
+    var list = unit.getTopNode().query(ABLNodeType.MESSAGE);
+    assertEquals(list.size(), 4);
+    var m1 = list.get(0);
+    assertEquals(m1.getToken().getIncludeStack().length, 0);
+    var m2 = list.get(1);
+    assertEquals(m2.getToken().getIncludeStack().length, 1);
+    assertEquals(m2.getToken().getIncludeStack()[0], new TextRange(0, 4, 0, 4, 36));
+    assertEquals(m2.getToken().getIncludeStack()[0].hashCode(), 28748475);
+    var m3 = list.get(2);
+    assertEquals(m3.getToken().getIncludeStack().length, 2);
+    assertEquals(m3.getToken().getIncludeStack()[0], new TextRange(0, 4, 0, 4, 36));
+    assertEquals(m3.getToken().getIncludeStack()[1], new TextRange(1, 2, 0, 2, 34));
+    assertNotEquals(m3.getToken().getIncludeStack()[0], m3.getToken().getIncludeStack()[1]);
+    var m4 = list.get(3);
+    assertEquals(m4.getToken().getIncludeStack().length, 0);
   }
 
   @Test
   public void test09() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor15.p"), session);
+    String code = """
+        // Variable FOO is expanded by preprocessor, and will result in OutOfRange problem with CPD
+        // Expansion should be reverted for CPD.
+        &scoped-define FOO LongLongLongLongLongLongLongLongName
+        MESSAGE "{&FOO  }" VIEW-AS
+          ALERT-BOX.
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     IncludeRef incRef = unit.getMacroGraph();
@@ -336,7 +411,13 @@ public class PreprocessorDirectiveTest extends AbstractProparseTest {
 
   @Test
   public void test11() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor17.p"), session);
+    String code = """
+        &scoped-define FOO "foo"
+        MESSAGE SUBSTITUTE("ABC", 123).
+        MESSAGE SUBSTITUTE({&FOO}, "123").
+        DISPLAY {&FOO} "Hello".
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
     List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.SUBSTITUTE);
@@ -379,7 +460,13 @@ public class PreprocessorDirectiveTest extends AbstractProparseTest {
 
   @Test
   public void test19() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor19.p"), session);
+    String code = """
+        &Scoped-define TargetTag ""
+        &IF "{&TargetTag}"  <> " " AND "{&TargetTag}"  <> '"' &THEN
+          MESSAGE "xxx".
+        &endif
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     TokenSource src = unit.preprocess();
     ProToken tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.AMPSCOPEDDEFINE);
@@ -432,7 +519,8 @@ public class PreprocessorDirectiveTest extends AbstractProparseTest {
 
   @Test
   public void test21() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor21.p"), session);
+    String code = "message \"Hello World\" {&_proparse_ skip-section} \"Test1\" \"Test2\" {&_proparse_ skip-section-end} view-as alert-box.\n";
+    ParseUnit unit = getParseUnit(code, session);
     TokenSource src = unit.preprocess();
     ProToken tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
@@ -454,7 +542,8 @@ public class PreprocessorDirectiveTest extends AbstractProparseTest {
 
   @Test
   public void test22() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor22.p"), session);
+    String code = "message \"Hello World\" {&_proparse_ skip-section} \"Test1\" \"Test2\".\n";
+    ParseUnit unit = getParseUnit(code, session);
     TokenSource src = unit.preprocess();
     ProToken tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
@@ -473,7 +562,8 @@ public class PreprocessorDirectiveTest extends AbstractProparseTest {
 
   @Test
   public void test23() {
-    ParseUnit unit = getParseUnit(new File(SRC_DIR, "preprocessor23.p"), session);
+    String code = "message \"Hello World\" {&_proparse_ skip-section} \"Test1\" {&_proparse_ something} \"Test2\" {&_proparse_ skip-section-end} view-as alert-box.\n";
+    ParseUnit unit = getParseUnit(code, session);
     TokenSource src = unit.preprocess();
     ProToken tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.MESSAGE);
@@ -491,6 +581,33 @@ public class PreprocessorDirectiveTest extends AbstractProparseTest {
     assertEquals(tok.getNodeType(), ABLNodeType.WS);
     tok = (ProToken) src.nextToken();
     assertEquals(tok.getNodeType(), ABLNodeType.VIEWAS);
+  }
+
+  @Test
+  public void test26() {
+    var unit = getParseUnit(new File(SRC_DIR + "/preprocessor26.p"), session);
+    var src = unit.preprocess();
+    var tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPSCOPEDDEFINE);
+    var macroGraph = unit.getMacroGraph();
+    assertTrue(macroGraph.getFileRefName().isBlank());
+    var macroDefList = macroGraph.macroEventList.stream().filter(MacroDef.class::isInstance).map(MacroDef.class::cast).toList();
+    assertEquals(macroDefList.size(), 1);
+    var def1 = macroDefList.get(0);
+    assertEquals(def1.getName(), "foo");
+    assertEquals(def1.getValue(), "'Foo' BAR");
+    var macroRefList = macroGraph.macroEventList.stream().filter(NamedMacroRef.class::isInstance).map(NamedMacroRef.class::cast).toList();
+    assertEquals(macroRefList.size(), 1);
+    assertNotNull(macroRefList.get(0).getMacroDef());
+    assertEquals(macroGraph.getIncludeChildren().size(), 1);
+    var inc01 = macroGraph.getIncludeChildren().get(0);
+    assertEquals(inc01.getFileRefName(), "preprocessor/preprocessor26.i");
+    var macroRefList2 = inc01.macroEventList.stream().filter(NamedMacroRef.class::isInstance).map(NamedMacroRef.class::cast).toList();
+    assertEquals(macroRefList2.size(), 1);
+    assertNull(macroRefList2.get(0).getMacroDef()); // Reference to arg number #1
+    assertEquals(inc01.getIncludeChildren().size(), 1);
+    var inc02 = inc01.getIncludeChildren().get(0);
+    assertEquals(inc02.getFileRefName(), "preprocessor/preprocessor26-02.i");
   }
 
   /**

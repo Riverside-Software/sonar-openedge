@@ -17,7 +17,6 @@ package org.prorefactor.core;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.prorefactor.core.util.SportsSchema;
@@ -38,7 +37,20 @@ public class MetricsTest extends AbstractProparseTest {
 
   @Test
   public void test01() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/data/preprocessor/preprocessor14.p"), session);
+    String code = """
+        /* First comment */
+        MESSAGE "1".
+
+        { preprocessor/preprocessor14-01.i }
+
+        /*
+        Multi line
+
+        comment
+        */
+        MESSAGE "2".
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.parse();
     assertFalse(unit.hasSyntaxError());
 
@@ -50,7 +62,12 @@ public class MetricsTest extends AbstractProparseTest {
 
   @Test
   public void test02() {
-    ParseUnit unit = getParseUnit(new File("src/test/resources/data/inc3.i"), session);
+    String code = """
+        /* Comment line 1 */
+        ASSIGN {1}.name = {2}.
+        /* Comment line 3 */
+        """;
+    ParseUnit unit = getParseUnit(code, session);
     unit.lexAndGenerateMetrics();
 
     assertEquals(unit.getMetrics().getLoc(), 1);

@@ -24,7 +24,7 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.rule.RuleKey;
-import org.sonar.plugins.openedge.api.LicenseRegistration.License;
+import org.sonar.plugins.openedge.api.License;
 
 /**
  * Parent class of all OpenEdge checks

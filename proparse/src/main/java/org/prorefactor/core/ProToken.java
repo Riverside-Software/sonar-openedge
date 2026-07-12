@@ -21,6 +21,7 @@ import javax.annotation.Nonnull;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
+import org.prorefactor.proparse.TextRange;
 
 import com.google.common.base.Splitter;
 
@@ -53,6 +54,7 @@ public class ProToken implements Token {
   private boolean macroExpansion;
   private boolean synthetic = false;
   private boolean nestedComments = false;
+  private TextRange[] includeStack;
 
   ProToken(ABLNodeType type, String text) {
     this.type = type;
@@ -161,6 +163,10 @@ public class ProToken implements Token {
 
   public boolean hasNestedComments() {
     return nestedComments;
+  }
+
+  public TextRange[] getIncludeStack() {
+    return includeStack;
   }
 
   /**
@@ -294,6 +300,7 @@ public class ProToken implements Token {
     private boolean synthetic = false;
     private boolean writable = false;
     private boolean nestedComments = false;
+    private TextRange[] includeStack;
 
     public Builder(ABLNodeType type, String text) {
       this.type = type;
@@ -410,6 +417,11 @@ public class ProToken implements Token {
       return this;
     }
 
+    public Builder setIncludeStack(TextRange[] includeStack) {
+      this.includeStack = includeStack;
+      return this;
+    }
+
     /**
      * Merge current builder with another token. Some information is lost in the process.
      */
@@ -445,6 +457,7 @@ public class ProToken implements Token {
       tok.synthetic = synthetic;
       tok.nestedComments = nestedComments;
       tok.rawText = rawText;
+      tok.includeStack = includeStack == null ? new TextRange[0] : includeStack;
 
       switch (type) {
         case COMMENT:

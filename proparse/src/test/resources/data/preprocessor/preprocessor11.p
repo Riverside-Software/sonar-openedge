@@ -1,8 +1,0 @@
-DISPLAY
-&IF TRUE &THEN
-"xx"
-&IF FALSE &THEN
-"yy"
-&ENDIF
-"zz"
-&ENDIF

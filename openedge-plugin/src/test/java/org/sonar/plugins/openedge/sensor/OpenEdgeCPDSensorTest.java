@@ -32,6 +32,8 @@ import static org.testng.Assert.assertNull;
 import org.sonar.api.config.internal.MapSettings;
 import org.sonar.plugins.openedge.OpenEdgePluginTest;
 import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.foundation.CheckRegistrar;
+import org.sonar.plugins.openedge.foundation.LicenseRegistrar;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
 import org.sonar.plugins.openedge.utils.TestProjectSensorContext;
@@ -48,7 +50,7 @@ public class OpenEdgeCPDSensorTest {
     context.setSettings(settings);
 
     var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    var components = new OpenEdgeComponents(context.config());
+    var components = new OpenEdgeComponents(context.config(), new CheckRegistrar(), new LicenseRegistrar());
     var sensor = new OpenEdgeCPDSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -64,7 +66,7 @@ public class OpenEdgeCPDSensorTest {
   public void testCPDSensor02() throws Exception {
     var context = TestProjectSensorContext.createContext();
     var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(), OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    var components = new OpenEdgeComponents(context.config());
+    var components = new OpenEdgeComponents(context.config(), new CheckRegistrar(), new LicenseRegistrar());
     var sensor = new OpenEdgeCPDSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -81,7 +83,7 @@ public class OpenEdgeCPDSensorTest {
     context.setSettings(settings);
     var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_DE_RUNTIME);
-    var components = new OpenEdgeComponents(context.config());
+    var components = new OpenEdgeComponents(context.config(), new CheckRegistrar(), new LicenseRegistrar());
     var sensor = new OpenEdgeCPDSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -97,7 +99,7 @@ public class OpenEdgeCPDSensorTest {
     context.setCanSkipUnchangedFiles(true);
     var oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_DE_RUNTIME);
-    var components = new OpenEdgeComponents(context.config());
+    var components = new OpenEdgeComponents(context.config(), new CheckRegistrar(), new LicenseRegistrar());
     var sensor01 = new OpenEdgeDependenciesSensor(oeSettings, components);
     sensor01.execute(context);
     var test3 = context.fileSystem().inputFile(

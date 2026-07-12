@@ -34,6 +34,7 @@ import org.prorefactor.core.schema.IField;
 import org.prorefactor.core.schema.IIndex;
 import org.prorefactor.core.schema.ITable;
 import org.prorefactor.core.schema.Index;
+import org.prorefactor.core.schema.IndexField;
 import org.prorefactor.core.schema.Table;
 import org.prorefactor.core.schema.TableType;
 import org.prorefactor.proparse.antlr4.Proparse.*;
@@ -1312,7 +1313,9 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   public void enterDefTableIndex(DefTableIndexContext ctx) {
     defineIndexInitialize(ctx.identifier().getText(), ctx.UNIQUE() != null, ctx.PRIMARY() != null, false);
     for (int zz = 1; zz < ctx.defTableIndexComponent().size(); zz++) {
-      defineIndexField(ctx.defTableIndexComponent(zz).identifier().getText());
+      var fldName = ctx.defTableIndexComponent(zz).identifier().getText();
+      var asc = ctx.defTableIndexComponent(zz).DESCENDING().isEmpty();
+      defineIndexField(fldName, asc);
     }
   }
 
@@ -2426,10 +2429,10 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
     currDefTable.getTable().add(currDefIndex);
   }
 
-  private void defineIndexField(String name) {
+  private void defineIndexField(String name, boolean ascending) {
     IField fld = currDefTable.getTable().lookupField(name);
     if (fld != null)
-      currDefIndex.addField(fld);
+      currDefIndex.addField(new IndexField(currDefIndex, name, ascending));
   }
 
   private void defineTable(JPNode defNode, String name, TableType storeType) {
@@ -2457,13 +2460,8 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
       LOG.trace("Copying all indexes from {}", currDefTableLike.getName());
       for (IIndex idx : currDefTableLike.getTable().getIndexes()) {
         Index newIdx = new Index(currDefTable.getTable(), idx.getName(), idx.isUnique(), idx.isPrimary());
-        for (IField fld : idx.getFields()) {
-          IField ifld = newIdx.getTable().lookupField(fld.getName());
-          if (ifld == null) {
-            LOG.info("Unable to find field name {} in table {}", fld.getName(), currDefTable.getTable().getName());
-          } else {
-            newIdx.addField(ifld);
-          }
+        for (var fld : idx.getFields()) {
+          newIdx.addField(new IndexField(newIdx, fld.getName(), fld.isAscending()));
         }
         currDefTable.getTable().add(newIdx);
       }

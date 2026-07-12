@@ -93,6 +93,16 @@ public class IncludeRef extends MacroRef {
     return null;
   }
 
+  /**
+   * @return List of files included in this include
+   */
+  public List<IncludeRef> getIncludeChildren() {
+    return macroEventList.stream() //
+      .filter(IncludeRef.class::isInstance) //
+      .map(IncludeRef.class::cast) //
+      .toList();
+  }
+
   @Override
   public String toString() {
     return "Include file at line " + getLine();

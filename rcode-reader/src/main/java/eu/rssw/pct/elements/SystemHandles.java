@@ -26,8 +26,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
@@ -45,7 +45,7 @@ import eu.rssw.pct.mapping.SystemHandlesMapping;
 
 @Generated(value = "github.com/Riverside-Software/oe-documentation")
 public class SystemHandles {
-  private static final Map<OpenEdgeVersion, Collection<ISystemHandle>> SYS_HANDLES = new HashMap<>();
+  private static final Map<OpenEdgeVersion, Collection<ISystemHandle>> SYS_HANDLES = new ConcurrentHashMap<>();
   public static final Function<OpenEdgeVersion, Function<String, ISystemHandle>> SYSTEM_HANDLE_PROVIDER = version -> {
     return name -> getSystemHandles(version).stream().filter(
         it -> it.getName().equalsIgnoreCase(name)).findFirst().orElse(null);

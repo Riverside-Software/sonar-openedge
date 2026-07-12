@@ -33,6 +33,8 @@ import org.sonar.api.batch.sensor.issue.Issue;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.OpenEdgePluginTest;
 import org.sonar.plugins.openedge.api.Constants;
+import org.sonar.plugins.openedge.foundation.CheckRegistrar;
+import org.sonar.plugins.openedge.foundation.LicenseRegistrar;
 import org.sonar.plugins.openedge.foundation.OpenEdgeComponents;
 import org.sonar.plugins.openedge.foundation.OpenEdgeRulesDefinition;
 import org.sonar.plugins.openedge.foundation.OpenEdgeSettings;
@@ -48,7 +50,7 @@ public class OpenEdgeWarningsSensorTest {
     context.setActiveRules(createRules1());
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
+    OpenEdgeComponents components = new OpenEdgeComponents(context.config(), new CheckRegistrar(), new LicenseRegistrar());
     OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -93,7 +95,7 @@ public class OpenEdgeWarningsSensorTest {
     context.setActiveRules(createRules2());
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
+    OpenEdgeComponents components = new OpenEdgeComponents(context.config(), new CheckRegistrar(), new LicenseRegistrar());
     OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings, components);
     sensor.execute(context);
 
@@ -131,7 +133,7 @@ public class OpenEdgeWarningsSensorTest {
     context.setActiveRules(createRules0());
     OpenEdgeSettings oeSettings = new OpenEdgeSettings(context.config(), context.fileSystem(),
         OpenEdgePluginTest.SONARQUBE_RUNTIME);
-    OpenEdgeComponents components = new OpenEdgeComponents(context.config());
+    OpenEdgeComponents components = new OpenEdgeComponents(context.config(), new CheckRegistrar(), new LicenseRegistrar());
     OpenEdgeWarningsSensor sensor = new OpenEdgeWarningsSensor(oeSettings, components);
     sensor.execute(context);
 

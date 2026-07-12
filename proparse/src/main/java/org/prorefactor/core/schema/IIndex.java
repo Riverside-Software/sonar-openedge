@@ -22,5 +22,5 @@ public interface IIndex {
   ITable getTable();
   boolean isUnique();
   boolean isPrimary();
-  List<IField> getFields();
+  List<IIndexField> getFields();
 }
