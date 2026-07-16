@@ -37,6 +37,8 @@ import org.prorefactor.proparse.antlr4.PreprocessorParser.KeywordAllFunctionCont
 import org.prorefactor.proparse.antlr4.PreprocessorParser.KeywordFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.LeftTrimFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.LengthFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.LogFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.LogicalFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.LookupFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.MaximumFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.MinimumFunctionContext;
@@ -237,6 +239,14 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
   }
 
   @Override
+  public Object visitLogicalFunction(LogicalFunctionContext ctx) {
+    if (ctx.format == null)
+      return logical(visit(ctx.expr(0)));
+    else
+      return logical(visit(ctx.expr(0)), visit(ctx.format));
+  }
+
+  @Override
   public Object visitDecimalFunction(DecimalFunctionContext ctx) {
     return decimal(visit(ctx.expr()));
   }
@@ -301,6 +311,14 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
   @Override
   public Object visitLengthFunction(LengthFunctionContext ctx) {
     return visit(ctx.expr(0)).toString().length();
+  }
+
+  @Override
+  public Object visitLogFunction(LogFunctionContext ctx) {
+    if (ctx.base == null)
+      return log(visit(ctx.expr(0)));
+    else
+      throw new ProEvalException("Error computing LOG");
   }
 
   @Override
@@ -626,12 +644,40 @@ public class PreproEval extends PreprocessorParserBaseVisitor<Object> {
     throw new ProEvalException("Error converting to INTEGER.");
   }
 
+  static Boolean logical(Object expr) {
+    return logical(expr, "yes/no");
+  }
+
+  static Boolean logical(Object expr, Object format) {
+    if ((expr == null) || (format == null) || !(format instanceof String))
+      throw new ProEvalException("Error converting to LOGICAL");
+    if (expr instanceof Number num)
+      return num.intValue() != 0;
+    if ((expr instanceof String expr0) && (format instanceof String format0)) {
+      var idx = format0.indexOf('/');
+      var trueVal = idx == -1 ? format0 : format0.substring(0, idx);
+      return expr0.equalsIgnoreCase(trueVal);
+    }
+
+    return false;
+  }
+
   static String lefttrim(Object a, Object b) {
     if (b != null) {
       String t = getString(b);
       return StringFuncs.leftTrim(getString(a), t);
     }
     return StringFuncs.leftTrim(getString(a));
+  }
+
+  public static Number log(Object x) {
+    if (x instanceof Number expr)
+      return Math.log(expr.doubleValue());
+    throw new ProEvalException("Error computing LOG");
+  }
+
+  public static Number log(Object x, Object y) {
+    throw new ProEvalException("Error computing LOG");
   }
 
   static Integer lookup(Object x, Object y, Object z) {

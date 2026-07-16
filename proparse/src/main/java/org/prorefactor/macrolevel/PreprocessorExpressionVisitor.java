@@ -30,6 +30,8 @@ import org.prorefactor.proparse.antlr4.PreprocessorParser.KeywordAllFunctionCont
 import org.prorefactor.proparse.antlr4.PreprocessorParser.KeywordFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.LeftTrimFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.LengthFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.LogFunctionContext;
+import org.prorefactor.proparse.antlr4.PreprocessorParser.LogicalFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.LookupFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.MaximumFunctionContext;
 import org.prorefactor.proparse.antlr4.PreprocessorParser.MinimumFunctionContext;
@@ -195,6 +197,11 @@ public class PreprocessorExpressionVisitor extends PreprocessorParserBaseVisitor
   }
 
   @Override
+  public String visitLogicalFunction(LogicalFunctionContext ctx) {
+    return "LOGICAL(" + visit(ctx.expr(0)) + ')';
+  }
+
+  @Override
   public String visitDecimalFunction(DecimalFunctionContext ctx) {
     return "DECIMAL(" + visit(ctx.expr()) + ')';
   }
@@ -254,6 +261,11 @@ public class PreprocessorExpressionVisitor extends PreprocessorParserBaseVisitor
   }
 
   @Override
+  public String visitLogFunction(LogFunctionContext ctx) {
+    return "LOG(" + visit(ctx.expr(0)) + ')';
+  }
+
+  @Override
   public String visitLookupFunction(LookupFunctionContext ctx) {
     String expr = visit(ctx.expr(0));
     String list = visit(ctx.list);
@@ -268,7 +280,7 @@ public class PreprocessorExpressionVisitor extends PreprocessorParserBaseVisitor
   public String visitMaximumFunction(MaximumFunctionContext ctx) {
     StringBuilder str = new StringBuilder();
     for (ExprContext expr : ctx.expr()) {
-      str.append(str.length() == 0 ? "" : ", ").append(visit(expr));
+      str.append(str.isEmpty() ? "" : ", ").append(visit(expr));
     }
 
     return "MAXIMUM(" + str.toString() + ')';
@@ -278,7 +290,7 @@ public class PreprocessorExpressionVisitor extends PreprocessorParserBaseVisitor
   public String visitMinimumFunction(MinimumFunctionContext ctx) {
     StringBuilder str = new StringBuilder();
     for (ExprContext expr : ctx.expr()) {
-      str.append(str.length() == 0 ? "" : ", ").append(visit(expr));
+      str.append(str.isEmpty() ? "" : ", ").append(visit(expr));
     }
 
     return "MINIMUM(" + str + ')';

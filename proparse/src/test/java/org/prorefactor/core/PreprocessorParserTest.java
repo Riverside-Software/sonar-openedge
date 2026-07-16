@@ -15,6 +15,7 @@
 package org.prorefactor.core;
 
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -24,6 +25,7 @@ import java.io.IOException;
 import org.prorefactor.core.util.SportsSchema;
 import org.prorefactor.core.util.UnitTestProparseSettings;
 import org.prorefactor.proparse.PreproEval;
+import org.prorefactor.proparse.ProEvalException;
 import org.prorefactor.refactor.RefactorSession;
 import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.ParseUnit;
@@ -412,6 +414,25 @@ public class PreprocessorParserTest extends AbstractProparseTest {
   @Test
   public void testTrim02() {
     testVariable(unit.getTopNode(), "var83");
+  }
+
+  @Test
+  public void testLog() {
+    testVariable(unit.getTopNode(), "var92");
+    testNoVariable(unit.getTopNode(), "var93");
+    assertThrows(ProEvalException.class, () -> PreproEval.log(10, 2));
+  }
+
+  @Test
+  public void testLogical() {
+    testVariable(unit.getTopNode(), "var84");
+    testNoVariable(unit.getTopNode(), "var85");
+    testVariable(unit.getTopNode(), "var86");
+    testVariable(unit.getTopNode(), "var87");
+    testNoVariable(unit.getTopNode(), "var88");
+    testNoVariable(unit.getTopNode(), "var89");
+    testVariable(unit.getTopNode(), "var90");
+    testNoVariable(unit.getTopNode(), "var91");
   }
 
   @Test

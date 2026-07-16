@@ -72,6 +72,7 @@ function:
   | LENGTH LEFTPAREN expr (COMMA type=expr)? RIGHTPAREN         # lengthFunction
   | LIBRARY LEFTPAREN expr RIGHTPAREN                           # libraryFunction
   | LOG LEFTPAREN expr (COMMA base=expr)? RIGHTPAREN            # logFunction
+  | LOGICAL LEFTPAREN expr (COMMA format=expr)? RIGHTPAREN             # logicalFunction
   | LOOKUP LEFTPAREN expr COMMA list=expr (COMMA character=expr)? RIGHTPAREN
                                                                 # lookupFunction
   | MAXIMUM LEFTPAREN expr (COMMA expr)+ RIGHTPAREN             # maximumFunction
