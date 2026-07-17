@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.prorefactor.core.Pair;
@@ -53,6 +54,8 @@ import eu.rssw.pct.elements.v12.TypeInfoV12;
  */
 public class RCodeInfo {
   private static final Logger LOGGER = LoggerFactory.getLogger(RCodeInfo.class);
+
+  private static final String BUILTIN_CLASSES_PREFIX = "Progress.Lang.";
 
   // Magic number, followed by same magic number written as little-endian
   private static final int MAGIC1 = 0x56CED309;
@@ -87,6 +90,9 @@ public class RCodeInfo {
   private static final int IVS_CRC_OFFSET_V10 = 0x6E;
   private static final int IVS_CRC_OFFSET_V11 = 0xA4;
   private static final int IVS_CRC_OFFSET_V12 = 0xAE;
+  private static final int IVS_GLOBAL_SHARED_OFFSET = 0x08;
+  private static final int IVS_SHARED_OFFSET = 0x10;
+  private static final int IVS_OO_INFO_OFFSET = 0x68;
 
   protected ByteOrder order;
   protected int version;
@@ -112,11 +118,27 @@ public class RCodeInfo {
   protected int frameSegmentTableSize;
   protected int textSegmentTableSize;
 
+  protected int textSegmentOffset;
+  protected int textSegmentSize;
+  protected Charset textSegmentCharset;
+
+  protected int attributeElementOffset;
+  protected int referencedTypesOffset;
+  protected int attributeElementCount;
+  protected int olSigList;
+  protected int typeTableSize;
+  
   // From type block
   private boolean isClass = false;
 
   private ITypeInfo typeInfo;
   private IMethodElement mainBlock;
+
+  private List<String> newGlobalSharedVars;
+  private List<String> newSharedVars;
+  private List<String> refdClasses;
+  private List<String> refdMethods;
+  private List<String> refdProperties;
 
   public RCodeInfo(InputStream input) throws InvalidRCodeException, IOException {
     this(input, null);
@@ -136,44 +158,14 @@ public class RCodeInfo {
       processHeader(input, out);
       processSignatureBlock(input, out);
       processSegmentTable(input, out);
-      byte[] rcodeBlock = input.readNBytes(rcodeSize);
-  
-      if ((version & 0x3FFF) >= 1200) {
-        crc = ByteBuffer.wrap(rcodeBlock, IVS_CRC_OFFSET_V12, Short.BYTES).order(order).getShort() & 0xFFFF;
-        digest = Base64.getEncoder().encodeToString(
-            Arrays.copyOfRange(rcodeBlock, digestOffset + 16, digestOffset + 16 + 32));
-      } else if ((version & 0x3FFF) >= 1100) {
-        crc = ByteBuffer.wrap(rcodeBlock, IVS_CRC_OFFSET_V11, Short.BYTES).order(order).getShort() & 0xFFFF;
-        if (digestOffset > 0)
-          digest = bufferToHex(Arrays.copyOfRange(rcodeBlock, digestOffset, digestOffset + 16));
-      } else {
-        crc = ByteBuffer.wrap(rcodeBlock, IVS_CRC_OFFSET_V10, Short.BYTES).order(order).getShort() & 0xFFFF;
-        if (digestOffset > 0)
-          digest = bufferToHex(Arrays.copyOfRange(rcodeBlock, digestOffset, digestOffset + 16));
-      }
-  
-      if ((version & 0x3FFF) >= 1100) {
-        if ((initialValueSegmentOffset >= 0) && (initialValueSegmentSize > 0)) {
-          processInitialValueSegment(Arrays.copyOfRange(rcodeBlock, initialValueSegmentOffset,
-              initialValueSegmentOffset + initialValueSegmentSize), out);
-        }
-        if ((actionSegmentOffset >= 0) && (actionSegmentSize > 0)) {
-          processActionSegment(
-              Arrays.copyOfRange(rcodeBlock, actionSegmentOffset, actionSegmentOffset + actionSegmentSize), out);
-        }
-        if ((ecodeSegmentOffset >= 0) && (ecodeSegmentSize > 0)) {
-          processEcodeSegment(Arrays.copyOfRange(rcodeBlock, ecodeSegmentOffset, ecodeSegmentOffset + ecodeSegmentSize),
-              out);
-        }
-        if ((debugSegmentOffset > 0) && (debugSegmentSize > 0)) {
-          processDebugSegment(Arrays.copyOfRange(rcodeBlock, debugSegmentOffset, debugSegmentOffset + debugSegmentSize),
-              out);
-        }
-      }
-  
+
+      var rcodeBlock = input.readNBytes(rcodeSize);
+      readDigest(rcodeBlock);
       if (typeBlockSize > 0) {
         processTypeBlock(input.readNBytes(typeBlockSize), out);
-        isClass = true;
+      }
+      if ((version & 0x3FFF) >= 1100) {
+        processRCodeBlock(rcodeBlock, out);
       }
     } catch (IndexOutOfBoundsException caught) {
       // Prevent RuntimeException from bubbling up
@@ -283,15 +275,66 @@ public class RCodeInfo {
     frameSegmentTableSize = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_FRAME_SEGMENT_TABLE_SIZE, Short.BYTES).order(order).getShort();
     textSegmentTableSize = ByteBuffer.wrap(header, SEGMENT_TABLE_OFFSET_TEXT_SEGMENT_TABLE_SIZE, Short.BYTES).order(order).getShort();
 
+    var offset = round8(
+        SEGMENT_TABLE_OFFSET_TEXT_SEGMENT_TABLE_SIZE + 4 + (12 * ipacsTableSize) + (8 * frameSegmentTableSize));
+    if ((header.length > offset + 12)) {
+      var languages = readNullTerminatedString(header, offset);
+      offset += languages.length() + 1;
+      textSegmentOffset = ByteBuffer.wrap(header, offset, Integer.BYTES).order(order).getInt();
+      textSegmentSize = ByteBuffer.wrap(header, offset + 4, Integer.BYTES).order(order).getInt();
+      textSegmentCharset = oeCharset(readNullTerminatedString(header, offset + 8));
+    }
+
     if (out != null) {
       out.printf("%nInitVal segment: %08X %08X%n", initialValueSegmentOffset, initialValueSegmentSize);
       out.printf("Action segment:  %08X %08X%n", actionSegmentOffset, actionSegmentSize);
       out.printf("Ecode segment:   %08X %08X%n", ecodeSegmentOffset, ecodeSegmentSize);
+      out.printf("Text segment:    %08X %08X%n", textSegmentOffset, textSegmentSize);
       out.printf("Debug segment:   %08X %08X%n", debugSegmentOffset, debugSegmentSize);
       out.printf("IPACS Sz:                 %08X%n", ipacsTableSize);
       out.printf("FrameSeg Sz:              %08X%n", frameSegmentTableSize);
       out.printf("TextSeg Sz:               %08X%n", textSegmentTableSize);
     }
+  }
+
+  private final void readDigest(byte[] rcodeBlock) {
+    if ((version & 0x3FFF) >= 1200) {
+      crc = ByteBuffer.wrap(rcodeBlock, IVS_CRC_OFFSET_V12, Short.BYTES).order(order).getShort() & 0xFFFF;
+      digest = Base64.getEncoder().encodeToString(
+          Arrays.copyOfRange(rcodeBlock, digestOffset + 16, digestOffset + 16 + 32));
+    } else if ((version & 0x3FFF) >= 1100) {
+      crc = ByteBuffer.wrap(rcodeBlock, IVS_CRC_OFFSET_V11, Short.BYTES).order(order).getShort() & 0xFFFF;
+      if (digestOffset > 0)
+        digest = bufferToHex(Arrays.copyOfRange(rcodeBlock, digestOffset, digestOffset + 16));
+    } else {
+      crc = ByteBuffer.wrap(rcodeBlock, IVS_CRC_OFFSET_V10, Short.BYTES).order(order).getShort() & 0xFFFF;
+      if (digestOffset > 0)
+        digest = bufferToHex(Arrays.copyOfRange(rcodeBlock, digestOffset, digestOffset + 16));
+    }
+  }
+
+  private final void processRCodeBlock(byte[] rcodeBlock, PrintStream out) throws InvalidRCodeException {
+    if ((textSegmentOffset >= 0) && (textSegmentSize > 0)) {
+      processTextSegment(Arrays.copyOfRange(rcodeBlock, textSegmentOffset, textSegmentOffset + textSegmentSize),
+          out);
+    }
+    if ((initialValueSegmentOffset >= 0) && (initialValueSegmentSize > 0)) {
+      processInitialValueSegment(Arrays.copyOfRange(rcodeBlock, initialValueSegmentOffset,
+          initialValueSegmentOffset + initialValueSegmentSize), Arrays.copyOfRange(rcodeBlock, textSegmentOffset, textSegmentOffset + textSegmentSize), out);
+    }
+    if ((actionSegmentOffset >= 0) && (actionSegmentSize > 0)) {
+      processActionSegment(
+          Arrays.copyOfRange(rcodeBlock, actionSegmentOffset, actionSegmentOffset + actionSegmentSize), Arrays.copyOfRange(rcodeBlock, textSegmentOffset, textSegmentOffset + textSegmentSize), out);
+    }
+    if ((ecodeSegmentOffset >= 0) && (ecodeSegmentSize > 0)) {
+      processEcodeSegment(Arrays.copyOfRange(rcodeBlock, ecodeSegmentOffset, ecodeSegmentOffset + ecodeSegmentSize),
+          out);
+    }
+    if ((debugSegmentOffset > 0) && (debugSegmentSize > 0)) {
+      processDebugSegment(Arrays.copyOfRange(rcodeBlock, debugSegmentOffset, debugSegmentOffset + debugSegmentSize),
+          out);
+    }
+
   }
 
   void processTypeBlock(byte[] segment, PrintStream out) throws InvalidRCodeException {
@@ -300,6 +343,7 @@ public class RCodeInfo {
       printByteBuffer(out, segment);
     }
 
+    isClass = true;
     if ((version & 0x3FFF) >= 1200) {
       this.typeInfo = TypeInfoV12.newTypeInfo(segment, order);
     } else {
@@ -307,12 +351,105 @@ public class RCodeInfo {
     }
   }
 
-  void processInitialValueSegment(byte[] segment, PrintStream out) throws InvalidRCodeException {
-    // No-op
+  void processInitialValueSegment(byte[] segment, byte[] textSeg, PrintStream out) {
+    if (out != null) {
+      out.printf("%n**********%nIVS%n***********%n");
+      printByteBuffer(out, segment);
+    }
+
+    // New global shared variables
+    var currOffset = ByteBuffer.wrap(segment, IVS_GLOBAL_SHARED_OFFSET, Integer.BYTES).order(order).getInt();
+    List<String> list = new ArrayList<>();
+    while (currOffset > 0) {
+      var textOffset = ByteBuffer.wrap(segment, currOffset + 4, Integer.BYTES).order(order).getInt();
+      var varName = readNullTerminatedString(textSeg, textOffset, textSegmentCharset);
+      list.add(varName);
+      currOffset = ByteBuffer.wrap(segment, currOffset, Integer.BYTES).order(order).getInt();
+    }
+    newGlobalSharedVars = List.of(list.toArray(new String[] {}));
+
+    // New shared variables
+    currOffset = ByteBuffer.wrap(segment, IVS_SHARED_OFFSET, Integer.BYTES).order(order).getInt();
+    list = new ArrayList<>();
+    while (currOffset > 0) {
+      var textOffset = ByteBuffer.wrap(segment, currOffset + 4, Integer.BYTES).order(order).getInt();
+      var varName = readNullTerminatedString(textSeg, textOffset, textSegmentCharset);
+      list.add(varName);
+      currOffset = ByteBuffer.wrap(segment, currOffset, Integer.BYTES).order(order).getInt();
+    }
+    newSharedVars = List.of(list.toArray(new String[] {}));
+
+    var ooInfoOffset = ByteBuffer.wrap(segment, IVS_OO_INFO_OFFSET, Integer.BYTES).order(order).getInt();
+    // ooInfoOffset is *sometimes* 0, so make sure we don't read garbage data
+    if (ooInfoOffset > 0) {
+      attributeElementOffset = ByteBuffer.wrap(segment, ooInfoOffset, Integer.BYTES).order(order).getInt();
+      referencedTypesOffset = ByteBuffer.wrap(segment, ooInfoOffset + 4, Integer.BYTES).order(order).getInt();
+      olSigList = ByteBuffer.wrap(segment, ooInfoOffset + 20, Integer.BYTES).order(order).getInt();
+      if ((version & 0x3FFF) >= 1200) {
+        attributeElementCount = ByteBuffer.wrap(segment, ooInfoOffset + 36, Short.BYTES).order(order).getShort();
+        typeTableSize = ByteBuffer.wrap(segment, ooInfoOffset + 38, Short.BYTES).order(order).getShort();
+      } else {
+        attributeElementCount = ByteBuffer.wrap(segment, ooInfoOffset + 32, Short.BYTES).order(order).getShort();
+        typeTableSize = ByteBuffer.wrap(segment, ooInfoOffset + 34, Short.BYTES).order(order).getShort();
+      }
+    }
   }
 
-  void processActionSegment(byte[] segment, PrintStream out) throws InvalidRCodeException {
+  void processTextSegment(byte[] segment, PrintStream out) {
     // No-op
+    if (out != null) {
+      out.printf("%n**********%nTEXT%n***********%n");
+      printByteBuffer(out, segment);
+    }
+  }
+
+  void processActionSegment(byte[] segment, byte[] textSegment, PrintStream out) {
+    if (out != null) {
+      out.printf("%n**********%nACTION%n***********%n");
+      printByteBuffer(out, segment);
+    }
+
+    var clsList = new String[typeTableSize];
+    var sz1 = ((version & 0x3FFF) >= 1200) ? 40 : 24;
+    for (int zz = 0; zz < typeTableSize; zz++) {
+      var typeNameOffset = ByteBuffer.wrap(segment, referencedTypesOffset + (zz * sz1), Integer.BYTES).order(
+          order).getInt();
+      var typeName = readNullTerminatedString(textSegment, typeNameOffset);
+      clsList[zz] = typeName;
+    }
+
+    var methdList = new String[attributeElementCount];
+    var propList = new String[attributeElementCount];
+    sz1 = ((version & 0x3FFF) >= 1200) ? 40 : 32;
+    for (int zz = 0; zz < attributeElementCount; zz++) {
+      var elemNameOffset = ByteBuffer.wrap(segment, attributeElementOffset + (zz * sz1), Integer.BYTES).order(
+          order).getInt();
+      var typeTableIndex = ByteBuffer.wrap(segment, attributeElementOffset + (zz * sz1) + (((version & 0x3FFF) >= 1200) ? 22 : 4), Short.BYTES).order(
+          order).getShort();
+      var elementType = ByteBuffer.wrap(segment, attributeElementOffset + (zz * sz1) + (((version & 0x3FFF) >= 1200) ? 38:30), Byte.BYTES).order(
+          order).get();
+      var elemName = readNullTerminatedString(textSegment, elemNameOffset);
+      if (elementType == 1) {
+        methdList[zz] = clsList[typeTableIndex] + ":" + elemName;
+      } else if ((elementType == 2) || (elementType == 8)) {
+        propList[zz] = clsList[typeTableIndex] + ":" + elemName;
+      }
+
+      refdClasses = Arrays.stream(clsList) //
+        .filter(it -> !isClass || !it.equalsIgnoreCase(typeInfo.getTypeName())) //
+        .filter(it -> !it.startsWith(BUILTIN_CLASSES_PREFIX)) //
+        .toList();
+      refdMethods = Arrays.stream(methdList) //
+        .filter(Objects::nonNull) //
+        .filter(it -> !isClass || !it.startsWith(typeInfo.getTypeName() + ":")) //
+        .filter(it -> !it.startsWith(BUILTIN_CLASSES_PREFIX)) //
+        .toList();
+      refdProperties = Arrays.stream(propList) //
+        .filter(Objects::nonNull) //
+        .filter(it -> !isClass || !it.startsWith(typeInfo.getTypeName() + ":")) //
+        .filter(it -> !it.startsWith(BUILTIN_CLASSES_PREFIX)) //
+        .toList();
+    }
   }
 
   void processEcodeSegment(byte[] segment, PrintStream out) throws InvalidRCodeException {
@@ -350,6 +487,26 @@ public class RCodeInfo {
 
   public ITypeInfo getTypeInfo() {
     return typeInfo;
+  }
+
+  public List<String> getNewGlobalSharedVars() {
+    return newGlobalSharedVars;
+  }
+
+  public List<String> getNewSharedVars() {
+    return newSharedVars;
+  }
+
+  public List<String> getReferencedClasses() {
+    return refdClasses == null ? List.of() : refdClasses;
+  }
+
+  public List<String> getReferencedMethods() {
+    return refdMethods == null ? List.of() : refdMethods;
+  }
+
+  public List<String> getReferencedProperties() {
+    return refdProperties == null ? List.of() : refdProperties;
   }
 
   public Optional<IMethodElement> getMainBlock() {
@@ -534,6 +691,10 @@ public class RCodeInfo {
     public InvalidRCodeException(Throwable caught) {
       super(caught);
     }
+  }
+
+  private static int round8(int i) {
+    return (i + 7) & ~7;
   }
 
 }
