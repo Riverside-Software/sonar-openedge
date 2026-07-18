@@ -30,6 +30,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
@@ -614,7 +615,6 @@ public class CrossReference {
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
-            "sourceGuid",
             "fileNum",
             "refSeq",
             "lineNum",
@@ -633,8 +633,6 @@ public class CrossReference {
         })
         public static class Reference {
 
-            @XmlElement(name = "Source-guid", required = true, nillable = true)
-            protected String sourceGuid;
             @XmlElement(name = "File-num", required = true, type = Integer.class, nillable = true)
             protected Integer fileNum;
             @XmlElement(name = "Ref-seq", required = true, type = Integer.class, nillable = true)
@@ -666,33 +664,10 @@ public class CrossReference {
             @XmlElement(name = "Interface-ref")
             protected List<CrossReference.Source.Reference.InterfaceRef> interfaceRef;
             @XmlAttribute(name = "Reference-type")
-            protected String referenceType;
+            @XmlJavaTypeAdapter(ReferenceTypeAdapter.class)
+            protected ReferenceType referenceType;
             @XmlAttribute(name = "Object-identifier")
             protected String objectIdentifier;
-
-            /**
-             * Gets the value of the sourceGuid property.
-             * 
-             * @return
-             *     possible object is
-             *     {@link String }
-             *     
-             */
-            public String getSourceGuid() {
-                return sourceGuid;
-            }
-
-            /**
-             * Sets the value of the sourceGuid property.
-             * 
-             * @param value
-             *     allowed object is
-             *     {@link String }
-             *     
-             */
-            public void setSourceGuid(String value) {
-                this.sourceGuid = value;
-            }
 
             /**
              * Gets the value of the fileNum property.
@@ -1081,25 +1056,29 @@ public class CrossReference {
 
             /**
              * Gets the value of the referenceType property.
-             * 
+             *
              * @return
              *     possible object is
-             *     {@link String }
-             *     
+             *     {@link ReferenceType }
+             *
              */
             public String getReferenceType() {
+              return referenceType == null ? ReferenceType.UNKNOWN.toString() : referenceType.toString().replace('_', '-');
+            }
+
+            public ReferenceType getRefType() {
                 return referenceType;
             }
 
             /**
              * Sets the value of the referenceType property.
-             * 
+             *
              * @param value
              *     allowed object is
-             *     {@link String }
-             *     
+             *     {@link ReferenceType }
+             *
              */
-            public void setReferenceType(String value) {
+            public void setRefType(ReferenceType value) {
                 this.referenceType = value;
             }
 
@@ -1127,6 +1106,10 @@ public class CrossReference {
                 this.objectIdentifier = value;
             }
 
+            @Override
+            public String toString() {
+              return referenceType.toString() + "@" + fileNum + ":" + lineNum;
+            }
 
             /**
              * <p>Java class for anonymous complex type.
