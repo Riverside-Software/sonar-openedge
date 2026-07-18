@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -74,6 +73,7 @@ import com.google.common.base.Strings;
 import com.progress.xref.CrossReference;
 import com.progress.xref.CrossReference.Source;
 import com.progress.xref.CrossReference.Source.Reference;
+import com.progress.xref.ReferenceType;
 
 import eu.rssw.pct.elements.ITypeInfo;
 
@@ -538,7 +538,7 @@ public class ParseUnit {
             "WHOLE-INDEX".equals(ref.getDetail()));
         // All sort-access on the same line number
         src.getReference().stream() //
-          .filter(it -> "SORT-ACCESS".equals(it.getReferenceType())) //
+          .filter(it -> it.getReferenceType() == ReferenceType.SORT_ACCESS) //
           .filter(it -> it.getRefSeq().intValue() > ref.getRefSeq().intValue()) //
           .filter(it -> it.getFileNum().intValue() == ref.getFileNum().intValue()
               && it.getLineNum().intValue() == ref.getLineNum().intValue()) //
@@ -561,7 +561,7 @@ public class ParseUnit {
         .filter(it -> it.findDirectChild(ABLNodeType.RECORD_NAME) != null) //
         .map(it -> it.findDirectChild(ABLNodeType.RECORD_NAME)) //
         .map(RecordNameNode.class::cast) //
-        .collect(Collectors.toList());
+        .toList();
     // Remove duplicates RecordNameNodes pointing to the same table at the same *statement* line and in same file
     // XREF report index usage at the enclosing statement line number, and only with the table name (not with the actual
     // buffer name)
@@ -586,7 +586,7 @@ public class ParseUnit {
 
     for (Source src : xref.getSource()) {
       for (Reference ref : src.getReference()) {
-        if ("search".equalsIgnoreCase(ref.getReferenceType())) {
+        if (ref.getReferenceType() == ReferenceType.SEARCH) {
           handleSearchNode(src, ref, filteredList);
         }
       }

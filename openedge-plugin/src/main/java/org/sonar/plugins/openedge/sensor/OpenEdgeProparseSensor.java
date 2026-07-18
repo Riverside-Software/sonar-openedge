@@ -93,6 +93,7 @@ import com.google.common.io.ByteStreams;
 import com.progress.xref.CrossReference;
 import com.progress.xref.CrossReferenceUtils;
 import com.progress.xref.InvalidXMLFilterStream;
+import com.progress.xref.ReferenceType;
 
 import eu.rssw.listing.CodeBlock;
 import eu.rssw.listing.ListingParser;
@@ -310,11 +311,11 @@ public class OpenEdgeProparseSensor implements Sensor {
 
     // Shared objects
     long numShrTT = xref.getSource().stream().mapToLong(src -> src.getReference().stream().filter(
-        ref -> "NEW-SHR-TEMPTABLE".equalsIgnoreCase(ref.getReferenceType())).count()).sum();
+        ref -> ref.getReferenceType() == ReferenceType.NEW_SHR_TEMPTABLE).count()).sum();
     long numShrDS = xref.getSource().stream().mapToLong(src -> src.getReference().stream().filter(
-        ref -> "NEW-SHR-DATASET".equalsIgnoreCase(ref.getReferenceType())).count()).sum();
+        ref -> ref.getReferenceType() == ReferenceType.NEW_SHR_DATASET).count()).sum();
     long numShrVar = xref.getSource().stream().mapToLong(src -> src.getReference().stream().filter(
-        ref -> "NEW-SHR-VARIABLE".equalsIgnoreCase(ref.getReferenceType())).count()).sum();
+        ref -> ref.getReferenceType() == ReferenceType.NEW_SHR_VARIABLE).count()).sum();
 
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.NUM_TRANSACTIONS).withValue(
         trxBlocks.size()).save();

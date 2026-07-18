@@ -24,9 +24,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Set;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
@@ -38,10 +39,12 @@ import javax.xml.transform.sax.SAXSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
+import org.xml.sax.helpers.XMLFilterImpl;
 
 import com.progress.xref.CrossReference.Source;
 import com.progress.xref.CrossReference.Source.Reference;
@@ -52,6 +55,15 @@ public class CrossReferenceUtils {
   private static final JAXBContext CONTEXT;
   private static final Unmarshaller UNMARSHALLER;
   private static final CrossReference EMPTY_XREF = new EmptyCrossReference();
+  private static final Set<ReferenceType> ALLOWED_REF_TYPES = EnumSet.of(ReferenceType.INCLUDE, //
+      ReferenceType.RUN, //
+      ReferenceType.SORT_ACCESS, //
+      ReferenceType.SEARCH, //
+      ReferenceType.INVOKE, //
+      ReferenceType.NEW, //
+      ReferenceType.NEW_SHR_DATASET, //
+      ReferenceType.NEW_SHR_TEMPTABLE, //
+      ReferenceType.NEW_SHR_VARIABLE);
 
   static {
     SAX_PARSER_FACTORY = SAXParserFactory.newInstance();
@@ -123,8 +135,11 @@ public class CrossReferenceUtils {
   private static CrossReference parseXmlXref(InputStream input) throws IOException {
     CrossReference doc = EMPTY_XREF;
     try {
-      doc = (CrossReference) UNMARSHALLER.unmarshal(new SAXSource(SAX_PARSER_FACTORY.newSAXParser().getXMLReader(),
-          new InputSource(new InvalidXMLFilterStream(input))));
+      var reader = SAX_PARSER_FACTORY.newSAXParser().getXMLReader();
+      var filter = new SkippingFilter();
+      filter.setParent(reader);
+      doc = (CrossReference) UNMARSHALLER.unmarshal(
+          new SAXSource(filter, new InputSource(new InvalidXMLFilterStream(input))));
     } catch (JAXBException | SAXException | ParserConfigurationException caught) {
       throw new IOException(caught);
     }
@@ -214,55 +229,54 @@ public class CrossReferenceUtils {
       String currSrcStr = null;
       String ln = null;
       int lineNum = 0;
-      final AtomicInteger fileNum = new AtomicInteger(1);
-      final AtomicInteger seqNum = new AtomicInteger(1);
+      int fileNum = 1;
+      int seqNum = 1;
       while ((ln = reader2.readLine()) != null) {
         lineNum++;
         try {
           String[] line = parseLine(ln);
           if ((currSrc == null) || (currSrcStr == null) || !currSrcStr.equals(line[1])) {
             currSrcStr = line[1];
-            currSrc = sources.computeIfAbsent(line[1], key -> {
-              Source src = new Source();
-              src.fileNum = fileNum.getAndIncrement();
-              src.fileName = key;
-              src.reference = new ArrayList<>();
-              doc.source.add(src);
-              return src;
-            });
+            currSrc = sources.get(currSrcStr);
+            if (currSrc == null) {
+              currSrc = new Source();
+              currSrc.fileNum = fileNum++;
+              currSrc.fileName = currSrcStr;
+              currSrc.reference = new ArrayList<>();
+              doc.source.add(currSrc);
+              sources.put(currSrcStr, currSrc);
+            }
           }
-  
+
           Reference ref = new Reference();
-          ref.referenceType = line[3];
-          ref.fileNum = currSrc.fileNum;
-          ref.refSeq = seqNum.getAndIncrement();
+          ref.referenceType = ReferenceType.fromValue(line[3]);
+          ref.refSeq = seqNum++;
           // Line-number can be 'IMPLICIT' or 'NONE'
           ref.lineNum = !Character.isDigit(line[2].charAt(0)) ? 0 : Integer.parseInt(line[2]);
           ref.objectIdentifier = (line[4].length() > 2) && (line[4].charAt(0) == '"')
               && (line[4].charAt(line[4].length() - 1) == '"') ? line[4].substring(1, line[4].length() - 1) : line[4];
   
-          switch (line[3]) {
-            case "INCLUDE":
+          switch (ref.referenceType) {
+            case INCLUDE:
               handleIncludeReference(currSrc, ref);
               break;
-            case "RUN":
+            case RUN:
               handleRunReference(currSrc, ref);
               break;
-            case "SORT-ACCESS":
+            case SORT_ACCESS:
               handleSortAccessReference(currSrc, ref);
               break;
-            case "SEARCH":
+            case SEARCH:
               handleSearchReference(currSrc, ref);
               break;
-            case "INVOKE":
-            case "NEW":
+            case INVOKE, NEW:
               handleInvokeReference(currSrc, ref);
               break;
-            case "NEW-SHR-TEMPTABLE":
-            case "NEW-SHR-DATASET":
-            case "NEW-SHR-VARIABLE":
+            case NEW_SHR_TEMPTABLE, NEW_SHR_DATASET, NEW_SHR_VARIABLE:
               handleNewSharedReference(currSrc, ref);
               break;
+            default:
+              // No post-processing required
           }
         } catch (Exception caught) {
           LOGGER.debug("File '{}' - Unable to parse XREF line {}: '{}' -- Msg: {}", fName, lineNum, ln,
@@ -343,4 +357,34 @@ public class CrossReferenceUtils {
     }
   }
 
+  private static class SkippingFilter extends XMLFilterImpl {
+    private int skipDepth = 0;
+
+    @Override
+    public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+      if (skipDepth > 0) {
+        skipDepth++;
+        return;
+      }
+      if ("Reference".equals(qName) && !ALLOWED_REF_TYPES.contains(ReferenceType.fromValue(atts.getValue("Reference-type")))) {
+        skipDepth = 1;
+        return;
+      }
+      super.startElement(uri, localName, qName, atts);
+    }
+
+    @Override
+    public void endElement(String uri, String localName, String qName) throws SAXException {
+      if (skipDepth > 0) {
+        skipDepth--;
+        return;
+      }
+      super.endElement(uri, localName, qName);
+    }
+
+    @Override
+    public void characters(char[] ch, int start, int length) throws SAXException {
+      if (skipDepth == 0) super.characters(ch, start, length);
+    }
+  }
 }
