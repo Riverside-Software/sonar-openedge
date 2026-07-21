@@ -234,8 +234,10 @@ public class RCodeInfoTest {
       }
 
       try (Input input2 = new Input(new FileInputStream("target/rcode-kryo.bin"));) {
-        TypeInfoV12 foo = kryo.readObject(input2, TypeInfoV12.class);
-        System.out.println(foo);
+        var copy = kryo.readObject(input2, TypeInfoV12.class);
+        assertEquals(copy.getTypeName(), rci.getTypeInfo().getTypeName());
+        assertEquals(copy.getMethods().size(), rci.getTypeInfo().getMethods().size());
+        assertEquals(copy.getProperties().size(), rci.getTypeInfo().getProperties().size());
       }
 
     } catch (InvalidRCodeException caught) {
@@ -558,8 +560,11 @@ public class RCodeInfoTest {
       }
 
       try (Input input2 = new Input(new FileInputStream("target/plop.bin"));) {
-        TypeInfoV12 foo = kryo.readObject(input2, TypeInfoV12.class);
-        System.out.println(foo);
+        var copy = kryo.readObject(input2, TypeInfoV12.class);
+        assertEquals(copy.getTypeName(), rci.getTypeInfo().getTypeName());
+        assertNotNull(copy.getTempTable("tt1"));
+        assertNotNull(copy.getTempTable("tt2"));
+        assertNull(copy.getTempTable("tt5"));
       }
 
     } catch (InvalidRCodeException caught) {
