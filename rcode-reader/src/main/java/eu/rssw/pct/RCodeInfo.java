@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.prorefactor.core.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IMethodElement;
@@ -50,6 +52,8 @@ import eu.rssw.pct.elements.v12.TypeInfoV12;
  * Extract rcode information
  */
 public class RCodeInfo {
+  private static final Logger LOGGER = LoggerFactory.getLogger(RCodeInfo.class);
+
   // Magic number, followed by same magic number written as little-endian
   private static final int MAGIC1 = 0x56CED309;
   private static final int MAGIC2 = 0x09D3CE56;
@@ -191,6 +195,7 @@ public class RCodeInfo {
     } else if (magic == MAGIC2) {
       order = ByteOrder.LITTLE_ENDIAN;
     } else {
+      LOGGER.error("Invalid magic number in rcode");
       throw new InvalidRCodeException("Can't find magic number");
     }
 
@@ -219,6 +224,7 @@ public class RCodeInfo {
       typeBlockSize = 0;
       rcodeSize = ByteBuffer.wrap(header, HEADER_OFFSET_RCODE_SIZE, Integer.BYTES).order(order).getInt();
     } else {
+      LOGGER.error("Only v10+ rcode is supported");
       throw new InvalidRCodeException("Only v10+ rcode is supported");
     }
 
