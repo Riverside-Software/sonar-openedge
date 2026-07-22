@@ -24,6 +24,7 @@ import static org.testng.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
@@ -40,8 +41,6 @@ import org.prorefactor.treeparser.AbstractProparseTest;
 import org.prorefactor.treeparser.ParseUnit;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-import com.google.common.base.Charsets;
 
 public class PostLexerTest extends AbstractProparseTest {
   private static final String SRC_DIR = "src/test/resources/data/lexer";
@@ -480,7 +479,7 @@ public class PostLexerTest extends AbstractProparseTest {
 
   @Test
   public void testUnicodeBom() {
-    RefactorSession session2 = new RefactorSession(new ProparseSettings("src/test/resources/data"), new Schema(), Charsets.UTF_8);
+    RefactorSession session2 = new RefactorSession(new ProparseSettings("src/test/resources/data"), new Schema(), StandardCharsets.UTF_8);
     ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer13.p"), session2);
     TokenSource src = unit.preprocess();
 
@@ -527,7 +526,7 @@ public class PostLexerTest extends AbstractProparseTest {
     // Test with customSkipXCode set to true
     ProparseSettings settings = new ProparseSettings("src/test/resources/data");
     settings.setCustomSkipXCode(true);
-    RefactorSession session2 = new RefactorSession(settings, new Schema(), Charsets.UTF_8);
+    RefactorSession session2 = new RefactorSession(settings, new Schema(), StandardCharsets.UTF_8);
     ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer14.p"), session2);
     TokenSource src = unit.preprocess();
 
@@ -549,7 +548,7 @@ public class PostLexerTest extends AbstractProparseTest {
     // Test with customSkipXCode set to false
     ProparseSettings settings = new ProparseSettings("src/test/resources/data");
     settings.setCustomSkipXCode(false);
-    RefactorSession session2 = new RefactorSession(settings, new Schema(), Charsets.UTF_8);
+    RefactorSession session2 = new RefactorSession(settings, new Schema(), StandardCharsets.UTF_8);
     ParseUnit unit = getParseUnit(new File(SRC_DIR, "lexer14.p"), session2);
     // Has to fail here
     unit.preprocess();
