@@ -61,9 +61,9 @@
     <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../coverage-report/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     <!-- Dependencies -->
     <slf4j.version>1.7.36</slf4j.version>
-    <json.version>20231013</json.version>
-    <gson.version>2.10.1</gson.version>
-    <guava.version>33.2.1-jre</guava.version>
+    <json.version>20260719</json.version>
+    <gson.version>2.14.0</gson.version>
+    <guava.version>33.6.0-jre</guava.version>
     <kryo.version>5.6.2</kryo.version>
     <testng.version>7.12.0</testng.version>
     <assertj.version>3.27.7</assertj.version>
