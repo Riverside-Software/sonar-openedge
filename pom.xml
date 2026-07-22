@@ -59,6 +59,22 @@
     <sonar.cpd.exclusions>**/SelectorUtils.java</sonar.cpd.exclusions>
     <sonar.coverage.exclusions>**/SelectorUtils.java</sonar.coverage.exclusions>
     <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../coverage-report/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+    <!-- Dependencies -->
+    <slf4j.version>1.7.36</slf4j.version>
+    <json.version>20231013</json.version>
+    <gson.version>2.10.1</gson.version>
+    <guava.version>33.2.1-jre</guava.version>
+    <kryo.version>5.6.2</kryo.version>
+    <testng.version>7.12.0</testng.version>
+    <assertj.version>3.27.7</assertj.version>
+    <antlr4.version>4.13.2</antlr4.version>
+    <antlr4.runtime.version>4.13.2</antlr4.runtime.version>
+    <sonar.plugin.version>10.14.0.2599</sonar.plugin.version>
+    <sonar.plugin.impl.version>10.7.0.96327</sonar.plugin.impl.version>
+    <sonar.ws.version>25.12.0.117093</sonar.ws.version>
+    <sonar.packaging.version>1.25.1.3002</sonar.packaging.version>
+    <maven.resolver.version>1.24.0</maven.resolver.version>
+    <maven.shade.version>3.6.2</maven.shade.version>
   </properties>
 
   <build>
