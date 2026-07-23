@@ -69,9 +69,9 @@
     <assertj.version>3.27.7</assertj.version>
     <antlr4.version>4.13.2</antlr4.version>
     <antlr4.runtime.version>4.13.2</antlr4.runtime.version>
-    <sonar.plugin.version>10.14.0.2599</sonar.plugin.version>
-    <sonar.plugin.impl.version>10.7.0.96327</sonar.plugin.impl.version>
-    <sonar.ws.version>25.12.0.117093</sonar.ws.version>
+    <sonar.plugin.version>13.5.0.4319</sonar.plugin.version>
+    <sonar.plugin.impl.version>26.3.0.120487</sonar.plugin.impl.version>
+    <sonar.ws.version>26.3.0.120487</sonar.ws.version>
     <sonar.packaging.version>1.25.1.3002</sonar.packaging.version>
     <maven.resolver.version>1.24.0</maven.resolver.version>
     <maven.shade.version>3.6.2</maven.shade.version>
