@@ -56,6 +56,7 @@ import org.sonar.plugins.openedge.api.model.CleanCode;
 import org.sonar.plugins.openedge.api.model.Impact;
 import org.sonar.plugins.openedge.api.model.OWASP;
 import org.sonar.plugins.openedge.api.model.OWASP2021;
+import org.sonar.plugins.openedge.api.model.OWASP2025;
 import org.sonar.plugins.openedge.api.model.RuleTemplate;
 import org.sonar.plugins.openedge.api.model.SecurityHotspot;
 import org.sonar.plugins.openedge.api.model.SqaleConstantRemediation;
@@ -150,7 +151,7 @@ public class AnnotationBasedRulesDefinition {
   private void setupSecurityModel(NewRule rule, Class<?> ruleClass) {
     var hotspotAnnotation = AnnotationUtils.getAnnotation(ruleClass, SecurityHotspot.class);
     if (hotspotAnnotation != null) {
-      rule.setType(RuleType.SECURITY_HOTSPOT);
+      rule.setType(RuleType.VULNERABILITY);
     }
     var cweAnnotation = AnnotationUtils.getAnnotation(ruleClass, CWE.class);
     if (cweAnnotation != null)
@@ -161,6 +162,9 @@ public class AnnotationBasedRulesDefinition {
     var owasp2021Annotation = AnnotationUtils.getAnnotation(ruleClass, OWASP2021.class);
     if (owasp2021Annotation != null)
       setOwasp(rule, OwaspTop10Version.Y2021, owasp2021Annotation.values());
+    var owasp2025Annotation = AnnotationUtils.getAnnotation(ruleClass, OWASP2025.class);
+    if (owasp2025Annotation != null)
+      setOwasp(rule, OwaspTop10Version.Y2025, owasp2025Annotation.values());
   }
 
   private void setOwasp(NewRule rule, OwaspTop10Version version, String[] list) {
