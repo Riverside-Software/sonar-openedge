@@ -71,7 +71,7 @@ public interface ITypeInfo {
   boolean hasBuffer(String inName);
 
   /**
-   * Returns simple name of this class (without package name)
+   * @return simple name of this class (without package name)
    */
   default String getSimpleName() {
     var str = getTypeName();
@@ -79,7 +79,7 @@ public interface ITypeInfo {
   }
 
   /**
-   * Returns package name of this class. Returns empty string if class has no package.
+   * @return package name of this class. Returns empty string if class has no package.
    */
   default String getPackageName() {
     var str = getTypeName();
@@ -88,7 +88,7 @@ public interface ITypeInfo {
   }
 
   /**
-   * Returns uppercase letters of the class name (package excluded)
+   * @return uppercase letters of the class name (package excluded)
    */
   default String toUpperCaseAcronym() {
     // According to documentation:
@@ -101,7 +101,7 @@ public interface ITypeInfo {
   }
 
   /**
-   * Determines if the class or interface represented by this Class object is either the same as, or is a superclass or
+   * Determine if the class or interface represented by this Class object is either the same as, or is a superclass or
    * superinterface of, the class or interface represented by the specified Class parameter. It returns true if so;
    * otherwise it returns false.
    */
