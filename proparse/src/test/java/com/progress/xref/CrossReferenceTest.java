@@ -41,7 +41,7 @@ public class CrossReferenceTest {
       .actual();
     var refList = assertThat(src0).extracting(Source::getReference).actual();
     assertThat(refList).hasSize(597);
-    assertThat(refList).filteredOn(it -> it.getReferenceType() == ReferenceType.STRING).isEmpty();
+    assertThat(refList).filteredOn(it -> it.getRefType() == ReferenceType.STRING).isEmpty();
 
     var txtXref = CrossReferenceUtils.parseXREF(Path.of("src/test/resources/xref/xref01.txt"));
     var txtSrc0 = assertThat(txtXref).isNotNull() //
@@ -50,7 +50,10 @@ public class CrossReferenceTest {
       .actual();
     var refList2 = assertThat(txtSrc0).extracting(Source::getReference).actual();
     assertThat(refList2).hasSize(597);
-    assertThat(refList2).filteredOn(it -> it.getReferenceType() == ReferenceType.STRING).isEmpty();
+    assertThat(refList2).filteredOn(it -> it.getRefType() == ReferenceType.STRING).isEmpty();
+    assertThat(refList2).filteredOn(it -> it.getReferenceType() == null).isEmpty();
+    assertThat(refList2).filteredOn(it -> it.getReferenceType() == "UNKNOWN").isEmpty();
+    assertThat(refList2).filteredOn(it -> it.getReferenceType() == "INVOKE").isNotEmpty();
   }
 
   @Test
@@ -63,7 +66,7 @@ public class CrossReferenceTest {
       .actual();
     var refList = assertThat(src0).extracting(Source::getReference).actual();
     assertThat(refList).hasSize(154);
-    assertThat(refList).filteredOn(it -> it.getReferenceType() == ReferenceType.STRING).isEmpty();
+    assertThat(refList).filteredOn(it -> it.getRefType() == ReferenceType.STRING).isEmpty();
     
     var txtXref = CrossReferenceUtils.parseXREF(Path.of("src/test/resources/xref/xref02.txt"));
     var txtSrc0 = assertThat(txtXref).isNotNull() //
@@ -72,7 +75,7 @@ public class CrossReferenceTest {
       .actual();
     var refList2 = assertThat(txtSrc0).extracting(Source::getReference).actual();
     assertThat(refList2).hasSize(850); // Yes, clearly not consistent with XML XREF...
-    assertThat(refList2).filteredOn(it -> it.getReferenceType() == ReferenceType.STRING).isEmpty();
+    assertThat(refList2).filteredOn(it -> it.getRefType() == ReferenceType.STRING).isEmpty();
   }
 
 }

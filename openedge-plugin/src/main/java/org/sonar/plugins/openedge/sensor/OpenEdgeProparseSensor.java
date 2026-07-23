@@ -311,11 +311,11 @@ public class OpenEdgeProparseSensor implements Sensor {
 
     // Shared objects
     long numShrTT = xref.getSource().stream().mapToLong(src -> src.getReference().stream().filter(
-        ref -> ref.getReferenceType() == ReferenceType.NEW_SHR_TEMPTABLE).count()).sum();
+        ref -> ref.getRefType() == ReferenceType.NEW_SHR_TEMPTABLE).count()).sum();
     long numShrDS = xref.getSource().stream().mapToLong(src -> src.getReference().stream().filter(
-        ref -> ref.getReferenceType() == ReferenceType.NEW_SHR_DATASET).count()).sum();
+        ref -> ref.getRefType() == ReferenceType.NEW_SHR_DATASET).count()).sum();
     long numShrVar = xref.getSource().stream().mapToLong(src -> src.getReference().stream().filter(
-        ref -> ref.getReferenceType() == ReferenceType.NEW_SHR_VARIABLE).count()).sum();
+        ref -> ref.getRefType() == ReferenceType.NEW_SHR_VARIABLE).count()).sum();
 
     context.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.NUM_TRANSACTIONS).withValue(
         trxBlocks.size()).save();

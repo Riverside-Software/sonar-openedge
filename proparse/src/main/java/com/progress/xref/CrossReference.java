@@ -1062,7 +1062,11 @@ public class CrossReference {
              *     {@link ReferenceType }
              *
              */
-            public ReferenceType getReferenceType() {
+            public String getReferenceType() {
+              return referenceType == null ? ReferenceType.UNKNOWN.toString() : referenceType.toString().replace('_', '-');
+            }
+
+            public ReferenceType getRefType() {
                 return referenceType;
             }
 
@@ -1074,7 +1078,7 @@ public class CrossReference {
              *     {@link ReferenceType }
              *
              */
-            public void setReferenceType(ReferenceType value) {
+            public void setRefType(ReferenceType value) {
                 this.referenceType = value;
             }
 

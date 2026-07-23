@@ -538,7 +538,7 @@ public class ParseUnit {
             "WHOLE-INDEX".equals(ref.getDetail()));
         // All sort-access on the same line number
         src.getReference().stream() //
-          .filter(it -> it.getReferenceType() == ReferenceType.SORT_ACCESS) //
+          .filter(it -> it.getRefType() == ReferenceType.SORT_ACCESS) //
           .filter(it -> it.getRefSeq().intValue() > ref.getRefSeq().intValue()) //
           .filter(it -> it.getFileNum().intValue() == ref.getFileNum().intValue()
               && it.getLineNum().intValue() == ref.getLineNum().intValue()) //
@@ -586,7 +586,7 @@ public class ParseUnit {
 
     for (Source src : xref.getSource()) {
       for (Reference ref : src.getReference()) {
-        if (ref.getReferenceType() == ReferenceType.SEARCH) {
+        if (ref.getRefType() == ReferenceType.SEARCH) {
           handleSearchNode(src, ref, filteredList);
         }
       }
