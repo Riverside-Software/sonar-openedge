@@ -1036,11 +1036,10 @@ public class RCodeInfoTest {
   public void testTypeInfoIVS03() throws IOException {
     try (var input = Files.newInputStream(Paths.get("src/test/resources/rcode/TestClassElementsChV12.r"))) {
       var rci = new RCodeInfo(input);
-      assertEquals(rci.getReferencedClasses(),
-          List.of( "rcode.TestClassElements"));
-      assertEquals(rci.getReferencedMethods(), List.of("rcode.TestClassElements:TestClassElements"));
-      assertEquals(rci.getReferencedProperties(), List.of(
-          "rcode.TestClassElements:prop01"));
+      assertEquals(rci.getReferencedClasses(), List.of("rcode.TestClassElementsCh", "rcode.TestClassElements"));
+      assertEquals(rci.getReferencedMethods(),
+          List.of("rcode.TestClassElements:TestClassElements", "rcode.TestClassElementsCh:TestClassElementsCh"));
+      assertEquals(rci.getReferencedProperties(), List.of("rcode.TestClassElements:prop01"));
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }
@@ -1050,11 +1049,10 @@ public class RCodeInfoTest {
   public void testTypeInfoIVS04() throws IOException {
     try (var input = Files.newInputStream(Paths.get("src/test/resources/rcode/TestClassElementsChV11.r"))) {
       var rci = new RCodeInfo(input);
-      assertEquals(rci.getReferencedClasses(),
-          List.of( "rcode.TestClassElements"));
-      assertEquals(rci.getReferencedMethods(), List.of("rcode.TestClassElements:TestClassElements"));
-      assertEquals(rci.getReferencedProperties(), List.of(
-          "rcode.TestClassElements:prop01"));
+      assertEquals(rci.getReferencedClasses(), List.of("rcode.TestClassElementsCh", "rcode.TestClassElements"));
+      assertEquals(rci.getReferencedMethods(),
+          List.of("rcode.TestClassElements:TestClassElements", "rcode.TestClassElementsCh:TestClassElementsCh"));
+      assertEquals(rci.getReferencedProperties(), List.of("rcode.TestClassElements:prop01"));
     } catch (InvalidRCodeException caught) {
       throw new RuntimeException("RCode should be valid", caught);
     }

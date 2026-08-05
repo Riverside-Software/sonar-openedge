@@ -436,17 +436,14 @@ public class RCodeInfo {
       }
 
       refdClasses = Arrays.stream(clsList) //
-        .filter(it -> !isClass || !it.equalsIgnoreCase(typeInfo.getTypeName())) //
         .filter(it -> !it.startsWith(BUILTIN_CLASSES_PREFIX)) //
         .toList();
       refdMethods = Arrays.stream(methdList) //
         .filter(Objects::nonNull) //
-        .filter(it -> !isClass || !it.startsWith(typeInfo.getTypeName() + ":")) //
         .filter(it -> !it.startsWith(BUILTIN_CLASSES_PREFIX)) //
         .toList();
       refdProperties = Arrays.stream(propList) //
         .filter(Objects::nonNull) //
-        .filter(it -> !isClass || !it.startsWith(typeInfo.getTypeName() + ":")) //
         .filter(it -> !it.startsWith(BUILTIN_CLASSES_PREFIX)) //
         .toList();
     }
