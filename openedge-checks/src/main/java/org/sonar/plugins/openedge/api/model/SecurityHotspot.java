@@ -24,9 +24,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * @deprecated Since 3.10
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Deprecated
+@Deprecated(since = "3.10")
 public @interface SecurityHotspot {
   @Deprecated(forRemoval = true)
   int[] cwe() default {};
