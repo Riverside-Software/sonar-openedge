@@ -250,6 +250,7 @@ public class CrossReferenceUtils {
 
           Reference ref = new Reference();
           ref.referenceType = ReferenceType.fromValue(line[3]);
+          ref.fileNum = currSrc.fileNum;
           ref.refSeq = seqNum++;
           // Line-number can be 'IMPLICIT' or 'NONE'
           ref.lineNum = !Character.isDigit(line[2].charAt(0)) ? 0 : Integer.parseInt(line[2]);

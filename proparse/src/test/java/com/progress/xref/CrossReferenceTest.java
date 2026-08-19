@@ -42,6 +42,7 @@ public class CrossReferenceTest {
     var refList = assertThat(src0).extracting(Source::getReference).actual();
     assertThat(refList).hasSize(597);
     assertThat(refList).filteredOn(it -> it.getRefType() == ReferenceType.STRING).isEmpty();
+    assertThat(refList).filteredOn(it -> it.getFileNum() == null).isEmpty();
 
     var txtXref = CrossReferenceUtils.parseXREF(Path.of("src/test/resources/xref/xref01.txt"));
     var txtSrc0 = assertThat(txtXref).isNotNull() //
@@ -54,6 +55,7 @@ public class CrossReferenceTest {
     assertThat(refList2).filteredOn(it -> it.getReferenceType() == null).isEmpty();
     assertThat(refList2).filteredOn(it -> it.getReferenceType() == "UNKNOWN").isEmpty();
     assertThat(refList2).filteredOn(it -> it.getReferenceType() == "INVOKE").isNotEmpty();
+    assertThat(refList2).filteredOn(it -> it.getFileNum() == null).isEmpty();
   }
 
   @Test
