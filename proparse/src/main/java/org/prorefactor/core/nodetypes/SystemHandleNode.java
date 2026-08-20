@@ -19,6 +19,7 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.Pair;
 import org.prorefactor.core.ProToken;
 
+import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.ITypeInfo;
@@ -34,7 +35,19 @@ public class SystemHandleNode extends ExpressionNode {
 
   @Override
   public DataType getDataType() {
-    return DataType.HANDLE;
+    switch (getFirstChild().getNodeType()) {
+      case SUPER:
+        var typeInfo = getTopLevelParent().getTypeInfo();
+        if ((typeInfo == null) || BuiltinClasses.PLO_CLASSNAME.equals(typeInfo.getTypeName()))
+          return new DataType(BuiltinClasses.PLO_CLASSNAME);
+        var parentTypeInfo = typeInfo.getParentTypeName();
+        return parentTypeInfo == null ? new DataType(BuiltinClasses.PLO_CLASSNAME) : new DataType(parentTypeInfo);
+      case THISOBJECT:
+        return new DataType(getTopLevelParent().getClassName());
+      default:
+        return DataType.HANDLE;
+    }
+
   }
 
   DataType getAttributeDataType(String id) {
