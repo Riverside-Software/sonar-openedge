@@ -1346,4 +1346,21 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertEquals(attr1.getDataType(), DataType.CHARACTER);
   }
 
+  @Test
+  public void testInputValue() {
+    var code = """
+        define variable x1 as integer no-undo.
+        message x1:input-value.
+        """;
+    var unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+
+    var list1 = unit.getTopNode().query(ABLNodeType.ATTRIBUTE_REF);
+    assertEquals(list1.size(), 1);
+    var attr1 = (AttributeReferenceNode) list1.get(0);
+    assertEquals(attr1.getAttributeName(), "input-value");
+    assertEquals(attr1.getDataType(), DataType.INTEGER);
+  }
+
 }
