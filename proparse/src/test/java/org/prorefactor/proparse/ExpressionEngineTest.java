@@ -1363,4 +1363,23 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertEquals(attr1.getDataType(), DataType.INTEGER);
   }
 
+  @Test
+  public void testRecid01() {
+    var code = """
+        find first customer.
+        message recid(customer).
+        message buffer customer:recid.
+        """;
+    var unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+
+    var list1 = unit.getTopNode().queryExpressions();
+    assertEquals(list1.size(), 2);
+    var attr1 = list1.get(0);
+    assertEquals(attr1.getDataType(), DataType.RECID);
+    var attr2 = (AttributeReferenceNode) list1.get(1);
+    assertEquals(attr2.getAttributeName(), "recid");
+    assertEquals(attr2.getDataType(), DataType.RECID);
+  }
 }
