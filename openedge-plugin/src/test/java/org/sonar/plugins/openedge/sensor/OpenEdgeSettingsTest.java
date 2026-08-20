@@ -476,8 +476,8 @@ public class OpenEdgeSettingsTest {
         cache);
     oeSettings.init();
 
-    assertTrue(oeSettings.getPropath().stream().anyMatch(it -> it.getName().endsWith("net-12.8.9.pl")));
-    assertTrue(oeSettings.getPropath().stream().anyMatch(it -> it.getName().endsWith("core-12.8.9.apl")));
+    assertTrue(oeSettings.getPropath().stream().anyMatch(it -> it.getName().endsWith("net-12.8.11.pl")));
+    assertTrue(oeSettings.getPropath().stream().anyMatch(it -> it.getName().endsWith("core-12.8.11.pl")));
     assertTrue(oeSettings.getPropath().stream().anyMatch(it -> it.getName().endsWith("adecomm.pl")));
     assertTrue(oeSettings.getPropath().stream().anyMatch(
         it -> it.getName().endsWith("4feb5d83e9b6559144d87a558145a720d4abc4cf")));

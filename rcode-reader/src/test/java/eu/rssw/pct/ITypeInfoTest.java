@@ -483,4 +483,15 @@ public class ITypeInfoTest {
       assertThat(val2).isNull();
     }
   }
+
+  @Test
+  public void testCamelCase() {
+    assertEquals(new TypeInfo("com.progress.HelloWorld", false, false, "", "").toUpperCaseAcronym(), "HW");
+    assertEquals(new TypeInfo("com.progress.helloworld", false, false, "", "").toUpperCaseAcronym(), "");
+    assertEquals(new TypeInfo("com.progress.helloWorld", false, false, "", "").toUpperCaseAcronym(), "W");
+    assertEquals(new TypeInfo("HelloWorld", false, false, "", "").toUpperCaseAcronym(), "HW");
+    assertEquals(new TypeInfo("com.progress.Hello-World_%IDislikeSymbols", false, false, "", "").toUpperCaseAcronym(),
+        "HWIDS");
+  }
+
 }

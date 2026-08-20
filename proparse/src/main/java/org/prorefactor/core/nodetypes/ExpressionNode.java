@@ -454,7 +454,6 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
       case "POSITION":
       case "PRINTER-CONTROL-HANDLE":
       case "PRINTER-HDC":
-      case "RECID":
       case "RECORD-LENGTH":
       case "REMOTE-PORT":
       case "RESTART-ROW":
@@ -728,6 +727,8 @@ public abstract class ExpressionNode extends JPNode implements IExpression {
       case "RESTART-ROWID":
       case "ROWID":
         return DataType.ROWID;
+      case "RECID":
+        return DataType.RECID;
       default:
         return DataType.NOT_COMPUTED;
     }

@@ -27,4 +27,14 @@ public interface IAccessibleElement extends IElement {
   boolean isStatic();
   boolean isPackageProtected();
   boolean isPackagePrivate();
+
+  /**
+   * @return Uppercase letters of the element
+   */
+  default String toUpperCaseAcronym() {
+    // According to documentation:
+    // The value of the name is restricted to alphanumeric characters plus the symbols #, $, %, -, and _.
+    return ITypeInfo.getUpperCaseLetters(getName());
+  }
+
 }

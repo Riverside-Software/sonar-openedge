@@ -234,8 +234,10 @@ public class RCodeInfoTest {
       }
 
       try (Input input2 = new Input(new FileInputStream("target/rcode-kryo.bin"));) {
-        TypeInfoV12 foo = kryo.readObject(input2, TypeInfoV12.class);
-        System.out.println(foo);
+        var copy = kryo.readObject(input2, TypeInfoV12.class);
+        assertEquals(copy.getTypeName(), rci.getTypeInfo().getTypeName());
+        assertEquals(copy.getMethods().size(), rci.getTypeInfo().getMethods().size());
+        assertEquals(copy.getProperties().size(), rci.getTypeInfo().getProperties().size());
       }
 
     } catch (InvalidRCodeException caught) {
@@ -558,8 +560,11 @@ public class RCodeInfoTest {
       }
 
       try (Input input2 = new Input(new FileInputStream("target/plop.bin"));) {
-        TypeInfoV12 foo = kryo.readObject(input2, TypeInfoV12.class);
-        System.out.println(foo);
+        var copy = kryo.readObject(input2, TypeInfoV12.class);
+        assertEquals(copy.getTypeName(), rci.getTypeInfo().getTypeName());
+        assertNotNull(copy.getTempTable("tt1"));
+        assertNotNull(copy.getTempTable("tt2"));
+        assertNull(copy.getTempTable("tt5"));
       }
 
     } catch (InvalidRCodeException caught) {
@@ -995,4 +1000,72 @@ public class RCodeInfoTest {
     }
   }
 
+  @Test
+  public void testTypeInfoIVS01() throws IOException {
+    try (var input = Files.newInputStream(Paths.get("src/test/resources/rcode/ivsTest01-128.r"))) {
+      var rci = new RCodeInfo(input);
+      assertEquals(rci.getReferencedClasses(), List.of(
+          "Progress.Json.ObjectModel.JsonArray", "rssw.VerySimpleObjectChild", "Progress.Json.ObjectModel.JsonObject"));
+      assertEquals(rci.getReferencedMethods(),
+          List.of(
+              "Progress.Json.ObjectModel.JsonArray:Add", "Progress.Json.ObjectModel.JsonArray:IsNull"));
+      assertEquals(rci.getReferencedProperties(), List.of(
+          "Progress.Json.ObjectModel.JsonArray:Length", "rssw.VerySimpleObjectChild:myArray"));
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
+  public void testTypeInfoIVS02() throws IOException {
+    try (var input = Files.newInputStream(Paths.get("src/test/resources/rcode/ivsTest01-117.r"))) {
+      var rci = new RCodeInfo(input);
+      assertEquals(rci.getReferencedClasses(), List.of(
+          "Progress.Json.ObjectModel.JsonArray", "rssw.VerySimpleObjectChild", "Progress.Json.ObjectModel.JsonObject"));
+      assertEquals(rci.getReferencedMethods(),
+          List.of(
+              "Progress.Json.ObjectModel.JsonArray:Add", "Progress.Json.ObjectModel.JsonArray:IsNull"));
+      assertEquals(rci.getReferencedProperties(), List.of(
+          "Progress.Json.ObjectModel.JsonArray:Length", "rssw.VerySimpleObjectChild:myArray"));
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
+  public void testTypeInfoIVS03() throws IOException {
+    try (var input = Files.newInputStream(Paths.get("src/test/resources/rcode/TestClassElementsChV12.r"))) {
+      var rci = new RCodeInfo(input);
+      assertEquals(rci.getReferencedClasses(), List.of("rcode.TestClassElementsCh", "rcode.TestClassElements"));
+      assertEquals(rci.getReferencedMethods(),
+          List.of("rcode.TestClassElements:TestClassElements", "rcode.TestClassElementsCh:TestClassElementsCh"));
+      assertEquals(rci.getReferencedProperties(), List.of("rcode.TestClassElements:prop01"));
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
+  public void testTypeInfoIVS04() throws IOException {
+    try (var input = Files.newInputStream(Paths.get("src/test/resources/rcode/TestClassElementsChV11.r"))) {
+      var rci = new RCodeInfo(input);
+      assertEquals(rci.getReferencedClasses(), List.of("rcode.TestClassElementsCh", "rcode.TestClassElements"));
+      assertEquals(rci.getReferencedMethods(),
+          List.of("rcode.TestClassElements:TestClassElements", "rcode.TestClassElementsCh:TestClassElementsCh"));
+      assertEquals(rci.getReferencedProperties(), List.of("rcode.TestClassElements:prop01"));
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
+  @Test
+  public void testNoTextSegment() throws IOException {
+    try (var input = Files.newInputStream(Paths.get("src/test/resources/rcode/cov.r"))) {
+      var rci = new RCodeInfo(input);
+      assertNotNull(rci);
+      assertFalse(rci.isClass());
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
 }

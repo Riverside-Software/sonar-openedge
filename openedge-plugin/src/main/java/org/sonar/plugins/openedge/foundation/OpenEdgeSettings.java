@@ -35,22 +35,31 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import org.eclipse.aether.RepositoryException;
+import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.graph.Dependency;
 import org.prorefactor.core.schema.IDatabase;
 import org.prorefactor.core.schema.Schema;
 import org.prorefactor.proparse.classdoc.ClassDocumentation;
@@ -84,8 +93,8 @@ import com.google.gson.JsonParseException;
 
 import eu.rssw.antlr.database.DumpFileUtils;
 import eu.rssw.antlr.database.objects.DatabaseDescription;
-import eu.rssw.openedge.ls.IDependencyResolver.LocalDependency;
-import eu.rssw.openedge.ls.OpenEdgeDependencyResolver;
+import eu.rssw.openedge.ls.OpenEdgeDependencyHandler;
+import eu.rssw.openedge.ls.IDependencyHandler.LocalDependency;
 import eu.rssw.openedge.ls.mapping.ProjectConfigFile;
 import eu.rssw.pct.FileEntry;
 import eu.rssw.pct.PLReader;
@@ -127,7 +136,7 @@ public class OpenEdgeSettings {
   private boolean rtbCompatibility;
   private Kryo kryo;
 
-  private OpenEdgeDependencyResolver resolver;
+  private OpenEdgeDependencyHandler resolver;
 
   public OpenEdgeSettings(Configuration config, FileSystem fileSystem, SonarRuntime runtime) {
     this(config, fileSystem, runtime, null);
@@ -245,58 +254,112 @@ public class OpenEdgeSettings {
     var projectName = config.get("sonar.projectName").orElse("No name");
     var srcFileName = config.get(Constants.DEPENDENCIES_SOURCE).orElse("openedge-project.json");
 
-    List<LocalDependency> resolvedDependencies = new ArrayList<>();
-    resolver = new OpenEdgeDependencyResolver();
+    var depFutureList = new ArrayList<CompletableFuture<Void>>();
+    var unresolvedDependencies = Collections.synchronizedList(new ArrayList<LocalDependency>());
+    var dependencies = Collections.synchronizedList(new ArrayList<LocalDependency>());
+    var dependencyHash = Collections.synchronizedMap(new HashMap<LocalDependency, Path>());
+
+    resolver = new OpenEdgeDependencyHandler();
     LOG.info("Reading dependencies in {}", srcFileName);
 
     try (var reader = java.nio.file.Files.newBufferedReader(fileSystem.baseDir().toPath().resolve(srcFileName))) {
       var cfg = new GsonBuilder().create().fromJson(reader, ProjectConfigFile.class);
       if ((cfg != null) && (cfg.dependencies != null)) {
-        for (var dep : cfg.dependencies) {
-          if (dep == null)
-            continue;
-          var dlFile = resolver.downloadArtifact(dep.groupId, dep.artifactId, dep.version, dep.classifier,
-              dep.extension);
-          resolvedDependencies.add(
-              new LocalDependency(dep.groupId, dep.artifactId, dep.version, dep.classifier, dep.extension, dlFile));
-          LOG.debug("Dependency: {}", dlFile.getPath());
-        }
+        var directDepList = Arrays.stream(cfg.dependencies) //
+          .map(dep -> new Dependency(
+              new DefaultArtifact(dep.groupId, dep.artifactId, dep.classifier, dep.extension, dep.version), null)) //
+          .toList();
+        LOG.info("Number of direct dependencies: {}", directDepList.size());
+
+        var lst = resolver.resolveTransitiveDependencies(directDepList);
+        LOG.info("Number of transitive dependencies: {}", lst.size());
+        lst.stream().filter(Objects::nonNull) //
+          .forEach(dep -> handleDirectDependency(dep, projectName, unresolvedDependencies, dependencies, dependencyHash,
+              depFutureList));
       }
-    } catch (IOException | RepositoryException e) {
-      LOG.error("Error handling dependencies in {}", srcFileName, e);
+    } catch (IOException | RepositoryException caught) {
+      LOG.error("Error handling dependencies in {}", srcFileName, caught);
     }
+
+    var dependenciesOK = CompletableFuture.allOf(depFutureList.toArray(new CompletableFuture[0])) //
+      .thenRun(() -> {
+        try {
+          processArtifacts(dependencies, dependencyHash, fileSystem.baseDir().toPath());
+        } catch (IOException caught) {
+          LOG.error("Error while processing dependencies", caught);
+        }
+      });
 
     try {
-      var list = processArtifacts(resolvedDependencies, projectName);
-      propath.addAll(list.stream().map(Path::toFile).toList());
-      propathFull.addAll(list.stream().map(Path::toFile).toList());
-    } catch (IOException caught) {
-      LOG.error("Error while processing dependencies", caught);
+      dependenciesOK.get(300, TimeUnit.SECONDS);
+    } catch (ExecutionException | TimeoutException uncaught) {
+      LOG.error("Error occured while fetching dependencies", uncaught);
+    } catch (InterruptedException uncaught) {
+      Thread.currentThread().interrupt();
     }
+    LOG.info("{} dependencies fetched", dependencies.size());
   }
 
-  private List<Path> processArtifacts(List<LocalDependency> resolvedDependencies, String projectName)
-      throws IOException {
+  private void handleDirectDependency(LocalDependency dep, String projectName,
+      List<LocalDependency> unresolvedDependencies, List<LocalDependency> dependencies,
+      Map<LocalDependency, Path> dependencyHash, List<CompletableFuture<Void>> depFutureList) {
+    unresolvedDependencies.add(
+        new LocalDependency(dep.groupId(), dep.artifactId(), dep.extension(), dep.classifier(), dep.version()));
+
+    depFutureList.add(CompletableFuture.supplyAsync(() -> {
+      LOG.debug("Downloading {}:{}:{}:{}:{}", dep.groupId(), dep.artifactId(), dep.extension(), dep.classifier(),
+          dep.version());
+      try {
+        var dlFile = resolver.downloadArtifact(dep.groupId(), dep.artifactId(), dep.version(), dep.classifier(),
+            dep.extension());
+        return new LocalDependency(dep.groupId(), dep.artifactId(), dep.version(), dep.classifier(), dep.extension(),
+            dlFile);
+      } catch (RepositoryException caught) {
+        LOG.error("Uncaught exception while fetching dependency", caught);
+        return null;
+      }
+    }).thenAccept(it -> {
+      if (it != null) {
+        LOG.debug("Processing {}:{}:{}:{}:{} -- File {}", dep.groupId(), dep.artifactId(), dep.extension(),
+            dep.classifier(), dep.version(), it.localFile());
+        dependencies.add(it);
+        var extractPath = resolver.processArtifact(it, fileSystem.baseDir().toPath().resolve(".dependencies"),
+            projectName);
+        if (extractPath != null)
+          dependencyHash.put(it, extractPath);
+      }
+    }));
+  }
+
+  private void processArtifacts(List<LocalDependency> resolvedDependencies, Map<LocalDependency, Path> dependencyHash,
+      Path rootDirectory) throws IOException {
     var dotDir = fileSystem.baseDir().toPath().resolve(".dependencies");
     java.nio.file.Files.createDirectories(dotDir);
-    List<Path> list = new ArrayList<>();
+
     for (var dep : resolvedDependencies) {
-      var extractPath = resolver.processArtifact(dep, dotDir, projectName);
-      if (dep.classifier() == null) {
-        if ("zip".equals(dep.extension()) && (extractPath != null)) {
-          try (var files = java.nio.file.Files.list(extractPath)) {
-            list.addAll(files.filter(
-                it -> it.getFileName().toString().endsWith(".pl") || it.getFileName().toString().endsWith(".apl")) //
-              .toList());
+      if ((dep.classifier() == null) || dep.classifier().isBlank()) {
+        if ("zip".equals(dep.extension())) {
+          var extractDir = dependencyHash.get(dep);
+          var relPath = rootDirectory.relativize(extractDir);
+          try (var list = java.nio.file.Files.list(extractDir)) {
+            list.filter(
+                it -> (it.getFileName().toString().endsWith(".pl") || it.getFileName().toString().endsWith(".apl"))
+                    && java.nio.file.Files.isRegularFile(it)) //
+              .forEach(it -> {
+                propath.add(rootDirectory.relativize(it).toFile());
+                propathFull.add(rootDirectory.relativize(it).toFile());
+              });
+          } catch (IOException uncaught) {
+            LOG.error("Unable to read directory", uncaught);
           }
-          list.add(extractPath);
+          propath.add(relPath.toFile());
+          propathFull.add(relPath.toFile());
         } else if ("pl".equals(dep.extension()) || "apl".equals(dep.extension())) {
-          list.add(dep.localFile().toPath());
+          propath.add(dep.localFile());
+          propathFull.add(dep.localFile());
         }
       }
     }
-
-    return list;
   }
 
   private final void initializeCPD() {

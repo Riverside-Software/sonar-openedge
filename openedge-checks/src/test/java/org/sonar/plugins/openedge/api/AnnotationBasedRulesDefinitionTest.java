@@ -37,6 +37,7 @@ import org.sonar.check.Rule;
 import org.sonar.plugins.openedge.api.model.CWE;
 import org.sonar.plugins.openedge.api.model.OWASP;
 import org.sonar.plugins.openedge.api.model.OWASP2021;
+import org.sonar.plugins.openedge.api.model.OWASP2025;
 import org.sonar.plugins.openedge.api.model.SecurityHotspot;
 import org.testng.annotations.Test;
 
@@ -70,6 +71,7 @@ public class AnnotationBasedRulesDefinitionTest {
   @Rule(key = "CustomRule04", name = "Number 4", tags = {"rssw", "security"})
   @CWE(values = {10})
   @OWASP2021(values = {"A9"})
+  @OWASP2025(values = {"A10"})
   private static class CustomRule04 {
     // Nothing
   }
@@ -103,7 +105,8 @@ public class AnnotationBasedRulesDefinitionTest {
 
     var rule2 = context.repository("repo1").rule("CustomRule02");
     assertEquals(rule2.name(), "Number 2");
-    assertEquals(rule2.type(), RuleType.SECURITY_HOTSPOT);
+    // SecurityHotspots now converted to Vulnerabilities
+    assertEquals(rule2.type(), RuleType.VULNERABILITY);
     assertTrue(rule2.securityStandards().contains("cwe:3"));
     assertTrue(rule2.securityStandards().contains("owaspTop10:a1"));
     assertTrue(rule2.htmlDescription().startsWith("<p>Introduction 2</p>"));
@@ -129,7 +132,7 @@ public class AnnotationBasedRulesDefinitionTest {
 
     var rule3 = context.repository("repo1").rule("CustomRule03");
     assertEquals(rule3.name(), "Number 3");
-    assertEquals(rule3.type(), RuleType.SECURITY_HOTSPOT);
+    assertEquals(rule3.type(), RuleType.VULNERABILITY);
     assertTrue(rule3.securityStandards().contains("cwe:3"));
     assertTrue(rule3.securityStandards().contains("owaspTop10:a1"));
     // CWE and OWASP attributes of @SecurityHotspot are not parsed anymore
@@ -142,6 +145,7 @@ public class AnnotationBasedRulesDefinitionTest {
     assertEquals(rule4.type(), RuleType.VULNERABILITY);
     assertTrue(rule4.securityStandards().contains("cwe:10"));
     assertTrue(rule4.securityStandards().contains("owaspTop10-2021:a9"));
+    assertTrue(rule4.securityStandards().contains("owaspTop10-2025:a10"));
     assertEquals(rule4.htmlDescription(), "<p>Rule04</p>");  }
 
 }

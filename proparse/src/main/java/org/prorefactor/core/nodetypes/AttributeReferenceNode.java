@@ -73,6 +73,8 @@ public class AttributeReferenceNode extends ExpressionNode {
       variable = v1 == null ? null : Pair.of(node.getStaticReference(), v1);
     } else if (node.getSymbol() instanceof Event) {
       // Events only have Publish / Subscribe, no properties
+    } else if ("input-value".equalsIgnoreCase(attributeName)) {
+      returnDataType = node.getDataType();
     } else if (node.isIExpression()) {
       handleExpression(node.asIExpression(), root);
     }

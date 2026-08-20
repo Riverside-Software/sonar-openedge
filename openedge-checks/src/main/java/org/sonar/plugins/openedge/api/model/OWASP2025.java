@@ -24,15 +24,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * @deprecated Since 3.10
- */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Deprecated(since = "3.10")
-public @interface SecurityHotspot {
-  @Deprecated(forRemoval = true)
-  int[] cwe() default {};
-  @Deprecated(forRemoval = true)
-  String[] owasp() default {};
+public @interface OWASP2025 {
+  String[] values();
 }
