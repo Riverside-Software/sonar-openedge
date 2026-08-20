@@ -50,6 +50,7 @@ import org.prorefactor.treeparser.symbols.Variable;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.ParameterMode;
 import eu.rssw.pct.elements.PrimitiveDataType;
@@ -363,6 +364,54 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     testSimpleExpression("message session:form-long-input.", DataType.RAW);
     testSimpleExpression("message session:word-wrap.", DataType.LOGICAL);
     testSimpleExpression("message session:after-rowid.", DataType.ROWID);
+  }
+
+  @BeforeMethod(dependsOnMethods = "setUp")
+  public void beforeThisObject01() {
+    TypeInfo typeInfo = new TypeInfo("rssw.Foo", false, false, BuiltinClasses.PLO_CLASSNAME, "");
+    session.injectTypeInfo(typeInfo);
+  }
+
+  @Test
+  public void testThisObject01() {
+    var code = """
+        class rssw.Foo:
+          method public x1():
+            this-object.
+            super.
+          end method.
+        end class.
+        """;
+    var unit = getParseUnit(code, session);
+    unit.treeParser01();
+
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 2);
+    IExpression exp1 = nodes.get(0);
+    assertEquals(exp1.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+    assertEquals(exp1.getDataType().getClassName(), "rssw.Foo");
+    IExpression exp2 = nodes.get(1);
+    assertEquals(exp2.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+    assertEquals(exp2.getDataType().getClassName(), BuiltinClasses.PLO_CLASSNAME);
+  }
+
+  @Test
+  public void testThisObject02() {
+    var code = """
+        class rssw.Foo2:
+          method public x1():
+            super.
+          end method.
+        end class.
+        """;
+    var unit = getParseUnit(code, session);
+    unit.treeParser01();
+
+    List<IExpression> nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 1);
+    IExpression exp1 = nodes.get(0);
+    assertEquals(exp1.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+    assertEquals(exp1.getDataType().getClassName(), BuiltinClasses.PLO_CLASSNAME);
   }
 
   @Test
@@ -1297,4 +1346,40 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertEquals(attr1.getDataType(), DataType.CHARACTER);
   }
 
+  @Test
+  public void testInputValue() {
+    var code = """
+        define variable x1 as integer no-undo.
+        message x1:input-value.
+        """;
+    var unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+
+    var list1 = unit.getTopNode().query(ABLNodeType.ATTRIBUTE_REF);
+    assertEquals(list1.size(), 1);
+    var attr1 = (AttributeReferenceNode) list1.get(0);
+    assertEquals(attr1.getAttributeName(), "input-value");
+    assertEquals(attr1.getDataType(), DataType.INTEGER);
+  }
+
+  @Test
+  public void testRecid01() {
+    var code = """
+        find first customer.
+        message recid(customer).
+        message buffer customer:recid.
+        """;
+    var unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+
+    var list1 = unit.getTopNode().queryExpressions();
+    assertEquals(list1.size(), 2);
+    var attr1 = list1.get(0);
+    assertEquals(attr1.getDataType(), DataType.RECID);
+    var attr2 = (AttributeReferenceNode) list1.get(1);
+    assertEquals(attr2.getAttributeName(), "recid");
+    assertEquals(attr2.getDataType(), DataType.RECID);
+  }
 }
