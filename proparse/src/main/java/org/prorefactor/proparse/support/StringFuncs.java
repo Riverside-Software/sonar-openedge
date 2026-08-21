@@ -65,7 +65,14 @@ public class StringFuncs {
     int endQuotePos = s.lastIndexOf(quoteType);
     if (endQuotePos < 1)
       return s;
-    return s.substring(1, endQuotePos).replace(String.valueOf(quoteType) + String.valueOf(quoteType), String.valueOf(quoteType)); 
+    // The lexer preserves the tilde and the line terminator of a tilde line-continuation ('~' immediately
+    // followed by a newline) as-is in the token text, so that source text can be reconstructed as-is. But as
+    // far as the string's value is concerned, a tilde line-continuation is not part of the string: both the
+    // tilde and the line terminator have to be discarded.
+    return s.substring(1, endQuotePos) //
+      .replace("~\r\n", "") //
+      .replace("~\n", "") //
+      .replace(String.valueOf(quoteType) + String.valueOf(quoteType), String.valueOf(quoteType));
   }
 
   static Set<Character> setOfMatchChars(String s) {
