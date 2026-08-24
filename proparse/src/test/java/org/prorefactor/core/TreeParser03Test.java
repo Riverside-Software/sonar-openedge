@@ -1714,6 +1714,33 @@ public class TreeParser03Test extends AbstractProparseTest {
   }
 
   @Test
+  public void testDatasetHandleRefExpression() {
+    var code = """
+        DEFINE VARIABLE ds1 AS HANDLE NO-UNDO.
+        DEFINE VARIABLE tt1 AS HANDLE NO-UNDO.
+        RUN proc.p (INPUT DATASET-HANDLE ds1, INPUT TABLE-HANDLE tt1).
+        """;
+    ParseUnit unit = getParseUnit(code, session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    assertNotNull(unit.getRootScope());
+
+    List<JPNode> nodes = unit.getTopNode().query(ABLNodeType.DATASET_HANDLE_REF);
+    assertNotNull(nodes);
+    assertEquals(nodes.size(), 1);
+    assertTrue(nodes.get(0).isIExpression());
+    assertEquals(nodes.get(0).asIExpression().getDataType(), DataType.DATASET_HANDLE);
+
+    List<JPNode> nodes2 = unit.getTopNode().query(ABLNodeType.TABLE_HANDLE_REF);
+    assertNotNull(nodes2);
+    assertEquals(nodes2.size(), 1);
+    assertTrue(nodes2.get(0).isIExpression());
+    assertEquals(nodes2.get(0).asIExpression().getDataType(), DataType.TABLE_HANDLE);
+  }
+
+  @Test
   public void testEntered() {
     var code = """
         DEFINE TEMP-TABLE tt1

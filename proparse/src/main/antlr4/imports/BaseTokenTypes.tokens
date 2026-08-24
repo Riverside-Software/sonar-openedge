@@ -118,6 +118,8 @@ User_func=191
 Widget_ref=192
 With_columns=193
 With_down=194
+DatasetHandle_ref=195
+TableHandle_ref=196
 
 
 AACBIT=201
