@@ -24,6 +24,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -46,13 +47,25 @@ public class BuiltinClassesTest {
   };
 
   @Test
-  private void testSignatures() {
+  public void testSignatures() {
     // Assert all signatures can be fetched
     for (OpenEdgeVersion version : OpenEdgeVersion.values()) {
       for (ITypeInfo typeInfo : BuiltinClasses.getBuiltinClasses(version)) {
         for (IMethodElement method : typeInfo.getMethods()) {
           assertNotNull(method.getSignature());
           assertNotEquals(method.getReturnType(), DataType.UNKNOWN, "Method " + method.getSignature());
+        }
+      }
+    }
+  }
+
+  @Test
+  public void testInterfaces() {
+    for (OpenEdgeVersion version : OpenEdgeVersion.values()) {
+      for (ITypeInfo typeInfo : BuiltinClasses.getBuiltinClasses(version)) {
+        for (var iface : typeInfo.getInterfaces()) {
+          assertEquals(iface.indexOf(','), -1,
+              "Invalid interface " + iface + " in " + version + " TypeInfo " + typeInfo.getTypeName());
         }
       }
     }

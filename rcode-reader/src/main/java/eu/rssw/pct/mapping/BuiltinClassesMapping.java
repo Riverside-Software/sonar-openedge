@@ -21,7 +21,7 @@ package eu.rssw.pct.mapping;
 
 import com.google.gson.annotations.SerializedName;
 
-// JSON mapping of system handles documentation
+// JSON mapping of Progress builtin classes
 public class BuiltinClassesMapping {
   @SerializedName(value = "classes")
   public BuiltinClass[] builtinClasses;
@@ -36,7 +36,7 @@ public class BuiltinClassesMapping {
     @SerializedName(value = "superClass")
     public String superClass;
     @SerializedName(value = "interfaces")
-    public String interfaces;
+    public String[] interfaces;
     @SerializedName(value = "methods")
     public Method[] methods;
     @SerializedName(value = "constructors")

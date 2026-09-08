@@ -5,13 +5,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Enum",
-      "enumNames": [
-        "Unexpected",
-        "APSV",
-        "SOAP",
-        "REST",
-        "WEB"
-      ],
+      "enumNames": ["Unexpected", "APSV", "SOAP", "REST", "WEB"],
       "methods": [],
       "properties": []
     },
@@ -374,7 +368,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.SysError",
-      "interfaces": "Progress.Lang.Error",
+      "interfaces": ["Progress.Lang.Error"],
       "methods": [],
       "properties": []
     },
@@ -500,7 +494,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.BPM.Filter.ITaskFilter",
+      "interfaces": ["Progress.BPM.Filter.ITaskFilter"],
       "methods": [
         {
           "name": "Is",
@@ -540,7 +534,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.BPM.Filter.ITaskFilter",
+      "interfaces": ["Progress.BPM.Filter.ITaskFilter"],
       "methods": [
         {
           "name": "Is",
@@ -580,7 +574,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.BPM.Filter.ITaskFilter",
+      "interfaces": ["Progress.BPM.Filter.ITaskFilter"],
       "methods": [
         {
           "name": "Is",
@@ -627,7 +621,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.BPM.Filter.ITaskFilter",
+      "interfaces": ["Progress.BPM.Filter.ITaskFilter"],
       "methods": [
         {
           "name": "Is",
@@ -667,7 +661,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.BPM.Filter.ITaskFilter",
+      "interfaces": ["Progress.BPM.Filter.ITaskFilter"],
       "methods": [
         {
           "name": "Is",
@@ -707,7 +701,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.BPM.Filter.ITaskFilter",
+      "interfaces": ["Progress.BPM.Filter.ITaskFilter"],
       "methods": [
         {
           "name": "Is",
@@ -747,7 +741,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.BPM.Filter.ITaskFilter",
+      "interfaces": ["Progress.BPM.Filter.ITaskFilter"],
       "methods": [
         {
           "name": "Is",
@@ -787,7 +781,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.BPM.Filter.ITaskFilter",
+      "interfaces": ["Progress.BPM.Filter.ITaskFilter"],
       "methods": [
         {
           "name": "Is",
@@ -827,7 +821,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.BPM.Filter.ITaskFilter",
+      "interfaces": ["Progress.BPM.Filter.ITaskFilter"],
       "methods": [
         {
           "name": "Is",
@@ -1574,7 +1568,20 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.Windows.Forms.BindingSource",
-      "interfaces": "System.ComponentModel.IComponent,System.IDisposable,System.ComponentModel.IBindingListView,System.ComponentModel.IBindingList,System.Collections.IList,System.Collections.ICollection,System.Collections.IEnumerable,System.ComponentModel.ITypedList,System.ComponentModel.ICancelAddNew,System.ComponentModel.ISupportInitializeNotification,System.ComponentModel.ISupportInitialize,System.Windows.Forms.ICurrencyManagerProvider",
+      "interfaces": [
+        "System.ComponentModel.IComponent",
+        "System.IDisposable",
+        "System.ComponentModel.IBindingListView",
+        "System.ComponentModel.IBindingList",
+        "System.Collections.IList",
+        "System.Collections.ICollection",
+        "System.Collections.IEnumerable",
+        "System.ComponentModel.ITypedList",
+        "System.ComponentModel.ICancelAddNew",
+        "System.ComponentModel.ISupportInitializeNotification",
+        "System.ComponentModel.ISupportInitialize",
+        "System.Windows.Forms.ICurrencyManagerProvider"
+      ],
       "methods": [
         {
           "name": "Assign",
@@ -2088,7 +2095,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.ComponentModel.PropertyDescriptor",
-      "interfaces": "System.Runtime.Serialization.ISerializable",
+      "interfaces": ["System.Runtime.Serialization.ISerializable"],
       "methods": [],
       "properties": [
         {
@@ -2228,7 +2235,11 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.Enum",
-      "interfaces": "System.IComparable,System.IFormattable,System.IConvertible",
+      "interfaces": [
+        "System.IComparable",
+        "System.IFormattable",
+        "System.IConvertible"
+      ],
       "enumNames": [
         "UNKNOWN",
         "CHARACTER",
@@ -2330,7 +2341,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.Object",
-      "interfaces": "System.Runtime.Serialization.ISerializable",
+      "interfaces": ["System.Runtime.Serialization.ISerializable"],
       "methods": [
         {
           "name": "Dispose",
@@ -2937,7 +2948,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.SysError",
-      "interfaces": "Progress.Lang.Error",
+      "interfaces": ["Progress.Lang.Error"],
       "methods": [],
       "properties": []
     },
@@ -2960,7 +2971,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Json.JsonError",
-      "interfaces": "Progress.Lang.Error",
+      "interfaces": ["Progress.Lang.Error"],
       "methods": [],
       "properties": [
         {
@@ -7604,7 +7615,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.ProError",
-      "interfaces": "Progress.Lang.Error",
+      "interfaces": ["Progress.Lang.Error"],
       "methods": [
         {
           "name": "AddMessage",
@@ -8906,7 +8917,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.Lang.Error",
+      "interfaces": ["Progress.Lang.Error"],
       "methods": [
         {
           "name": "GetMessage",
@@ -8962,7 +8973,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.SysError",
-      "interfaces": "Progress.Lang.Error",
+      "interfaces": ["Progress.Lang.Error"],
       "methods": [],
       "properties": [
         {
@@ -8999,7 +9010,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.SysError",
-      "interfaces": "Progress.Lang.Error",
+      "interfaces": ["Progress.Lang.Error"],
       "methods": [],
       "properties": []
     },
@@ -9008,7 +9019,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.ProError",
-      "interfaces": "Progress.Lang.Error",
+      "interfaces": ["Progress.Lang.Error"],
       "methods": [],
       "properties": []
     },
@@ -9025,11 +9036,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Enum",
-      "enumNames": [
-        "Public",
-        "Protected",
-        "Private"
-      ],
+      "enumNames": ["Public", "Protected", "Private"],
       "methods": [],
       "properties": []
     },
@@ -10304,7 +10311,32 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.Windows.Forms.Form",
-      "interfaces": "System.ComponentModel.IComponent,System.IDisposable,System.Windows.Forms.UnsafeNativeMethods+IOleControl,System.Windows.Forms.UnsafeNativeMethods+IOleObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject,System.Windows.Forms.UnsafeNativeMethods+IOleWindow,System.Windows.Forms.UnsafeNativeMethods+IViewObject,System.Windows.Forms.UnsafeNativeMethods+IViewObject2,System.Windows.Forms.UnsafeNativeMethods+IPersist,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag,System.Windows.Forms.UnsafeNativeMethods+IPersistStorage,System.Windows.Forms.UnsafeNativeMethods+IQuickActivate,System.Windows.Forms.ISupportOleDropSource,System.Windows.Forms.IDropTarget,System.ComponentModel.ISynchronizeInvoke,System.Windows.Forms.IWin32Window,System.Windows.Forms.Layout.IArrangedElement,System.Windows.Forms.IBindableComponent,System.Windows.Forms.IKeyboardToolTip,System.Windows.Forms.IContainerControl,Progress.Windows.IForm,Progress.Windows.IFormCommon",
+      "interfaces": [
+        "System.ComponentModel.IComponent",
+        "System.IDisposable",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleControl",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleWindow",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject2",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersist",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStorage",
+        "System.Windows.Forms.UnsafeNativeMethods+IQuickActivate",
+        "System.Windows.Forms.ISupportOleDropSource",
+        "System.Windows.Forms.IDropTarget",
+        "System.ComponentModel.ISynchronizeInvoke",
+        "System.Windows.Forms.IWin32Window",
+        "System.Windows.Forms.Layout.IArrangedElement",
+        "System.Windows.Forms.IBindableComponent",
+        "System.Windows.Forms.IKeyboardToolTip",
+        "System.Windows.Forms.IContainerControl",
+        "Progress.Windows.IForm",
+        "Progress.Windows.IFormCommon"
+      ],
       "methods": [
         {
           "name": "SetWaitState",
@@ -10378,7 +10410,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.Object",
-      "interfaces": "Progress.Windows.IForm",
+      "interfaces": ["Progress.Windows.IForm"],
       "methods": [],
       "properties": [
         {
@@ -10430,7 +10462,32 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Windows.Form",
-      "interfaces": "System.ComponentModel.IComponent,System.IDisposable,System.Windows.Forms.UnsafeNativeMethods+IOleControl,System.Windows.Forms.UnsafeNativeMethods+IOleObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject,System.Windows.Forms.UnsafeNativeMethods+IOleWindow,System.Windows.Forms.UnsafeNativeMethods+IViewObject,System.Windows.Forms.UnsafeNativeMethods+IViewObject2,System.Windows.Forms.UnsafeNativeMethods+IPersist,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag,System.Windows.Forms.UnsafeNativeMethods+IPersistStorage,System.Windows.Forms.UnsafeNativeMethods+IQuickActivate,System.Windows.Forms.ISupportOleDropSource,System.Windows.Forms.IDropTarget,System.ComponentModel.ISynchronizeInvoke,System.Windows.Forms.IWin32Window,System.Windows.Forms.Layout.IArrangedElement,System.Windows.Forms.IBindableComponent,System.Windows.Forms.IKeyboardToolTip,System.Windows.Forms.IContainerControl,Progress.Windows.IForm,Progress.Windows.IFormCommon",
+      "interfaces": [
+        "System.ComponentModel.IComponent",
+        "System.IDisposable",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleControl",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleWindow",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject2",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersist",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStorage",
+        "System.Windows.Forms.UnsafeNativeMethods+IQuickActivate",
+        "System.Windows.Forms.ISupportOleDropSource",
+        "System.Windows.Forms.IDropTarget",
+        "System.ComponentModel.ISynchronizeInvoke",
+        "System.Windows.Forms.IWin32Window",
+        "System.Windows.Forms.Layout.IArrangedElement",
+        "System.Windows.Forms.IBindableComponent",
+        "System.Windows.Forms.IKeyboardToolTip",
+        "System.Windows.Forms.IContainerControl",
+        "Progress.Windows.IForm",
+        "Progress.Windows.IFormCommon"
+      ],
       "methods": [],
       "properties": [
         {
@@ -10470,7 +10527,36 @@
       "interface": false,
       "abstract": false,
       "superClass": "Telerik.WinControls.UI.RadForm",
-      "interfaces": "System.ComponentModel.IComponent,System.IDisposable,System.Windows.Forms.UnsafeNativeMethods+IOleControl,System.Windows.Forms.UnsafeNativeMethods+IOleObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject,System.Windows.Forms.UnsafeNativeMethods+IOleWindow,System.Windows.Forms.UnsafeNativeMethods+IViewObject,System.Windows.Forms.UnsafeNativeMethods+IViewObject2,System.Windows.Forms.UnsafeNativeMethods+IPersist,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag,System.Windows.Forms.UnsafeNativeMethods+IPersistStorage,System.Windows.Forms.UnsafeNativeMethods+IQuickActivate,System.Windows.Forms.ISupportOleDropSource,System.Windows.Forms.IDropTarget,System.ComponentModel.ISynchronizeInvoke,System.Windows.Forms.IWin32Window,System.Windows.Forms.Layout.IArrangedElement,System.Windows.Forms.IBindableComponent,System.Windows.Forms.IKeyboardToolTip,System.Windows.Forms.IContainerControl,Telerik.WinControls.IComponentTreeHandler,Telerik.WinControls.Layouts.ILayoutHandler,System.ComponentModel.ISupportInitializeNotification,System.ComponentModel.ISupportInitialize,System.ComponentModel.INotifyPropertyChanged,Telerik.WinControls.IAnalyticsProvider",
+      "interfaces": [
+        "System.ComponentModel.IComponent",
+        "System.IDisposable",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleControl",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleWindow",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject2",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersist",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStorage",
+        "System.Windows.Forms.UnsafeNativeMethods+IQuickActivate",
+        "System.Windows.Forms.ISupportOleDropSource",
+        "System.Windows.Forms.IDropTarget",
+        "System.ComponentModel.ISynchronizeInvoke",
+        "System.Windows.Forms.IWin32Window",
+        "System.Windows.Forms.Layout.IArrangedElement",
+        "System.Windows.Forms.IBindableComponent",
+        "System.Windows.Forms.IKeyboardToolTip",
+        "System.Windows.Forms.IContainerControl",
+        "Telerik.WinControls.IComponentTreeHandler",
+        "Telerik.WinControls.Layouts.ILayoutHandler",
+        "System.ComponentModel.ISupportInitializeNotification",
+        "System.ComponentModel.ISupportInitialize",
+        "System.ComponentModel.INotifyPropertyChanged",
+        "Telerik.WinControls.IAnalyticsProvider"
+      ],
       "methods": [],
       "properties": [
         {
@@ -10510,7 +10596,36 @@
       "interface": false,
       "abstract": false,
       "superClass": "Telerik.WinControls.UI.RadRibbonForm",
-      "interfaces": "System.ComponentModel.IComponent,System.IDisposable,System.Windows.Forms.UnsafeNativeMethods+IOleControl,System.Windows.Forms.UnsafeNativeMethods+IOleObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject,System.Windows.Forms.UnsafeNativeMethods+IOleWindow,System.Windows.Forms.UnsafeNativeMethods+IViewObject,System.Windows.Forms.UnsafeNativeMethods+IViewObject2,System.Windows.Forms.UnsafeNativeMethods+IPersist,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag,System.Windows.Forms.UnsafeNativeMethods+IPersistStorage,System.Windows.Forms.UnsafeNativeMethods+IQuickActivate,System.Windows.Forms.ISupportOleDropSource,System.Windows.Forms.IDropTarget,System.ComponentModel.ISynchronizeInvoke,System.Windows.Forms.IWin32Window,System.Windows.Forms.Layout.IArrangedElement,System.Windows.Forms.IBindableComponent,System.Windows.Forms.IKeyboardToolTip,System.Windows.Forms.IContainerControl,Telerik.WinControls.IComponentTreeHandler,Telerik.WinControls.Layouts.ILayoutHandler,System.ComponentModel.ISupportInitializeNotification,System.ComponentModel.ISupportInitialize,System.ComponentModel.INotifyPropertyChanged,Telerik.WinControls.IAnalyticsProvider",
+      "interfaces": [
+        "System.ComponentModel.IComponent",
+        "System.IDisposable",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleControl",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleWindow",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject2",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersist",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStorage",
+        "System.Windows.Forms.UnsafeNativeMethods+IQuickActivate",
+        "System.Windows.Forms.ISupportOleDropSource",
+        "System.Windows.Forms.IDropTarget",
+        "System.ComponentModel.ISynchronizeInvoke",
+        "System.Windows.Forms.IWin32Window",
+        "System.Windows.Forms.Layout.IArrangedElement",
+        "System.Windows.Forms.IBindableComponent",
+        "System.Windows.Forms.IKeyboardToolTip",
+        "System.Windows.Forms.IContainerControl",
+        "Telerik.WinControls.IComponentTreeHandler",
+        "Telerik.WinControls.Layouts.ILayoutHandler",
+        "System.ComponentModel.ISupportInitializeNotification",
+        "System.ComponentModel.ISupportInitialize",
+        "System.ComponentModel.INotifyPropertyChanged",
+        "Telerik.WinControls.IAnalyticsProvider"
+      ],
       "methods": [],
       "properties": [
         {
@@ -10550,7 +10665,30 @@
       "interface": false,
       "abstract": false,
       "superClass": "Telerik.WinControls.UI.ShapedForm",
-      "interfaces": "System.ComponentModel.IComponent,System.IDisposable,System.Windows.Forms.UnsafeNativeMethods+IOleControl,System.Windows.Forms.UnsafeNativeMethods+IOleObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject,System.Windows.Forms.UnsafeNativeMethods+IOleWindow,System.Windows.Forms.UnsafeNativeMethods+IViewObject,System.Windows.Forms.UnsafeNativeMethods+IViewObject2,System.Windows.Forms.UnsafeNativeMethods+IPersist,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag,System.Windows.Forms.UnsafeNativeMethods+IPersistStorage,System.Windows.Forms.UnsafeNativeMethods+IQuickActivate,System.Windows.Forms.ISupportOleDropSource,System.Windows.Forms.IDropTarget,System.ComponentModel.ISynchronizeInvoke,System.Windows.Forms.IWin32Window,System.Windows.Forms.Layout.IArrangedElement,System.Windows.Forms.IBindableComponent,System.Windows.Forms.IKeyboardToolTip,System.Windows.Forms.IContainerControl",
+      "interfaces": [
+        "System.ComponentModel.IComponent",
+        "System.IDisposable",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleControl",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleWindow",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject2",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersist",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStorage",
+        "System.Windows.Forms.UnsafeNativeMethods+IQuickActivate",
+        "System.Windows.Forms.ISupportOleDropSource",
+        "System.Windows.Forms.IDropTarget",
+        "System.ComponentModel.ISynchronizeInvoke",
+        "System.Windows.Forms.IWin32Window",
+        "System.Windows.Forms.Layout.IArrangedElement",
+        "System.Windows.Forms.IBindableComponent",
+        "System.Windows.Forms.IKeyboardToolTip",
+        "System.Windows.Forms.IContainerControl"
+      ],
       "methods": [],
       "properties": [
         {
@@ -10590,7 +10728,38 @@
       "interface": false,
       "abstract": false,
       "superClass": "Telerik.WinControls.UI.RadForm",
-      "interfaces": "System.ComponentModel.IComponent,System.IDisposable,System.Windows.Forms.UnsafeNativeMethods+IOleControl,System.Windows.Forms.UnsafeNativeMethods+IOleObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject,System.Windows.Forms.UnsafeNativeMethods+IOleWindow,System.Windows.Forms.UnsafeNativeMethods+IViewObject,System.Windows.Forms.UnsafeNativeMethods+IViewObject2,System.Windows.Forms.UnsafeNativeMethods+IPersist,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag,System.Windows.Forms.UnsafeNativeMethods+IPersistStorage,System.Windows.Forms.UnsafeNativeMethods+IQuickActivate,System.Windows.Forms.ISupportOleDropSource,System.Windows.Forms.IDropTarget,System.ComponentModel.ISynchronizeInvoke,System.Windows.Forms.IWin32Window,System.Windows.Forms.Layout.IArrangedElement,System.Windows.Forms.IBindableComponent,System.Windows.Forms.IKeyboardToolTip,System.Windows.Forms.IContainerControl,Telerik.WinControls.IComponentTreeHandler,Telerik.WinControls.Layouts.ILayoutHandler,System.ComponentModel.ISupportInitializeNotification,System.ComponentModel.ISupportInitialize,System.ComponentModel.INotifyPropertyChanged,Telerik.WinControls.IAnalyticsProvider,Progress.Windows.IForm,Progress.Windows.IFormCommon",
+      "interfaces": [
+        "System.ComponentModel.IComponent",
+        "System.IDisposable",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleControl",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleWindow",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject2",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersist",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStorage",
+        "System.Windows.Forms.UnsafeNativeMethods+IQuickActivate",
+        "System.Windows.Forms.ISupportOleDropSource",
+        "System.Windows.Forms.IDropTarget",
+        "System.ComponentModel.ISynchronizeInvoke",
+        "System.Windows.Forms.IWin32Window",
+        "System.Windows.Forms.Layout.IArrangedElement",
+        "System.Windows.Forms.IBindableComponent",
+        "System.Windows.Forms.IKeyboardToolTip",
+        "System.Windows.Forms.IContainerControl",
+        "Telerik.WinControls.IComponentTreeHandler",
+        "Telerik.WinControls.Layouts.ILayoutHandler",
+        "System.ComponentModel.ISupportInitializeNotification",
+        "System.ComponentModel.ISupportInitialize",
+        "System.ComponentModel.INotifyPropertyChanged",
+        "Telerik.WinControls.IAnalyticsProvider",
+        "Progress.Windows.IForm",
+        "Progress.Windows.IFormCommon"
+      ],
       "methods": [
         {
           "name": "SetWaitState",
@@ -10664,7 +10833,38 @@
       "interface": false,
       "abstract": false,
       "superClass": "Telerik.WinControls.UI.RadRibbonForm",
-      "interfaces": "System.ComponentModel.IComponent,System.IDisposable,System.Windows.Forms.UnsafeNativeMethods+IOleControl,System.Windows.Forms.UnsafeNativeMethods+IOleObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject,System.Windows.Forms.UnsafeNativeMethods+IOleWindow,System.Windows.Forms.UnsafeNativeMethods+IViewObject,System.Windows.Forms.UnsafeNativeMethods+IViewObject2,System.Windows.Forms.UnsafeNativeMethods+IPersist,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag,System.Windows.Forms.UnsafeNativeMethods+IPersistStorage,System.Windows.Forms.UnsafeNativeMethods+IQuickActivate,System.Windows.Forms.ISupportOleDropSource,System.Windows.Forms.IDropTarget,System.ComponentModel.ISynchronizeInvoke,System.Windows.Forms.IWin32Window,System.Windows.Forms.Layout.IArrangedElement,System.Windows.Forms.IBindableComponent,System.Windows.Forms.IKeyboardToolTip,System.Windows.Forms.IContainerControl,Telerik.WinControls.IComponentTreeHandler,Telerik.WinControls.Layouts.ILayoutHandler,System.ComponentModel.ISupportInitializeNotification,System.ComponentModel.ISupportInitialize,System.ComponentModel.INotifyPropertyChanged,Telerik.WinControls.IAnalyticsProvider,Progress.Windows.IForm,Progress.Windows.IFormCommon",
+      "interfaces": [
+        "System.ComponentModel.IComponent",
+        "System.IDisposable",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleControl",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleWindow",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject2",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersist",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStorage",
+        "System.Windows.Forms.UnsafeNativeMethods+IQuickActivate",
+        "System.Windows.Forms.ISupportOleDropSource",
+        "System.Windows.Forms.IDropTarget",
+        "System.ComponentModel.ISynchronizeInvoke",
+        "System.Windows.Forms.IWin32Window",
+        "System.Windows.Forms.Layout.IArrangedElement",
+        "System.Windows.Forms.IBindableComponent",
+        "System.Windows.Forms.IKeyboardToolTip",
+        "System.Windows.Forms.IContainerControl",
+        "Telerik.WinControls.IComponentTreeHandler",
+        "Telerik.WinControls.Layouts.ILayoutHandler",
+        "System.ComponentModel.ISupportInitializeNotification",
+        "System.ComponentModel.ISupportInitialize",
+        "System.ComponentModel.INotifyPropertyChanged",
+        "Telerik.WinControls.IAnalyticsProvider",
+        "Progress.Windows.IForm",
+        "Progress.Windows.IFormCommon"
+      ],
       "methods": [
         {
           "name": "SetWaitState",
@@ -10738,7 +10938,32 @@
       "interface": false,
       "abstract": false,
       "superClass": "Telerik.WinControls.UI.ShapedForm",
-      "interfaces": "System.ComponentModel.IComponent,System.IDisposable,System.Windows.Forms.UnsafeNativeMethods+IOleControl,System.Windows.Forms.UnsafeNativeMethods+IOleObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject,System.Windows.Forms.UnsafeNativeMethods+IOleWindow,System.Windows.Forms.UnsafeNativeMethods+IViewObject,System.Windows.Forms.UnsafeNativeMethods+IViewObject2,System.Windows.Forms.UnsafeNativeMethods+IPersist,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag,System.Windows.Forms.UnsafeNativeMethods+IPersistStorage,System.Windows.Forms.UnsafeNativeMethods+IQuickActivate,System.Windows.Forms.ISupportOleDropSource,System.Windows.Forms.IDropTarget,System.ComponentModel.ISynchronizeInvoke,System.Windows.Forms.IWin32Window,System.Windows.Forms.Layout.IArrangedElement,System.Windows.Forms.IBindableComponent,System.Windows.Forms.IKeyboardToolTip,System.Windows.Forms.IContainerControl,Progress.Windows.IForm,Progress.Windows.IFormCommon",
+      "interfaces": [
+        "System.ComponentModel.IComponent",
+        "System.IDisposable",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleControl",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleWindow",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject2",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersist",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStorage",
+        "System.Windows.Forms.UnsafeNativeMethods+IQuickActivate",
+        "System.Windows.Forms.ISupportOleDropSource",
+        "System.Windows.Forms.IDropTarget",
+        "System.ComponentModel.ISynchronizeInvoke",
+        "System.Windows.Forms.IWin32Window",
+        "System.Windows.Forms.Layout.IArrangedElement",
+        "System.Windows.Forms.IBindableComponent",
+        "System.Windows.Forms.IKeyboardToolTip",
+        "System.Windows.Forms.IContainerControl",
+        "Progress.Windows.IForm",
+        "Progress.Windows.IFormCommon"
+      ],
       "methods": [
         {
           "name": "SetWaitState",
@@ -10812,7 +11037,30 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.Windows.Forms.UserControl",
-      "interfaces": "System.ComponentModel.IComponent,System.IDisposable,System.Windows.Forms.UnsafeNativeMethods+IOleControl,System.Windows.Forms.UnsafeNativeMethods+IOleObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject,System.Windows.Forms.UnsafeNativeMethods+IOleWindow,System.Windows.Forms.UnsafeNativeMethods+IViewObject,System.Windows.Forms.UnsafeNativeMethods+IViewObject2,System.Windows.Forms.UnsafeNativeMethods+IPersist,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag,System.Windows.Forms.UnsafeNativeMethods+IPersistStorage,System.Windows.Forms.UnsafeNativeMethods+IQuickActivate,System.Windows.Forms.ISupportOleDropSource,System.Windows.Forms.IDropTarget,System.ComponentModel.ISynchronizeInvoke,System.Windows.Forms.IWin32Window,System.Windows.Forms.Layout.IArrangedElement,System.Windows.Forms.IBindableComponent,System.Windows.Forms.IKeyboardToolTip,System.Windows.Forms.IContainerControl",
+      "interfaces": [
+        "System.ComponentModel.IComponent",
+        "System.IDisposable",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleControl",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleWindow",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject2",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersist",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStorage",
+        "System.Windows.Forms.UnsafeNativeMethods+IQuickActivate",
+        "System.Windows.Forms.ISupportOleDropSource",
+        "System.Windows.Forms.IDropTarget",
+        "System.ComponentModel.ISynchronizeInvoke",
+        "System.Windows.Forms.IWin32Window",
+        "System.Windows.Forms.Layout.IArrangedElement",
+        "System.Windows.Forms.IBindableComponent",
+        "System.Windows.Forms.IKeyboardToolTip",
+        "System.Windows.Forms.IContainerControl"
+      ],
       "methods": [],
       "properties": [],
       "constructors": [
@@ -10826,7 +11074,30 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.Windows.Forms.UserControl",
-      "interfaces": "System.ComponentModel.IComponent,System.IDisposable,System.Windows.Forms.UnsafeNativeMethods+IOleControl,System.Windows.Forms.UnsafeNativeMethods+IOleObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject,System.Windows.Forms.UnsafeNativeMethods+IOleWindow,System.Windows.Forms.UnsafeNativeMethods+IViewObject,System.Windows.Forms.UnsafeNativeMethods+IViewObject2,System.Windows.Forms.UnsafeNativeMethods+IPersist,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag,System.Windows.Forms.UnsafeNativeMethods+IPersistStorage,System.Windows.Forms.UnsafeNativeMethods+IQuickActivate,System.Windows.Forms.ISupportOleDropSource,System.Windows.Forms.IDropTarget,System.ComponentModel.ISynchronizeInvoke,System.Windows.Forms.IWin32Window,System.Windows.Forms.Layout.IArrangedElement,System.Windows.Forms.IBindableComponent,System.Windows.Forms.IKeyboardToolTip,System.Windows.Forms.IContainerControl",
+      "interfaces": [
+        "System.ComponentModel.IComponent",
+        "System.IDisposable",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleControl",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleWindow",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject2",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersist",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStorage",
+        "System.Windows.Forms.UnsafeNativeMethods+IQuickActivate",
+        "System.Windows.Forms.ISupportOleDropSource",
+        "System.Windows.Forms.IDropTarget",
+        "System.ComponentModel.ISynchronizeInvoke",
+        "System.Windows.Forms.IWin32Window",
+        "System.Windows.Forms.Layout.IArrangedElement",
+        "System.Windows.Forms.IBindableComponent",
+        "System.Windows.Forms.IKeyboardToolTip",
+        "System.Windows.Forms.IContainerControl"
+      ],
       "methods": [],
       "properties": [
         {
@@ -10846,7 +11117,11 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.Object",
-      "interfaces": "Progress.Lang.Error,System.Runtime.Serialization.ISerializable,System.Runtime.InteropServices._Exception",
+      "interfaces": [
+        "Progress.Lang.Error",
+        "System.Runtime.Serialization.ISerializable",
+        "System.Runtime.InteropServices._Exception"
+      ],
       "methods": [
         {
           "name": "GetMessage",

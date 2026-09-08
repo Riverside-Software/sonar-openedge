@@ -54,7 +54,6 @@ import com.google.gson.JsonParser;
 
 import eu.rssw.pct.RCodeInfo.InvalidRCodeException;
 import eu.rssw.pct.elements.BuiltinClasses;
-import eu.rssw.pct.mapping.OpenEdgeVersion;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IDatasetElement;
 import eu.rssw.pct.elements.IEventElement;
@@ -76,6 +75,7 @@ import eu.rssw.pct.elements.fixed.TableElement;
 import eu.rssw.pct.elements.fixed.TypeInfo;
 import eu.rssw.pct.elements.fixed.VariableElement;
 import eu.rssw.pct.elements.v12.TypeInfoV12;
+import eu.rssw.pct.mapping.OpenEdgeVersion;
 
 public class RCodeInfoTest {
   private static final Function<String, ITypeInfo> EMPTY_PROVIDER = str -> null;
