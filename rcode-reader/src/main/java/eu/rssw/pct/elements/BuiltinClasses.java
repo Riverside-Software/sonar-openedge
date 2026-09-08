@@ -102,9 +102,9 @@ public class BuiltinClasses {
                 params[paramEntry.number - 1] = prm;
               }
             }
-            var method = new MethodElement(
-                methodEntry.name, methodEntry.isStatic, methodEntry.returnDataType.equals("OBJECT")
-                    ? new DataType(methodEntry.returnName) : DataType.get(methodEntry.returnDataType),
+            var method = new MethodElement(methodEntry.name, methodEntry.isStatic, methodEntry.isAbstract,
+                methodEntry.returnDataType.equals("OBJECT") ? new DataType(methodEntry.returnName)
+                    : DataType.get(methodEntry.returnDataType),
                 methodEntry.extent, params);
             typeInfo.addMethod(method);
           }

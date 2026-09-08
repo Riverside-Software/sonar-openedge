@@ -20,6 +20,7 @@
 package eu.rssw.pct.elements.fixed;
 
 import java.util.EnumSet;
+import java.util.Set;
 
 import eu.rssw.pct.elements.AbstractAccessibleElement;
 import eu.rssw.pct.elements.AccessType;
@@ -37,10 +38,24 @@ public class MethodElement extends AbstractAccessibleElement implements IMethodE
   }
 
   public MethodElement(String name, boolean isStatic, DataType returnDataType, int extent, IParameter... params) {
-    super(name, isStatic ? EnumSet.of(AccessType.STATIC, AccessType.PUBLIC) : EnumSet.of(AccessType.PUBLIC));
+    this(name, isStatic, false, returnDataType, extent, params);
+  }
+
+  public MethodElement(String name, boolean isStatic, boolean isAbstract, DataType returnDataType, int extent, IParameter... params) {
+    super(name, getAccessType(isStatic, isAbstract));
     this.returnDataType = returnDataType;
     this.parameters = params;
     this.extent = extent;
+  }
+
+  private static Set<AccessType> getAccessType(boolean isStatic, boolean isAbstract) {
+    var accessType = EnumSet.of(AccessType.PUBLIC);
+    if (isStatic)
+      accessType.add(AccessType.STATIC);
+    if (isAbstract)
+      accessType.add(AccessType.ABSTRACT);
+
+    return accessType;
   }
 
   @Override

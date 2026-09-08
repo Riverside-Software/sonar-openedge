@@ -64,6 +64,8 @@ public class BuiltinClassesMapping {
     public String name;
     @SerializedName(value = "static")
     public boolean isStatic;
+    @SerializedName(value = "abstract")
+    public boolean isAbstract;
     @SerializedName(value = "returnDataType")
     public String returnDataType;
     @SerializedName(value = "returnDataTypeName")
