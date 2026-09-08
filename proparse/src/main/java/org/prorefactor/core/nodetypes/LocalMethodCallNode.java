@@ -18,8 +18,6 @@ import org.prorefactor.core.JPNode;
 import org.prorefactor.core.Pair;
 import org.prorefactor.core.ProToken;
 
-import com.google.common.base.Strings;
-
 import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IMethodElement;
@@ -28,18 +26,12 @@ import eu.rssw.pct.elements.ITypeInfo;
 /**
  * Expression node: <code>methodName(parameters)</code> (only in classes)
  */
-public class LocalMethodCallNode extends ExpressionNode {
-  private final String methodName;
+public class LocalMethodCallNode extends AbstractMethodCallNode {
   private boolean computed = false;
   private Pair<ITypeInfo, IMethodElement> method = null;
 
   public LocalMethodCallNode(ProToken t, JPNode parent, int num, boolean hasChildren, String methodName) {
-    super(t, parent, num, hasChildren);
-    this.methodName = Strings.nullToEmpty(methodName);
-  }
-
-  public String getMethodName() {
-    return methodName;
+    super(t, parent, num, hasChildren, methodName);
   }
 
   private void compute() {
@@ -48,7 +40,7 @@ public class LocalMethodCallNode extends ExpressionNode {
       ITypeInfo typeInfo = root.getTypeInfo();
       if (root.isClass() && (typeInfo == null))
         typeInfo = root.getTypeInfoProvider().apply(BuiltinClasses.PLO_CLASSNAME);
-      method = typeInfo == null ? null : getObjectMethod(root.getTypeInfoProvider(), this, typeInfo, methodName);
+      method = typeInfo == null ? null : getObjectMethod(root.getTypeInfoProvider(), this, typeInfo, getMethodName());
     }
   }
 
