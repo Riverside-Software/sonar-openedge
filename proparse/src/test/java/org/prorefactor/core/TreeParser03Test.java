@@ -51,7 +51,9 @@ import org.testng.annotations.Test;
 
 import eu.rssw.pct.elements.BuiltinClasses;
 import eu.rssw.pct.elements.DataType;
+import eu.rssw.pct.elements.IParameter;
 import eu.rssw.pct.elements.ParameterMode;
+import eu.rssw.pct.elements.ParameterType;
 import eu.rssw.pct.elements.PrimitiveDataType;
 import eu.rssw.pct.elements.fixed.MethodElement;
 import eu.rssw.pct.elements.fixed.TypeInfo;
@@ -2859,6 +2861,100 @@ public class TreeParser03Test extends AbstractProparseTest {
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getRootScope());
+  }
+
+  @Test
+  public void testRoutineMethod01() {
+    var typeInfo = new TypeInfo("rssw.MyClass", false, false, BuiltinClasses.PLO_CLASSNAME, "");
+    typeInfo.addMethod(new MethodElement("m1", false, DataType.VOID, new IParameter[] {
+        new eu.rssw.pct.elements.fixed.Parameter(1, "x1", 0, ParameterMode.INPUT, DataType.CHARACTER)}));
+    // That's how dataset-handle parameters are read in rcode (see RCodeInfoTest#testDataset)
+    typeInfo.addMethod(new MethodElement("m1", false, DataType.VOID,
+        new IParameter[] {
+            new eu.rssw.pct.elements.fixed.Parameter(1, "x1", 0, ParameterMode.INPUT, DataType.CHARACTER),
+            new eu.rssw.pct.elements.fixed.Parameter(2, "x2", 0, ParameterMode.INPUT, DataType.HANDLE,
+                ParameterType.DATASET)}));
+    typeInfo.addMethod(new MethodElement("m1", false, DataType.VOID,
+        new IParameter[] {
+            new eu.rssw.pct.elements.fixed.Parameter(1, "x1", 0, ParameterMode.INPUT, DataType.CHARACTER),
+            new eu.rssw.pct.elements.fixed.Parameter(2, "x2", 0, ParameterMode.INPUT, DataType.HANDLE,
+                ParameterType.TABLE)}));
+    typeInfo.addMethod(new MethodElement("m1", false, DataType.VOID,
+        new IParameter[] {
+            new eu.rssw.pct.elements.fixed.Parameter(1, "x1", 0, ParameterMode.INPUT, DataType.CHARACTER),
+            new eu.rssw.pct.elements.fixed.Parameter(2, "x2", 0, ParameterMode.INPUT,
+                new DataType(BuiltinClasses.PLO_CLASSNAME))}));
+    typeInfo.addMethod(new MethodElement("m1", false, DataType.VOID,
+        new IParameter[] {
+            new eu.rssw.pct.elements.fixed.Parameter(1, "x1", 0, ParameterMode.INPUT, DataType.CHARACTER),
+            new eu.rssw.pct.elements.fixed.Parameter(2, "x2", 0, ParameterMode.INPUT, DataType.DECIMAL)}));
+    session.injectTypeInfo(typeInfo);
+
+    var code = """
+        class rssw.MyClass:
+          method public void m1(input x1 as char):
+            //
+          end method.
+          method public void m1(input x1 as char, input dataset-handle x2):
+            //
+          end method.
+          method public void m1(input x1 as char, input table-handle x2):
+            //
+          end method.
+          method public void m1(input x1 as char, input x2 as Progress.Lang.Object):
+            //
+          end method.
+          method public void m1(input x1 as char, input x2 as decimal):
+            //
+          end method.
+          method public void m1(input x1 as char, input x2 as logical):
+            //
+          end method.
+        end class.
+        """;
+
+    var unit = getParseUnit(code, session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getRootScope());
+
+    var routines = unit.getRootScope().getRoutines();
+
+    var m1 = routines.get(1);
+    assertEquals(m1.getParameters().size(), 1);
+    assertNotNull(m1.getMethodElement());
+    assertEquals(m1.getMethodElement().getParameters().length, 1);
+
+    var m1bis = routines.get(2);
+    assertEquals(m1bis.getParameters().size(), 2);
+    assertNotNull(m1bis.getMethodElement());
+    assertEquals(m1bis.getMethodElement().getParameters().length, 2);
+    assertEquals(m1bis.getMethodElement().getParameters()[1].getDataType(), DataType.HANDLE);
+    assertEquals(m1bis.getMethodElement().getParameters()[1].getParameterType(), ParameterType.DATASET);
+
+    var m1ter = routines.get(3);
+    assertEquals(m1ter.getParameters().size(), 2);
+    assertNotNull(m1ter.getMethodElement());
+    assertEquals(m1ter.getMethodElement().getParameters().length, 2);
+    assertEquals(m1ter.getMethodElement().getParameters()[1].getDataType(), DataType.HANDLE);
+    assertEquals(m1ter.getMethodElement().getParameters()[1].getParameterType(), ParameterType.TABLE);
+
+    var m1quater = routines.get(4);
+    assertEquals(m1quater.getParameters().size(), 2);
+    assertNotNull(m1quater.getMethodElement());
+    assertEquals(m1quater.getMethodElement().getParameters().length, 2);
+    assertEquals(m1quater.getMethodElement().getParameters()[1].getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+
+    var m1quinquies = routines.get(5);
+    assertEquals(m1quinquies.getParameters().size(), 2);
+    assertNotNull(m1quinquies.getMethodElement());
+    assertEquals(m1quinquies.getMethodElement().getParameters().length, 2);
+    assertEquals(m1quinquies.getMethodElement().getParameters()[1].getDataType(), DataType.DECIMAL);
+
+    var m1sexies = routines.get(6);
+    assertEquals(m1sexies.getParameters().size(), 2);
+    assertNull(m1sexies.getMethodElement()); // Not found in typeInfo
   }
 
 }

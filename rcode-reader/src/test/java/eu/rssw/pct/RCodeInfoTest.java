@@ -1068,4 +1068,31 @@ public class RCodeInfoTest {
       throw new RuntimeException("RCode should be valid", caught);
     }
   }
+
+  @Test
+  public void testDatasetHandle() throws IOException {
+    try (var input = Files.newInputStream(Paths.get("src/test/resources/rcode/TestDataset.r"))) {
+      var rci = new RCodeInfo(input);
+      assertNotNull(rci);
+      assertTrue(rci.isClass());
+      var methds = rci.getTypeInfo().getMethods();
+
+      var m1 = methds.stream().filter(m -> "m1".equals(m.getName())).findFirst();
+      assertTrue(m1.isPresent());
+      assertEquals(m1.get().getParameters().length, 2);
+      assertEquals(m1.get().getParameters()[1].getMode(), ParameterMode.INPUT);
+      assertEquals(m1.get().getParameters()[1].getDataType(), DataType.HANDLE);
+      assertEquals(m1.get().getParameters()[1].getParameterType(), ParameterType.TABLE);
+
+      var m2 = methds.stream().filter(m -> "m2".equals(m.getName())).findFirst();
+      assertTrue(m2.isPresent());
+      assertEquals(m2.get().getParameters().length, 2);
+      assertEquals(m2.get().getParameters()[1].getMode(), ParameterMode.INPUT);
+      assertEquals(m2.get().getParameters()[1].getDataType(), DataType.HANDLE);
+      assertEquals(m2.get().getParameters()[1].getParameterType(), ParameterType.DATASET);
+    } catch (InvalidRCodeException caught) {
+      throw new RuntimeException("RCode should be valid", caught);
+    }
+  }
+
 }

@@ -25,6 +25,8 @@ import org.prorefactor.treeparser.TreeParserSymbolScope;
 
 import eu.rssw.pct.elements.DataType;
 import eu.rssw.pct.elements.IMethodElement;
+import eu.rssw.pct.elements.IParameter;
+import eu.rssw.pct.elements.ParameterType;
 import eu.rssw.pct.elements.PrimitiveDataType;
 
 /**
@@ -219,9 +221,6 @@ public class Routine extends Symbol {
     return graph;
   }
 
-  /**
-   * 
-   */
   private static boolean hasSameSignature(Routine routine, IMethodElement method) {
     // Different name, no match...
     if (!method.getName().equalsIgnoreCase(routine.getName()))
@@ -231,19 +230,34 @@ public class Routine extends Symbol {
       return false;
     // Compare parameter data type one by one
     int zz = 0;
-    for (var prm : method.getParameters()) {
-      var prm2 = routine.getParameters().get(zz).getSymbol();
-      if (prm2 instanceof Variable var2) {
-        if (prm.isClassDataType()) {
-          if (!prm.getDataType().getClassName().equalsIgnoreCase(var2.getDataType().getClassName()))
-            return false;
-        } else if (!prm.getDataType().equals(var2.getDataType()))
+    for (var methdParam : method.getParameters()) {
+      if (routine.getParameters().get(zz).getSymbol() instanceof Variable routineParam) {
+        if (!compareParameter(methdParam, routineParam))
           return false;
       } else {
         return false;
       }
       zz++;
     }
+    return true;
+  }
+
+  /**
+   * @return True if parameters are identical
+   */
+  private static boolean compareParameter(IParameter methdParam, Variable routineParam) {
+    if (methdParam.isClassDataType()) {
+      if (!methdParam.getDataType().getClassName().equalsIgnoreCase(routineParam.getDataType().getClassName()))
+        return false;
+    } else if (routineParam.getDataType() == DataType.DATASET_HANDLE) {
+      if ((methdParam.getDataType() != DataType.HANDLE) || (methdParam.getParameterType() != ParameterType.DATASET))
+        return false;
+    } else if (routineParam.getDataType() == DataType.TABLE_HANDLE) {
+      if ((methdParam.getDataType() != DataType.HANDLE) || (methdParam.getParameterType() != ParameterType.TABLE))
+        return false;
+    } else if (!methdParam.getDataType().equals(routineParam.getDataType()))
+      return false;
+
     return true;
   }
 
