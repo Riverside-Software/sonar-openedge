@@ -57,6 +57,7 @@ import eu.rssw.pct.elements.ParameterType;
 import eu.rssw.pct.elements.PrimitiveDataType;
 import eu.rssw.pct.elements.fixed.MethodElement;
 import eu.rssw.pct.elements.fixed.TypeInfo;
+import eu.rssw.pct.elements.fixed.VariableElement;
 
 /**
  * This class simply runs the tree parser through various code, and as long as the tree parser does not throw any
@@ -2888,6 +2889,39 @@ public class TreeParser03Test extends AbstractProparseTest {
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
     assertNotNull(unit.getRootScope());
+  }
+
+  @Test
+  public void testParentVariable() {
+    var typeInfo = new TypeInfo("rssw.ParentClass001", false, false, BuiltinClasses.PLO_CLASSNAME, "");
+    typeInfo.addVariable(new VariableElement("var1", DataType.CHARACTER));
+    session.injectTypeInfo(typeInfo);
+    var typeInfo2 = new TypeInfo("rssw.MyClass", false, false, "rssw.ParentClass001", "");
+    typeInfo2.addVariable(new VariableElement("var0", DataType.INTEGER));
+    session.injectTypeInfo(typeInfo2);
+    
+    var code = """
+        class rssw.MyClass inherits rssw.ParentClass001:
+          define private variable var0 as int.
+          method public void m1(input x1 as char):
+            message this-object:var0.
+            message this-object:var1.
+          end method.
+        end class.
+        """;
+    
+    var unit = getParseUnit(code, session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getRootScope());
+
+    var node0 = unit.getTopNode().query(ABLNodeType.MESSAGE).get(0);
+    var expr0 = node0.getFirstChild().getFirstChild().asIExpression();
+    assertEquals(expr0.getDataType(), DataType.INTEGER);
+    var node1 = unit.getTopNode().query(ABLNodeType.MESSAGE).get(1);
+    var expr1 = node1.getFirstChild().getFirstChild().asIExpression();
+    assertEquals(expr1.getDataType(), DataType.CHARACTER);
   }
 
   @Test

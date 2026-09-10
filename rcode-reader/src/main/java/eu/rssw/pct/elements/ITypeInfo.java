@@ -294,6 +294,23 @@ public interface ITypeInfo {
     return null;
   }
 
+  default Pair<ITypeInfo, IVariableElement> lookupVariable(Function<String, ITypeInfo> typeInfoProvider,
+      String varName) {
+    for (var elem : getVariables()) {
+      if (varName.equalsIgnoreCase(elem.getName())) {
+        return Pair.of(this, elem);
+      }
+    }
+    var parent = typeInfoProvider.apply(getParentTypeName());
+    if (parent != null) {
+      var parentProp = parent.lookupVariable(typeInfoProvider, varName);
+      if (parentProp != null)
+        return parentProp;
+    }
+
+    return null;
+  }
+
   /**
    * Return all properties of this type, including inherited properties.
    */
@@ -323,6 +340,30 @@ public interface ITypeInfo {
 
     // Then from class itself
     getProperties().stream().map(it -> Pair.of(this, it)).forEach(pairConsumer);
+
+    return list;
+  }
+
+  /**
+   * Return all variables of this type, including inherited variables.
+   */
+  default List<Pair<ITypeInfo, IVariableElement>> getAllVariables(Function<String, ITypeInfo> typeInfoProvider) {
+    // Result
+    var list = new ArrayList<Pair<ITypeInfo, IVariableElement>>();
+    Consumer<Pair<ITypeInfo, IVariableElement>> pairConsumer = item -> {
+      // Remove existing variables with same name (which shouldn't happen in theory as variables can't be overidden)
+      list.removeAll(
+          list.stream().filter(it -> it.getO2().getName().equalsIgnoreCase(item.getO2().getName())).toList());
+      list.add(item);
+    };
+
+    // Add variables from parent
+    var parent = typeInfoProvider.apply(getParentTypeName());
+    if (parent != null)
+      parent.getAllVariables(typeInfoProvider).forEach(pairConsumer);
+
+    // Then from class itself
+    getVariables().stream().map(it -> Pair.of(this, it)).forEach(pairConsumer);
 
     return list;
   }
@@ -371,15 +412,6 @@ public interface ITypeInfo {
     getMethods().stream().filter(it -> it.isConstructor()).map(it -> Pair.of(this, it)).forEach(pairConsumer);
 
     return list;
-  }
-
-  default IVariableElement lookupVariable(String varName) {
-    for (var elem : getVariables()) {
-      if (varName.equalsIgnoreCase(elem.getName())) {
-        return elem;
-      }
-    }
-    return null;
   }
 
   public static class ParameterDescriptor {

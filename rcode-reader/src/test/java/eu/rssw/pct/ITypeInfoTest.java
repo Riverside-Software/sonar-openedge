@@ -43,6 +43,7 @@ import eu.rssw.pct.elements.ParameterMode;
 import eu.rssw.pct.elements.fixed.MethodElement;
 import eu.rssw.pct.elements.fixed.Parameter;
 import eu.rssw.pct.elements.fixed.TypeInfo;
+import eu.rssw.pct.elements.fixed.VariableElement;
 
 public class ITypeInfoTest {
   private static final Function<OpenEdgeVersion, Function<String, ITypeInfo>> VERSION_TYPE_INFO_PROVIDER = version -> {
@@ -323,6 +324,28 @@ public class ITypeInfoTest {
       assertEquals(val6.getO2(), val3.getO2());
       assertEquals(val6.getO2().getParameters()[0].getMode(), ParameterMode.OUTPUT);
     }
+  }
+
+  @Test
+  public void test08() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+
+    var typeInfo = new TypeInfo("pkg.ParentTestClass", false, false, "Progress.Lang.Object", "");
+    typeInfo.addVariable(new VariableElement("var1", DataType.INT64));
+    var typeInfo2 = new TypeInfo("pkg.ChildTestClass", false, false, "pkg.ParentTestClass", "");
+    typeInfo2.addVariable(new VariableElement("var2", DataType.CHARACTER));
+    map.put(typeInfo.getTypeName(), typeInfo);
+    map.put(typeInfo2.getTypeName(), typeInfo2);
+
+    assertEquals(typeInfo.getAllVariables(map::get).size(), 1);
+    var var0 = typeInfo.getAllVariables(map::get).get(0);
+    assertEquals(var0.getO1(), typeInfo);
+
+    assertEquals(typeInfo2.getAllVariables(map::get).size(), 2);
+    var var1 = typeInfo2.getAllVariables(map::get).get(0);
+    assertEquals(var1.getO1(), typeInfo);
+    var var2 = typeInfo2.getAllVariables(map::get).get(1);
+    assertEquals(var2.getO1(), typeInfo2);
   }
 
   @Test
