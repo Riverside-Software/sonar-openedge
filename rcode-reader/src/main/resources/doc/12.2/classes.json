@@ -2721,6 +2721,14 @@
             }
           ]
         }
+      ],
+      "variables": [
+        {
+          "name": "_columns",
+          "static": false,
+          "dataType": "OBJECT",
+          "dataTypeName": "Progress.Data.ColumnPropDesc[]"
+        }
       ]
     },
     {

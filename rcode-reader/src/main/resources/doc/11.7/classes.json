@@ -2528,6 +2528,14 @@
             }
           ]
         }
+      ],
+      "variables": [
+        {
+          "name": "_columns",
+          "static": false,
+          "dataType": "OBJECT",
+          "dataTypeName": "Progress.Data.ColumnPropDesc[]"
+        }
       ]
     },
     {
@@ -11020,6 +11028,13 @@
             }
           ]
         }
+      ],
+      "variables": [
+        {
+          "name": "controlIsInitializingRootComponent",
+          "static": false,
+          "dataType": "LOGICAL"
+        }
       ]
     },
     {
@@ -11088,6 +11103,13 @@
               "dataType": "HANDLE"
             }
           ]
+        }
+      ],
+      "variables": [
+        {
+          "name": "controlIsInitializingRootComponent",
+          "static": false,
+          "dataType": "LOGICAL"
         }
       ]
     },
@@ -11259,6 +11281,13 @@
         {
           "name": "OERadForm"
         }
+      ],
+      "variables": [
+        {
+          "name": "controlIsInitializingRootComponent",
+          "static": false,
+          "dataType": "LOGICAL"
+        }
       ]
     },
     {
@@ -11365,6 +11394,13 @@
       "constructors": [
         {
           "name": "OERadRibbonForm"
+        }
+      ],
+      "variables": [
+        {
+          "name": "controlIsInitializingRootComponent",
+          "static": false,
+          "dataType": "LOGICAL"
         }
       ]
     },
