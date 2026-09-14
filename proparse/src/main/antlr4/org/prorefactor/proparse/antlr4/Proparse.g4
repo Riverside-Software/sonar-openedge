@@ -149,18 +149,21 @@ interfaceCodeBlock:
 classBlockOrStatement:
     emptyStatement
   | annotation
+  | stronglyTypedAnnotation
   | inClassStatement
   ;
 
 abstractClassBlockOrStatement:
     emptyStatement
   | annotation
+  | stronglyTypedAnnotation
   | inAbstractClassStatement
   ;
 
 interfaceBlockOrStatement:
     emptyStatement
   | annotation
+  | stronglyTypedAnnotation
   | inInterfaceStatement
   ;
 
@@ -970,6 +973,28 @@ analyzeStatement:
 
 annotation:
     ANNOTATION notStatementEnd* statementEnd
+  ;
+
+stronglyTypedAnnotation:
+    LEFTBRACE annotationName ( LEFTPAREN ( annotationProperty ( COMMA annotationProperty )* )? RIGHTPAREN )? RIGHTBRACE
+    statementEnd
+  ;
+
+annotationName:
+    ID
+  ;
+
+annotationProperty:
+    annotationPropName EQUAL annotationPropValue
+  ;
+
+annotationPropName:
+    // Same as newIdentifier
+    .
+  ;
+
+annotationPropValue:
+    TRUE | FALSE | YES | NO | UNKNOWNVALUE | QSTRING | NUMBER
   ;
 
 applyStatement:

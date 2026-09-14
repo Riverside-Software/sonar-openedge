@@ -642,6 +642,16 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitStronglyTypedAnnotation(StronglyTypedAnnotationContext ctx) {
+    return createTree(ctx, ABLNodeType.STRONGLY_TYPED_ANNOTATION).setStatement().setRuleNode(ctx);
+  }
+
+  @Override
+  public Builder visitAnnotationProperty(AnnotationPropertyContext ctx) {
+    return createTree(ctx, ABLNodeType.ANNOTATION_PROPERTY).setRuleNode(ctx);
+  }
+
+  @Override
   public Builder visitAnnotation(AnnotationContext ctx) {
     Builder node = visitTerminal(ctx.ANNOTATION()).setStatement().setRuleNode(ctx);
 

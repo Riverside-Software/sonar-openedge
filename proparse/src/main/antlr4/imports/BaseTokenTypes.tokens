@@ -120,6 +120,8 @@ With_columns=193
 With_down=194
 DatasetHandle_ref=195
 TableHandle_ref=196
+Strongly_Typed_Annotation=197
+Annotation_Property=198
 
 
 AACBIT=201

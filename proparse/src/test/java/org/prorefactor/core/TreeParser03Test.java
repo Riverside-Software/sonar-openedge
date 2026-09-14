@@ -3058,4 +3058,85 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertNull(m1sexies.getMethodElement()); // Not found in typeInfo
   }
 
+  @Test
+  public void testStronglyTypedAnnotation01() {
+    var code = """
+        class MyClass:
+          [TestAnnotation(type = "REST", operation = "read", foo = 1) ].
+          method public void ReadTestBE(input filter as character):
+          end method.
+        end class.
+        """;
+
+    var unit = getParseUnit(code, session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    var list = unit.getTopNode().query(ABLNodeType.STRONGLY_TYPED_ANNOTATION);
+    assertEquals(list.size(), 1);
+    assertEquals(list.get(0).getDirectChildren(ABLNodeType.ANNOTATION_PROPERTY).size(), 3);
+  }
+
+  @Test
+  public void testStronglyTypedAnnotation02() {
+    var code = """
+        class MyClass:
+          [TestAnnotation() ].
+          method public void ReadTestBE(input filter as character):
+          end method.
+        end class.
+        """;
+
+    var unit = getParseUnit(code, session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    var list = unit.getTopNode().query(ABLNodeType.STRONGLY_TYPED_ANNOTATION);
+    assertEquals(list.size(), 1);
+    assertEquals(list.get(0).getDirectChildren(ABLNodeType.ANNOTATION_PROPERTY).size(), 0);
+  }
+
+  @Test
+  public void testStronglyTypedAnnotation03() {
+    var code = """
+        class MyClass:
+          [  TestAnnotation ].
+          method public void ReadTestBE(input filter as character):
+          end method.
+        end class.
+        """;
+
+    var unit = getParseUnit(code, session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    var list = unit.getTopNode().query(ABLNodeType.STRONGLY_TYPED_ANNOTATION);
+    assertEquals(list.size(), 1);
+    assertEquals(list.get(0).getDirectChildren(ABLNodeType.ANNOTATION_PROPERTY).size(), 0);
+  }
+
+  @Test
+  public void testStronglyTypedAnnotation04() {
+    var code = """
+        class MyClass:
+          [  TestAnnotation ].
+          @TestAutreAnnotation.
+          method public void ReadTestBE(input filter as character):
+          end method.
+        end class.
+        """;
+
+    var unit = getParseUnit(code, session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    var list = unit.getTopNode().query(ABLNodeType.STRONGLY_TYPED_ANNOTATION);
+    assertEquals(list.size(), 1);
+    assertEquals(unit.getTopNode().query(ABLNodeType.ANNOTATION).size(), 1);
+  }
+
 }

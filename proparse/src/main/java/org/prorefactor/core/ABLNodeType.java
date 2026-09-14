@@ -196,6 +196,8 @@ public enum ABLNodeType {
   WIDGET_REF(Proparse.Widget_ref, NodeTypesOption.STRUCTURE),
   WITH_COLUMNS(Proparse.With_columns, NodeTypesOption.STRUCTURE),
   WITH_DOWN(Proparse.With_down, NodeTypesOption.STRUCTURE),
+  STRONGLY_TYPED_ANNOTATION(Proparse.Strongly_Typed_Annotation, NodeTypesOption.STRUCTURE),
+  ANNOTATION_PROPERTY(Proparse.Annotation_Property, NodeTypesOption.STRUCTURE),
 
   // Hidden keywords
   AACBIT(Proparse.AACBIT, "_cbit", NodeTypesOption.KEYWORD),
