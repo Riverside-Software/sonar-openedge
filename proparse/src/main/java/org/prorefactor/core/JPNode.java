@@ -1145,7 +1145,7 @@ public class JPNode {
             node = new BuiltinFunctionNode(tok, up, num, hasChildren);
             break;
           case NEW_TYPE_REF:
-            node = new NewTypeNode(tok, up, num, hasChildren);
+            node = new NewTypeNode(tok, up, num, hasChildren, "");
             break;
           case FIELD_REF:
             node = new FieldRefNode(tok, up, num, hasChildren);

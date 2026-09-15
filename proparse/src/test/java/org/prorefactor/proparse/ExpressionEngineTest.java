@@ -216,7 +216,7 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertTrue (exp instanceof NewTypeNode);
     assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(exp.getDataType().getClassName(), "Progress.Lang.Object");
-    var methd = ((NewTypeNode) exp).getMethod().getO2();
+    var methd = ((NewTypeNode) exp).getMethodElement();
     assertNotNull(methd) ;
     assertEquals(methd.getReturnType().getPrimitive(), PrimitiveDataType.VOID);
   }
@@ -254,11 +254,12 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertEquals(nodes.size(), 1);
     var exp = nodes.get(0);
     assertTrue (exp instanceof NewTypeNode);
+    var methd = ((NewTypeNode) exp).getMethodElement();
+    assertNotNull(methd);
+    assertEquals(methd.getParameters().length, 1);
+    assertEquals(methd.getReturnType().getPrimitive(), PrimitiveDataType.VOID);
     assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(exp.getDataType().getClassName(), "Progress.IO.FileInputStream");
-    var methd = ((NewTypeNode) exp).getMethod().getO2();
-    assertNotNull(methd) ;
-    assertEquals(methd.getReturnType().getPrimitive(), PrimitiveDataType.VOID);
   }
 
   @Test
@@ -275,9 +276,11 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertEquals(nodes.size(), 1);
     var exp = nodes.get(0);
     assertTrue (exp instanceof NewTypeNode);
+    var typeInfo = ((NewTypeNode) exp).getTypeInfo();
+    assertEquals(typeInfo.getTypeName(), "Progress.IO.FileInputStream");
     assertEquals(exp.getDataType().getPrimitive(), PrimitiveDataType.CLASS);
     assertEquals(exp.getDataType().getClassName(), "Progress.IO.FileInputStream");
-    var methd = ((NewTypeNode) exp).getMethod().getO2();
+    var methd = ((NewTypeNode) exp).getMethodElement();
     assertNotNull(methd) ;
     assertEquals(methd.getReturnType().getPrimitive(), PrimitiveDataType.VOID);
   }
