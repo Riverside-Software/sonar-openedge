@@ -176,6 +176,12 @@ public class Routine extends Symbol {
           return method;
         }
       }
+    } else if (progressType == ABLNodeType.CONSTRUCTOR) {
+      for (var method : routineScope.getRootScope().getTypeInfo().getMethods()) {
+        if (method.isConstructor() && hasSameSignature(this, method)) {
+          return method;
+        }
+      }
     }
     return null;
   }

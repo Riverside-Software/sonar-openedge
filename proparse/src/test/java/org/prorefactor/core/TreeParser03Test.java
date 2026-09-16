@@ -55,6 +55,7 @@ import eu.rssw.pct.elements.IParameter;
 import eu.rssw.pct.elements.ParameterMode;
 import eu.rssw.pct.elements.ParameterType;
 import eu.rssw.pct.elements.PrimitiveDataType;
+import eu.rssw.pct.elements.fixed.ConstructorElement;
 import eu.rssw.pct.elements.fixed.MethodElement;
 import eu.rssw.pct.elements.fixed.TypeInfo;
 import eu.rssw.pct.elements.fixed.VariableElement;
@@ -2927,6 +2928,14 @@ public class TreeParser03Test extends AbstractProparseTest {
   @Test
   public void testRoutineMethod01() {
     var typeInfo = new TypeInfo("rssw.MyClass", false, false, BuiltinClasses.PLO_CLASSNAME, "");
+    typeInfo.addMethod(new ConstructorElement("MyClass", new IParameter[] {}));
+    typeInfo.addMethod(new ConstructorElement("MyClass", new IParameter[] {
+        new eu.rssw.pct.elements.fixed.Parameter(1, "xx", 0, ParameterMode.INPUT, DataType.INTEGER)}));
+    typeInfo.addMethod(new ConstructorElement("MyClass",
+        new IParameter[] {
+            new eu.rssw.pct.elements.fixed.Parameter(1, "xx", 0, ParameterMode.INPUT, DataType.INTEGER),
+            new eu.rssw.pct.elements.fixed.Parameter(2, "yy", 0, ParameterMode.INPUT,
+                new DataType(BuiltinClasses.PLO_CLASSNAME))}));
     typeInfo.addMethod(new MethodElement("m1", false, DataType.VOID, new IParameter[] {
         new eu.rssw.pct.elements.fixed.Parameter(1, "x1", 0, ParameterMode.INPUT, DataType.CHARACTER)}));
     // That's how dataset-handle parameters are read in rcode (see RCodeInfoTest#testDataset)
@@ -2953,6 +2962,15 @@ public class TreeParser03Test extends AbstractProparseTest {
 
     var code = """
         class rssw.MyClass:
+          constructor MyClass():
+            //
+          end constructor.
+          constructor MyClass(xx as int):
+            //
+          end constructor.
+          constructor MyClass(xx as int, yy as Progress.Lang.Object):
+            //
+          end constructor.
           method public void m1(input x1 as char):
             //
           end method.
@@ -2981,39 +2999,61 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertNotNull(unit.getRootScope());
 
     var routines = unit.getRootScope().getRoutines();
+    assertEquals(routines.size(), 10);
 
-    var m1 = routines.get(1);
+    var c1 = routines.get(1);
+    assertEquals(c1.getParameters().size(), 0);
+    assertNotNull(c1.getMethodElement());
+    assertTrue(c1.getMethodElement().isConstructor());
+    assertEquals(c1.getMethodElement().getParameters().length, 0);
+
+    var c1bis = routines.get(2);
+    assertEquals(c1bis.getParameters().size(), 1);
+    assertNotNull(c1bis.getMethodElement());
+    assertTrue(c1bis.getMethodElement().isConstructor());
+    assertEquals(c1bis.getMethodElement().getParameters().length, 1);
+    assertEquals(c1bis.getMethodElement().getParameters()[0].getDataType(), DataType.INTEGER);
+
+    var c1ter = routines.get(3);
+    assertEquals(c1ter.getParameters().size(), 2);
+    assertNotNull(c1ter.getMethodElement());
+    assertTrue(c1ter.getMethodElement().isConstructor());
+    assertEquals(c1ter.getMethodElement().getParameters().length, 2);
+    assertEquals(c1ter.getMethodElement().getParameters()[0].getDataType(), DataType.INTEGER);
+    assertEquals(c1ter.getMethodElement().getParameters()[1].getDataType().getPrimitive(), PrimitiveDataType.CLASS);
+
+    var m1 = routines.get(4);
     assertEquals(m1.getParameters().size(), 1);
     assertNotNull(m1.getMethodElement());
     assertEquals(m1.getMethodElement().getParameters().length, 1);
 
-    var m1bis = routines.get(2);
+    var m1bis = routines.get(5);
     assertEquals(m1bis.getParameters().size(), 2);
     assertNotNull(m1bis.getMethodElement());
     assertEquals(m1bis.getMethodElement().getParameters().length, 2);
     assertEquals(m1bis.getMethodElement().getParameters()[1].getDataType(), DataType.HANDLE);
     assertEquals(m1bis.getMethodElement().getParameters()[1].getParameterType(), ParameterType.DATASET);
 
-    var m1ter = routines.get(3);
+    var m1ter = routines.get(6);
     assertEquals(m1ter.getParameters().size(), 2);
     assertNotNull(m1ter.getMethodElement());
     assertEquals(m1ter.getMethodElement().getParameters().length, 2);
     assertEquals(m1ter.getMethodElement().getParameters()[1].getDataType(), DataType.HANDLE);
     assertEquals(m1ter.getMethodElement().getParameters()[1].getParameterType(), ParameterType.TABLE);
 
-    var m1quater = routines.get(4);
+    var m1quater = routines.get(7);
     assertEquals(m1quater.getParameters().size(), 2);
     assertNotNull(m1quater.getMethodElement());
     assertEquals(m1quater.getMethodElement().getParameters().length, 2);
     assertEquals(m1quater.getMethodElement().getParameters()[1].getDataType().getPrimitive(), PrimitiveDataType.CLASS);
 
-    var m1quinquies = routines.get(5);
+    var m1quinquies = routines.get(8);
     assertEquals(m1quinquies.getParameters().size(), 2);
     assertNotNull(m1quinquies.getMethodElement());
     assertEquals(m1quinquies.getMethodElement().getParameters().length, 2);
     assertEquals(m1quinquies.getMethodElement().getParameters()[1].getDataType(), DataType.DECIMAL);
 
-    var m1sexies = routines.get(6);
+    var m1sexies = routines.get(9);
     assertEquals(m1sexies.getParameters().size(), 2);
     assertNull(m1sexies.getMethodElement()); // Not found in typeInfo
   }
