@@ -133,7 +133,7 @@ public final class DumpFileUtils {
     public boolean processLine(String line) {
       if (line.startsWith("cpstream=")) {
         try {
-          charset = Charset.forName(line.substring(9));
+          charset = getCharset(line.substring(9));
         } catch (IllegalCharsetNameException | UnsupportedCharsetException uncaught) {
           // Undefined for example...
         }
@@ -141,5 +141,15 @@ public final class DumpFileUtils {
       }
       return true;
     }
+
+    private Charset getCharset(String str) {
+      if (str.startsWith("125"))
+        str = "windows-" + str;
+      else if ("big-5".equalsIgnoreCase(str))
+        str = "Big5";
+
+      return Charset.forName(str);
+    }
+
   }
 }

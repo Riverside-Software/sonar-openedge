@@ -193,6 +193,15 @@ public class TestDumpFile {
     DatabaseDescription db = DumpFileUtils.getDatabaseDescription(Paths.get("src/test/resources/1252.df"));
     assertNotNull(db.getTable("Tab1"));
     assertNotNull(db.getTable("Tab1").getField("Fld1"));
+    assertEquals(db.getTable("Tab1").getField("Fld1").getDescription(), "Téàst");
+  }
+
+  @Test
+  public void test1253() throws IOException {
+    DatabaseDescription db = DumpFileUtils.getDatabaseDescription(Paths.get("src/test/resources/1253.df"));
+    assertNotNull(db.getTable("Tab1"));
+    assertNotNull(db.getTable("Tab1").getField("Fld1"));
+    assertEquals(db.getTable("Tab1").getField("Fld1").getDescription(), "Tιΰst");
   }
 
   @Test
