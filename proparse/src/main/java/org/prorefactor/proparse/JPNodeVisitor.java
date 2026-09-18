@@ -706,14 +706,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
     // statement can be an assignment or a comparison. And it is faster and easier to transform ASSIGN statement to
     // EXPRESSION statement when the left-part of the assignment is a constant, rather than doing that directly in the
     // grammar
-    if ((ctx.EQUAL() != null) && (ctx.assignEqualLeft().expressionTerm() instanceof ExprTermOtherContext)) {
-      ExprTermOtherContext ctx2 = (ExprTermOtherContext) ctx.assignEqualLeft().expressionTerm();
-      if (ctx2.expressionTerm2() instanceof Exprt2ConstantContext) {
-        node1.getDown().getDown().setRight(node1.getDown().getRight());
-        node1.setDown(node1.getDown().getDown());
-        return new Builder(ABLNodeType.EXPR_STATEMENT).setStatement().setDown(
-            node1.changeType(ABLNodeType.EQ)).setRuleNode(ctx);
-      }
+    if ((ctx.EQUAL() != null) && (ctx.assignEqualLeft().expressionTerm() instanceof ExprTermOtherContext ctx2)
+        && (ctx2.expressionTerm2() instanceof Exprt2ConstantContext)) {
+      node1.getDown().getDown().setRight(node1.getDown().getRight());
+      node1.setDown(node1.getDown().getDown());
+      return new Builder(ABLNodeType.EXPR_STATEMENT).setStatement().setDown(
+          node1.changeType(ABLNodeType.EQ)).setRuleNode(ctx);
     }
 
     Builder holder = new Builder(ABLNodeType.ASSIGN).setStatement().setDown(node1).setRuleNode(ctx);
