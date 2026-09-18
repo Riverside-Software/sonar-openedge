@@ -914,6 +914,14 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitAnnotationStatement(AnnotationStatementContext ctx) {
+    isClass = true;
+    className = ctx.tn.getText();
+    isAbstract = false;
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
+  }
+
+  @Override
   public Builder visitClassStatement(ClassStatementContext ctx) {
     isClass = true;
     className = ctx.tn.getText();
@@ -1326,6 +1334,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
       retVal.moveRightToDown();
 
     return retVal;
+  }
+
+  @Override
+  public Builder visitDefineAnnotationPropertyStatement(DefineAnnotationPropertyStatementContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.PROPERTY);
   }
 
   @Override

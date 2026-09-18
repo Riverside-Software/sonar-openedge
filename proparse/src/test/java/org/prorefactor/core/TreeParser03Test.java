@@ -3139,4 +3139,25 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertEquals(unit.getTopNode().query(ABLNodeType.ANNOTATION).size(), 1);
   }
 
+  @Test
+  public void testAnnotationClass() {
+    var code = """
+        annotation rssw.MyAnnotation:
+          [  TestAnnotation ].
+          @TestAutreAnnotation.
+          define public property foobar as char.
+        end annotation.
+        """;
+
+    var unit = getParseUnit(code, session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    assertNotNull(unit.getTopNode());
+    var list01 = unit.getTopNode().queryStateHead(ABLNodeType.ANNOTATIONKW);
+    assertEquals(list01.size(), 1);
+    var list02 = unit.getTopNode().queryStateHead(ABLNodeType.DEFINE);
+    assertEquals(list02.size(), 1);
+  }
+
 }

@@ -321,6 +321,7 @@ public enum ABLNodeType {
   ALTERNATEKEY(Proparse.ALTERNATEKEY, "alternate-key", NodeTypesOption.KEYWORD),
   AMBIGUOUS(Proparse.AMBIGUOUS, "ambiguous", 5, NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   AND(Proparse.AND, "and", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
+  ANNOTATIONKW(Proparse.ANNOTATIONKW, "annotation", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   ANSIONLY(Proparse.ANSIONLY, "ansi-only", NodeTypesOption.KEYWORD),
   ANY(Proparse.ANY, "any", NodeTypesOption.KEYWORD, NodeTypesOption.RESERVED),
   ANYWHERE(Proparse.ANYWHERE, "anywhere", NodeTypesOption.KEYWORD),

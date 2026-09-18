@@ -146,6 +146,10 @@ interfaceCodeBlock:
     interfaceBlockOrStatement*
   ;
 
+annotationCodeBlock:
+    annotationBlockOrStatement*
+  ;
+
 classBlockOrStatement:
     emptyStatement
   | annotation
@@ -165,6 +169,13 @@ interfaceBlockOrStatement:
   | annotation
   | stronglyTypedAnnotation
   | inInterfaceStatement
+  ;
+
+annotationBlockOrStatement:
+    emptyStatement
+  | annotation
+  | stronglyTypedAnnotation
+  | inAnnotationStatement
   ;
 
 emptyStatement:
@@ -219,6 +230,7 @@ statement:
   |  accumulateStatement
   |  aggregateStatement
   |  analyzeStatement
+  |  annotationStatement
   |  applyStatement
   |  assignStatement
   |  bellStatement
@@ -443,6 +455,10 @@ inInterfaceStatement:
   |  methodDefinitionStatement
   |  externalProcedureStatement // Only external procedures are accepted
   |  externalFunctionStatement  // Only FUNCTION ... IN ... are accepted
+  ;
+
+inAnnotationStatement:
+    defineAnnotationPropertyStatement
   ;
 
 pseudoFunction:
@@ -973,6 +989,17 @@ analyzeStatement:
 
 annotation:
     ANNOTATION notStatementEnd* statementEnd
+  ;
+
+annotationStatement:
+    ANNOTATIONKW tn=typeName2 { support.defineClass($tn.text); }
+    blockColon
+    annotationCodeBlock
+    annotationEnd statementEnd
+  ;
+
+annotationEnd:
+    END (ANNOTATIONKW)?
   ;
 
 stronglyTypedAnnotation:
@@ -1901,6 +1928,11 @@ defineParamVar2:
 defineParamVar3:
     ( AS datatype | LIKE fieldExpr )?
     ( formatExpression | initialConstant | labelConstant | NOUNDO )*
+  ;
+
+defineAnnotationPropertyStatement:
+    DEFINE PUBLIC? PROPERTY n=newIdentifier AS datatype initialConstant?
+    { support.defVar($n.text); }
   ;
 
 definePropertyStatement:
