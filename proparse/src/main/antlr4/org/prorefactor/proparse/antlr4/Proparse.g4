@@ -1008,7 +1008,7 @@ stronglyTypedAnnotation:
   ;
 
 annotationName:
-    ID
+    typeName
   ;
 
 annotationProperty:
