@@ -129,6 +129,7 @@ public class ParseUnit {
   private boolean isClass;
   private boolean isInterface;
   private boolean isEnum;
+  private boolean isAnnotation;
   private boolean isAbstract;
   private String className;
 
@@ -417,6 +418,7 @@ public class ParseUnit {
     isClass = visitor.isClass();
     isInterface = visitor.isInterface();
     isEnum = visitor.isEnum();
+    isAnnotation = visitor.isAnnotation();
     isAbstract = visitor.isAbstractClass();
     className = visitor.getClassName();
 
@@ -685,6 +687,10 @@ public class ParseUnit {
 
   public boolean isEnum() {
     return isEnum;
+  }
+
+  public boolean isAnnotation() {
+    return isAnnotation;
   }
 
   public boolean isAbstractClass() {

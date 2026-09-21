@@ -38,6 +38,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   private boolean isClass;
   private boolean isInterface;
   private boolean isEnum;
+  private boolean isAnnotation;
   private boolean isAbstract;
   private String className;
   private boolean generateErrorNode;
@@ -62,6 +63,10 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   public boolean isEnum() {
     return isEnum;
+  }
+
+  public boolean isAnnotation() {
+    return isAnnotation;
   }
 
   public boolean isAbstractClass() {
@@ -913,7 +918,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   @Override
   public Builder visitAnnotationStatement(AnnotationStatementContext ctx) {
-    isClass = true;
+    isAnnotation = true;
     className = ctx.tn.getText();
     isAbstract = false;
     return createStatementTreeFromFirstNode(ctx).setBlock(true);

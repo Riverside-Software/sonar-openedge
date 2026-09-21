@@ -3153,11 +3153,15 @@ public class TreeParser03Test extends AbstractProparseTest {
     assertNull(unit.getTopNode());
     unit.treeParser01();
     assertFalse(unit.hasSyntaxError());
+    assertTrue(unit.isAnnotation());
     assertNotNull(unit.getTopNode());
     var list01 = unit.getTopNode().queryStateHead(ABLNodeType.ANNOTATIONKW);
     assertEquals(list01.size(), 1);
     var list02 = unit.getTopNode().queryStateHead(ABLNodeType.DEFINE);
     assertEquals(list02.size(), 1);
+    var vars = unit.getRootScope().getAllSymbols(Variable.class);
+    assertEquals(vars.size(), 1);
+    assertEquals(vars.get(0).getName(), "foobar");
   }
 
 }
