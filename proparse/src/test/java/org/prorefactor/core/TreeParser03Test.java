@@ -57,6 +57,7 @@ import eu.rssw.pct.elements.ParameterType;
 import eu.rssw.pct.elements.PrimitiveDataType;
 import eu.rssw.pct.elements.fixed.ConstructorElement;
 import eu.rssw.pct.elements.fixed.MethodElement;
+import eu.rssw.pct.elements.fixed.PropertyElement;
 import eu.rssw.pct.elements.fixed.TypeInfo;
 import eu.rssw.pct.elements.fixed.VariableElement;
 
@@ -3162,6 +3163,61 @@ public class TreeParser03Test extends AbstractProparseTest {
     var vars = unit.getRootScope().getAllSymbols(Variable.class);
     assertEquals(vars.size(), 1);
     assertEquals(vars.get(0).getName(), "foobar");
+  }
+
+  @Test
+  public void testRef() {
+    var typeInfo = new TypeInfo("rssw.TestRef", false, false, BuiltinClasses.PLO_CLASSNAME, "");
+    typeInfo.addProperty(new PropertyElement("prop01", false, DataType.INTEGER));
+    session.injectTypeInfo(typeInfo);
+
+    var code = """
+        class rssw.TestRef:
+          define public property prop01 as int get. set.
+          method public void foo():
+            this-object:prop01 = 1.
+            prop01 = 1.
+          end.
+        end class.
+        """;
+
+    var unit = getParseUnit(code, session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+
+    var lst = unit.getTopNode().query(ABLNodeType.LEFT_PART);
+    assertEquals(lst.size(), 2);
+    assertEquals(lst.get(0).getFirstChild().getSymbol(), lst.get(1).getFirstChild().getSymbol());
+
+    var prop01 = unit.getRootScope().getVariable("prop01");
+    assertNotNull(prop01);
+    assertEquals(prop01.getReadWriteReferences().size(), 2);
+  }
+
+  @Test
+  public void testRef2() {
+    var typeInfo = new TypeInfo("rssw.TestRefParent", false, false, BuiltinClasses.PLO_CLASSNAME, "");
+    typeInfo.addProperty(new PropertyElement("prop01", false, DataType.INTEGER));
+    session.injectTypeInfo(typeInfo);
+    var typeInfo2 = new TypeInfo("rssw.TestRefChild", false, false, "rssw.TestRefParent", "");
+    session.injectTypeInfo(typeInfo2);
+
+    var code = """
+        class rssw.TestRefChild inherits rssw.TestRefParent:
+          method public void foo():
+            this-object:prop01 = 1.
+            prop01 = 1.
+          end.
+        end class.
+        """;
+
+    var unit = getParseUnit(code, session);
+    assertNull(unit.getTopNode());
+    unit.treeParser01();
+
+    var lst = unit.getTopNode().query(ABLNodeType.LEFT_PART);
+    assertEquals(lst.size(), 2);
+    assertEquals(lst.get(0).getFirstChild().getSymbol(), lst.get(1).getFirstChild().getSymbol());
   }
 
 }
