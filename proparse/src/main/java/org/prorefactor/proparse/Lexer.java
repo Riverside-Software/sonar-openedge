@@ -1738,7 +1738,7 @@ public class Lexer implements IPreprocessor {
   }
 
   private void ppNewMacroRef2(String theText, FilePos refPos) {
-    if (theText.length() == 0) {
+    if (theText.isEmpty()) {
       ++sourceCounter;
       prepro.getLstListener().macroRefEnd();
       return;
@@ -1838,7 +1838,7 @@ public class Lexer implements IPreprocessor {
     // It *is* possible to get here with a blank include file
     // name. See bug#034. Don't enter if the includefilename is blank.
     String fName = referencedWithName.trim().replace('\\', '/');
-    if (prepro.isConsuming() || prepro.isLexOnly() || fName.length() == 0)
+    if (prepro.isConsuming() || prepro.isLexOnly() || fName.isEmpty())
       return false;
 
     File incFile = null;
@@ -2063,7 +2063,7 @@ public class Lexer implements IPreprocessor {
   // ***********************************
 
   private static boolean isNumber(String str) {
-    if ((str == null) || (str.length() == 0))
+    if ((str == null) || str.isEmpty())
       return false;
     for (int zz = 0; zz < str.length(); zz++) {
       if (!Character.isDigit(str.charAt(zz)))
