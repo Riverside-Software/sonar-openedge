@@ -265,6 +265,131 @@ public interface ITypeInfo {
   }
 
   /**
+   * Return method with diagnostic information about the resolution process.
+   * Unlike getMethod(), this method provides detailed information about candidates and ambiguities.
+   */
+  default MethodResolutionResult getMethodWithDiagnostics(Function<String, ITypeInfo> provider, String method,
+      ParameterDescriptor[] parameters) {
+    // First try exact match
+    var exactMatch = getExactMatchMethod(provider, method, parameters);
+    if (exactMatch != null)
+      return MethodResolutionResult.exactMatch(exactMatch.getO1(), exactMatch.getO2());
+
+    // Then try compatible match with diagnostics
+    return getCompatibleMatchWithDiagnostics(provider, method, false, parameters);
+  }
+
+  /**
+   * Return constructor with diagnostic information about the resolution process.
+   */
+  default MethodResolutionResult getConstructorWithDiagnostics(Function<String, ITypeInfo> provider,
+      ParameterDescriptor[] parameters) {
+    // First try exact match
+    var exactMatch = getExactMatchConstructor(provider, parameters);
+    if (exactMatch != null)
+      return MethodResolutionResult.exactMatch(exactMatch.getO1(), exactMatch.getO2());
+
+    // Then try compatible match with diagnostics
+    return getCompatibleMatchWithDiagnostics(provider, getTypeName(), true, parameters);
+  }
+
+  /**
+   * Internal method that performs compatible matching and returns diagnostic information.
+   */
+  default MethodResolutionResult getCompatibleMatchWithDiagnostics(Function<String, ITypeInfo> provider, String method,
+      boolean constructor, ParameterDescriptor[] parameters) {
+    // Collect all compatible methods with their match reasons
+    List<MethodResolutionResult.Candidate> candidates = new ArrayList<>();
+
+    for (var elem : getMethods()) {
+      var cond1 = constructor && elem.isConstructor() && (elem.getParameters().length == parameters.length);
+      var cond2 = !constructor && !elem.isConstructor() && method.equalsIgnoreCase(elem.getName())
+          && (elem.getParameters().length == parameters.length);
+      if (cond1 || cond2) {
+        var match = true;
+        List<MethodResolutionResult.MatchReason> reasons = new ArrayList<>();
+
+        for (int zz = 0; zz < elem.getParameters().length; zz++) {
+          if (parameters[zz].getDataType() == DataType.UNKNOWN) {
+            reasons.add(MethodResolutionResult.MatchReason.UNKNOWN_DATATYPE);
+          } else {
+            var extent = ((elem.getParameters()[zz].getExtent() == 0) && (parameters[zz].getExtent() == 0))
+                || ((elem.getParameters()[zz].getExtent() != 0) && (parameters[zz].getExtent() != 0));
+            var same = extent && elem.getParameters()[zz].getDataType().equals(parameters[zz].getDataType());
+            var compat = extent
+                && elem.getParameters()[zz].getDataType().isCompatible(parameters[zz].getDataType(), provider);
+
+            match &= compat;
+            if (!same && compat)
+              reasons.add(MethodResolutionResult.MatchReason.PARAMETER_TYPE_DIFFERENCE);
+            var sameMode = elem.getParameters()[zz].getMode().equals(parameters[zz].getMode());
+            if (!sameMode)
+              reasons.add(MethodResolutionResult.MatchReason.PARAMETER_MODE_DIFFERENCE);
+          }
+        }
+        if (match) {
+          if (reasons.isEmpty())
+            reasons.add(MethodResolutionResult.MatchReason.EXACT);
+          candidates.add(new MethodResolutionResult.Candidate(this, elem, reasons));
+        }
+      }
+    }
+
+    // Also search in interfaces
+    for (var ifaceName : getInterfaces()) {
+      var iface = provider.apply(ifaceName);
+      if (iface != null) {
+        var ifaceResult = iface.getCompatibleMatchWithDiagnostics(provider, method, constructor, parameters);
+        candidates.addAll(ifaceResult.getCandidates());
+      }
+    }
+
+    if (candidates.size() > 1) {
+      // Multiple candidates - check for ambiguity
+      var anyUnknown = candidates.stream()
+          .anyMatch(c -> c.hasReason(MethodResolutionResult.MatchReason.UNKNOWN_DATATYPE));
+      var paramModeList = candidates.stream()
+          .filter(c -> c.hasReason(MethodResolutionResult.MatchReason.PARAMETER_MODE_DIFFERENCE)).toList();
+      var paramTypeList = candidates.stream()
+          .filter(c -> c.hasReason(MethodResolutionResult.MatchReason.PARAMETER_TYPE_DIFFERENCE)).toList();
+
+      if (anyUnknown) {
+        // Ambiguous due to unknown parameter type (null/?)
+        return MethodResolutionResult.ambiguous(candidates,
+            "Cannot resolve method due to unknown parameter type (null/?). " + candidates.size()
+                + " candidates found.");
+      }
+
+      // Select the best candidate using existing rules
+      MethodResolutionResult.Candidate selected;
+      if (!paramModeList.isEmpty() && paramTypeList.isEmpty()) {
+        selected = paramModeList.get(0);
+      } else if (!paramTypeList.isEmpty() && paramModeList.isEmpty()) {
+        selected = paramTypeList.get(0);
+      } else {
+        selected = paramModeList.isEmpty() ? candidates.get(0) : paramModeList.get(0);
+      }
+
+      return MethodResolutionResult.resolvedWithCandidates(selected.getTypeInfo(), selected.getMethod(), candidates);
+
+    } else if (candidates.size() == 1) {
+      // Single match
+      var candidate = candidates.get(0);
+      return MethodResolutionResult.singleMatch(candidate.getTypeInfo(), candidate.getMethod(),
+          candidate.getReasons());
+    }
+
+    // No match in this class - check parent
+    if (!constructor) {
+      var parent = provider.apply(getParentTypeName());
+      if (parent != null)
+        return parent.getCompatibleMatchWithDiagnostics(provider, method, constructor, parameters);
+    }
+
+    return MethodResolutionResult.notFound();
+  }
+
+  /**
    * Return property by name in class hierarchy
    */
   default Pair<ITypeInfo, IPropertyElement> lookupProperty(Function<String, ITypeInfo> typeInfoProvider,

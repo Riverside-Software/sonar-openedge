@@ -40,6 +40,7 @@ import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.ITypeInfo.ParameterDescriptor;
 import eu.rssw.pct.elements.ParameterMode;
+import eu.rssw.pct.elements.fixed.ConstructorElement;
 import eu.rssw.pct.elements.fixed.MethodElement;
 import eu.rssw.pct.elements.fixed.Parameter;
 import eu.rssw.pct.elements.fixed.TypeInfo;
@@ -515,6 +516,163 @@ public class ITypeInfoTest {
     assertEquals(new TypeInfo("HelloWorld", false, false, "", "").toUpperCaseAcronym(), "HW");
     assertEquals(new TypeInfo("com.progress.Hello-World_%IDislikeSymbols", false, false, "", "").toUpperCaseAcronym(),
         "HWIDS");
+  }
+
+  // ========================================
+  // Phase 7: Diagnostic and reporting tests
+  // ========================================
+
+  @Test
+  public void testDiagnosticsExactMatch() {
+    // Test that exact match returns proper diagnostic info
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+
+    var typeInfo = new TypeInfo("TestClass", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("exactMethod", false, DataType.CHARACTER,
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INTEGER)));
+    map.put(typeInfo.getTypeName(), typeInfo);
+
+    var result = typeInfo.getMethodWithDiagnostics(map::get, "exactMethod",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.INTEGER, 0, ParameterMode.INPUT)});
+
+    assertTrue(result.isResolved());
+    assertFalse(result.isAmbiguous());
+    assertNotNull(result.getResolvedMethod());
+    assertEquals(result.getResolvedMethod().getO2().getName(), "exactMethod");
+    assertEquals(result.getCandidates().size(), 1);
+    assertTrue(result.getCandidates().get(0).hasReason(
+        eu.rssw.pct.elements.MethodResolutionResult.MatchReason.EXACT));
+  }
+
+  @Test
+  public void testDiagnosticsNotFound() {
+    // Test that not found returns proper diagnostic info
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+
+    var typeInfo = new TypeInfo("TestClass", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("someMethod", false, DataType.CHARACTER));
+    map.put(typeInfo.getTypeName(), typeInfo);
+
+    var result = typeInfo.getMethodWithDiagnostics(map::get, "nonExistentMethod",
+        new ParameterDescriptor[] {});
+
+    assertFalse(result.isResolved());
+    assertFalse(result.isAmbiguous());
+    assertNull(result.getResolvedMethod());
+    assertTrue(result.getCandidates().isEmpty());
+  }
+
+  @Test
+  public void testDiagnosticsAmbiguousWithUnknown() {
+    // Test ambiguity when using unknown datatype (null/?)
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+
+    var typeInfo = new TypeInfo("TestClass", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("overloaded", false, DataType.CHARACTER,
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER)));
+    typeInfo.addMethod(new MethodElement("overloaded", false, DataType.INTEGER,
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INTEGER)));
+    map.put(typeInfo.getTypeName(), typeInfo);
+
+    var result = typeInfo.getMethodWithDiagnostics(map::get, "overloaded",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.UNKNOWN, 0, ParameterMode.INPUT)});
+
+    assertFalse(result.isResolved());
+    assertTrue(result.isAmbiguous());
+    assertNull(result.getResolvedMethod());
+    assertEquals(result.getCandidates().size(), 2);
+    assertNotNull(result.getAmbiguityReason());
+    assertTrue(result.getAmbiguityReason().contains("unknown parameter type"));
+    assertTrue(result.hasUnknownDatatypeCandidate());
+  }
+
+  @Test
+  public void testDiagnosticsResolvedWithMultipleCandidates() {
+    // Test when multiple candidates exist but one is selected
+    // We use INPUT_OUTPUT and OUTPUT methods - calling with INPUT will match both as compatible
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+
+    var typeInfo = new TypeInfo("TestClass", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("method01", false, DataType.CHARACTER,
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT_OUTPUT, DataType.CHARACTER)));
+    typeInfo.addMethod(new MethodElement("method01", false, DataType.INTEGER,
+        new Parameter(1, "prm1", 0, ParameterMode.OUTPUT, DataType.CHARACTER)));
+    map.put(typeInfo.getTypeName(), typeInfo);
+
+    // Call with INPUT mode - no exact match, both INPUT_OUTPUT and OUTPUT are compatible
+    var result = typeInfo.getMethodWithDiagnostics(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT)});
+
+    assertTrue(result.isResolved());
+    assertFalse(result.isAmbiguous());
+    assertNotNull(result.getResolvedMethod());
+    assertTrue(result.hadMultipleCandidates());
+    assertEquals(result.getCandidates().size(), 2);
+  }
+
+  @Test
+  public void testDiagnosticsParameterTypeDifference() {
+    // Test compatible match with parameter type difference (CHAR vs LONGCHAR)
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+    BuiltinClasses.getBuiltinClasses(OpenEdgeVersion.V117).forEach(it -> map.put(it.getTypeName(), it));
+
+    var typeInfo = new TypeInfo("TestClass", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("acceptLongchar", false, DataType.VOID,
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.LONGCHAR)));
+    map.put(typeInfo.getTypeName(), typeInfo);
+
+    // Call with CHARACTER - should match LONGCHAR method with type difference
+    var result = typeInfo.getMethodWithDiagnostics(map::get, "acceptLongchar",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT)});
+
+    assertTrue(result.isResolved());
+    assertFalse(result.isAmbiguous());
+    assertEquals(result.getCandidates().size(), 1);
+    assertTrue(result.getCandidates().get(0).hasReason(
+        eu.rssw.pct.elements.MethodResolutionResult.MatchReason.PARAMETER_TYPE_DIFFERENCE));
+  }
+
+  @Test
+  public void testDiagnosticsParameterModeDifference() {
+    // Test compatible match with parameter mode difference
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+
+    var typeInfo = new TypeInfo("TestClass", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("acceptInputOutput", false, DataType.VOID,
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT_OUTPUT, DataType.CHARACTER)));
+    map.put(typeInfo.getTypeName(), typeInfo);
+
+    // Call with INPUT mode - should match INPUT_OUTPUT method with mode difference
+    var result = typeInfo.getMethodWithDiagnostics(map::get, "acceptInputOutput",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT)});
+
+    assertTrue(result.isResolved());
+    assertFalse(result.isAmbiguous());
+    assertEquals(result.getCandidates().size(), 1);
+    assertTrue(result.getCandidates().get(0).hasReason(
+        eu.rssw.pct.elements.MethodResolutionResult.MatchReason.PARAMETER_MODE_DIFFERENCE));
+  }
+
+  @Test
+  public void testDiagnosticsConstructor() {
+    // Test constructor resolution with diagnostics
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+
+    var typeInfo = new TypeInfo("TestClass", false, false, "Progress.Lang.Object", "");
+    var ctor1 = new ConstructorElement("TestClass");
+    var ctor2 = new ConstructorElement("TestClass",
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER));
+    typeInfo.addMethod(ctor1);
+    typeInfo.addMethod(ctor2);
+    map.put(typeInfo.getTypeName(), typeInfo);
+
+    // Call with no parameters - should find default constructor
+    var result = typeInfo.getConstructorWithDiagnostics(map::get, new ParameterDescriptor[] {});
+
+    assertTrue(result.isResolved());
+    assertNotNull(result.getResolvedMethod());
+    assertTrue(result.getResolvedMethod().getO2().isConstructor());
+    assertEquals(result.getResolvedMethod().getO2().getParameters().length, 0);
   }
 
 }
