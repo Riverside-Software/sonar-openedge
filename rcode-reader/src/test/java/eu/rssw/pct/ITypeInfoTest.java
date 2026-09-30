@@ -517,4 +517,125 @@ public class ITypeInfoTest {
         "HWIDS");
   }
 
+  /**
+   * Test that INPUT formal parameter accepts INPUT and INPUT-OUTPUT actual parameters
+   */
+  @Test
+  public void testParameterModeInputFormal() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+    BuiltinClasses.getBuiltinClasses(OpenEdgeVersion.V117).forEach(it -> map.put(it.getTypeName(), it));
+
+    var typeInfo = new TypeInfo("TestClass", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("method01", false, DataType.VOID,
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER)));
+    map.put(typeInfo.getTypeName(), typeInfo);
+
+    // INPUT actual -> INPUT formal: should match
+    var val1 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT)});
+    assertNotNull(val1);
+
+    // INPUT_OUTPUT actual -> INPUT formal: should match
+    var val2 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT_OUTPUT)});
+    assertNotNull(val2);
+
+    // OUTPUT actual -> INPUT formal: should NOT match
+    var val3 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.OUTPUT)});
+    assertNull(val3);
+  }
+
+  /**
+   * Test that OUTPUT formal parameter accepts OUTPUT and INPUT-OUTPUT actual parameters
+   */
+  @Test
+  public void testParameterModeOutputFormal() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+    BuiltinClasses.getBuiltinClasses(OpenEdgeVersion.V117).forEach(it -> map.put(it.getTypeName(), it));
+
+    var typeInfo = new TypeInfo("TestClass", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("method01", false, DataType.VOID,
+        new Parameter(1, "prm1", 0, ParameterMode.OUTPUT, DataType.CHARACTER)));
+    map.put(typeInfo.getTypeName(), typeInfo);
+
+    // OUTPUT actual -> OUTPUT formal: should match
+    var val1 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.OUTPUT)});
+    assertNotNull(val1);
+
+    // INPUT_OUTPUT actual -> OUTPUT formal: should match
+    var val2 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT_OUTPUT)});
+    assertNotNull(val2);
+
+    // INPUT actual -> OUTPUT formal: should NOT match
+    var val3 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT)});
+    assertNull(val3);
+  }
+
+  /**
+   * Test that INPUT-OUTPUT formal parameter accepts INPUT, OUTPUT, and INPUT-OUTPUT actual parameters
+   */
+  @Test
+  public void testParameterModeInputOutputFormal() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+    BuiltinClasses.getBuiltinClasses(OpenEdgeVersion.V117).forEach(it -> map.put(it.getTypeName(), it));
+
+    var typeInfo = new TypeInfo("TestClass", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("method01", false, DataType.VOID,
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT_OUTPUT, DataType.CHARACTER)));
+    map.put(typeInfo.getTypeName(), typeInfo);
+
+    // INPUT_OUTPUT actual -> INPUT_OUTPUT formal: should match
+    var val1 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT_OUTPUT)});
+    assertNotNull(val1);
+
+    // INPUT actual -> INPUT_OUTPUT formal: should match (permissive)
+    var val2 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT)});
+    assertNotNull(val2);
+
+    // OUTPUT actual -> INPUT_OUTPUT formal: should match (permissive)
+    var val3 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.OUTPUT)});
+    assertNotNull(val3);
+  }
+
+  /**
+   * Test that BUFFER formal parameter accepts only BUFFER actual parameter
+   */
+  @Test
+  public void testParameterModeBufferFormal() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+    BuiltinClasses.getBuiltinClasses(OpenEdgeVersion.V117).forEach(it -> map.put(it.getTypeName(), it));
+
+    var typeInfo = new TypeInfo("TestClass", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("method01", false, DataType.VOID,
+        new Parameter(1, "prm1", 0, ParameterMode.BUFFER, DataType.CHARACTER)));
+    map.put(typeInfo.getTypeName(), typeInfo);
+
+    // BUFFER actual -> BUFFER formal: should match
+    var val1 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.BUFFER)});
+    assertNotNull(val1);
+
+    // INPUT actual -> BUFFER formal: should NOT match
+    var val2 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT)});
+    assertNull(val2);
+
+    // OUTPUT actual -> BUFFER formal: should NOT match
+    var val3 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.OUTPUT)});
+    assertNull(val3);
+
+    // INPUT_OUTPUT actual -> BUFFER formal: should NOT match
+    var val4 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT_OUTPUT)});
+    assertNull(val4);
+  }
+
 }

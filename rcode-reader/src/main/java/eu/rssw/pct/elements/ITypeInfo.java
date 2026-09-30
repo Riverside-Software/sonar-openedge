@@ -191,9 +191,16 @@ public interface ITypeInfo {
             match &= compat;
             if (!same && compat)
               reason.add(3);
-            var sameMode = elem.getParameters()[zz].getMode().equals(parameters[zz].getMode());
-            if (!sameMode)
+
+            // Check parameter mode compatibility
+            var formalMode = elem.getParameters()[zz].getMode();
+            var actualMode = parameters[zz].getMode();
+            if (!isParameterModeCompatible(formalMode, actualMode)) {
+              match = false;
+            }
+            if (!formalMode.equals(actualMode)) {
               reason.add(2);
+            }
           }
         }
         if (match) {
@@ -412,6 +419,33 @@ public interface ITypeInfo {
     getMethods().stream().filter(it -> it.isConstructor()).map(it -> Pair.of(this, it)).forEach(pairConsumer);
 
     return list;
+  }
+
+  /**
+   * Checks if the actual parameter mode is compatible with the formal parameter mode.
+   * Rules:
+   * - INPUT formal accepts INPUT or INPUT-OUTPUT actual
+   * - OUTPUT formal accepts OUTPUT or INPUT-OUTPUT actual
+   * - INPUT-OUTPUT formal accepts INPUT, OUTPUT, or INPUT-OUTPUT actual
+   * - BUFFER formal accepts only BUFFER actual
+   */
+  private static boolean isParameterModeCompatible(ParameterMode formal, ParameterMode actual) {
+    if (formal.equals(actual)) {
+      return true;
+    }
+    switch (formal) {
+      case INPUT:
+        return actual == ParameterMode.INPUT_OUTPUT;
+      case OUTPUT:
+        return actual == ParameterMode.INPUT_OUTPUT;
+      case INPUT_OUTPUT:
+        // INPUT_OUTPUT is the most permissive - accepts INPUT, OUTPUT or INPUT_OUTPUT
+        return actual == ParameterMode.INPUT || actual == ParameterMode.OUTPUT;
+      case BUFFER:
+        return false; // Must be exact match
+      default:
+        return false;
+    }
   }
 
   public static class ParameterDescriptor {
