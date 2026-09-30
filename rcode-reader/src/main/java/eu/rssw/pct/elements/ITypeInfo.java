@@ -71,6 +71,32 @@ public interface ITypeInfo {
   boolean hasBuffer(String inName);
 
   /**
+   * Returns methods with the given name (case-insensitive).
+   * This method can be overridden in implementations to provide cached/indexed access.
+   * Default implementation filters getMethods() which may be slow for classes with many methods.
+   *
+   * @param name The method name to search for
+   * @return Collection of methods with the given name, never null
+   */
+  default Collection<IMethodElement> getMethodsByName(String name) {
+    return getMethods().stream()
+        .filter(m -> !m.isConstructor() && m.getName().equalsIgnoreCase(name))
+        .toList();
+  }
+
+  /**
+   * Returns all constructors.
+   * This method can be overridden in implementations to provide cached access.
+   *
+   * @return Collection of constructors, never null
+   */
+  default Collection<IMethodElement> getConstructors() {
+    return getMethods().stream()
+        .filter(IMethodElement::isConstructor)
+        .toList();
+  }
+
+  /**
    * @return simple name of this class (without package name)
    */
   default String getSimpleName() {
@@ -120,26 +146,42 @@ public interface ITypeInfo {
   }
 
   /**
-   * Return method or constructor with the right name (for methods) and exactly the same parameters
+   * Return method or constructor with the right name (for methods) and exactly the same parameters.
+   * Optimized to use getMethodsByName() or getConstructors() for faster lookup.
    */
   default Pair<ITypeInfo, IMethodElement> getExactMatch(Function<String, ITypeInfo> provider, String method,
       boolean constructor, ParameterDescriptor[] parameters) {
-    for (var elem : getMethods()) {
-      var cond1 = constructor && elem.isConstructor() && (elem.getParameters().length == parameters.length);
-      var cond2 = !constructor && !elem.isConstructor() && method.equalsIgnoreCase(elem.getName())
-          && (elem.getParameters().length == parameters.length);
-      if (cond1 || cond2) {
-        var match = true;
-        for (int zz = 0; zz < elem.getParameters().length; zz++) {
-          match &= elem.getParameters()[zz].getDataType().equals(parameters[zz].getDataType());
-          match &= elem.getParameters()[zz].getMode().equals(parameters[zz].getMode());
-          match &= ((elem.getParameters()[zz].getExtent() == 0) && (parameters[zz].getExtent() == 0))
-              || ((elem.getParameters()[zz].getExtent() != 0) && (parameters[zz].getExtent() != 0));
+    // Use optimized method lookup - getMethodsByName/getConstructors can be overridden
+    // to provide indexed/cached access in implementations
+    var candidates = constructor ? getConstructors() : getMethodsByName(method);
+
+    for (var elem : candidates) {
+      if (elem.getParameters().length != parameters.length)
+        continue;
+
+      var match = true;
+      for (int zz = 0; zz < elem.getParameters().length; zz++) {
+        // Early exit on first mismatch for better performance
+        if (!elem.getParameters()[zz].getDataType().equals(parameters[zz].getDataType())) {
+          match = false;
+          break;
         }
-        if (match)
-          return Pair.of(this, elem);
+        if (!elem.getParameters()[zz].getMode().equals(parameters[zz].getMode())) {
+          match = false;
+          break;
+        }
+        var extentMatch = ((elem.getParameters()[zz].getExtent() == 0) && (parameters[zz].getExtent() == 0))
+            || ((elem.getParameters()[zz].getExtent() != 0) && (parameters[zz].getExtent() != 0));
+        if (!extentMatch) {
+          match = false;
+          break;
+        }
       }
+      if (match)
+        return Pair.of(this, elem);
     }
+
+    // Search in parent class for methods (not constructors)
     if (!constructor) {
       var parent = provider.apply(getParentTypeName());
       if (parent != null)
@@ -165,42 +207,59 @@ public interface ITypeInfo {
     return getExactMatch(provider, method, false, parameters);
   }
 
+  /**
+   * Return method or constructor with compatible parameters.
+   * Optimized to use getMethodsByName() or getConstructors() for faster lookup.
+   */
   default Pair<ITypeInfo, IMethodElement> getCompatibleMatch(Function<String, ITypeInfo> provider, String method,
       boolean constructor, ParameterDescriptor[] parameters) {
     // First, keep track of all compatible methods, and the reason why they are compatible
     // No enum for the reason as I don't want it to be public
     // 1 -> Unknown data type used, 2 -> ParameterMode difference, 3 -> Parameter datatype difference
     List<Triplet<ITypeInfo, IMethodElement, Set<Integer>>> list01 = new ArrayList<>();
-    for (var elem : getMethods()) {
-      var cond1 = constructor && elem.isConstructor() && (elem.getParameters().length == parameters.length);
-      var cond2 = !constructor && !elem.isConstructor() && method.equalsIgnoreCase(elem.getName())
-          && (elem.getParameters().length == parameters.length);
-      if (cond1 || cond2) {
-        var match = true;
-        Set<Integer> reason = new HashSet<>();
-        for (int zz = 0; zz < elem.getParameters().length; zz++) {
-          if (parameters[zz].getDataType() == DataType.UNKNOWN) {
-            reason.add(1);
-          } else {
-            var extent = ((elem.getParameters()[zz].getExtent() == 0) && (parameters[zz].getExtent() == 0))
-                || ((elem.getParameters()[zz].getExtent() != 0) && (parameters[zz].getExtent() != 0));
-            var same = extent && elem.getParameters()[zz].getDataType().equals(parameters[zz].getDataType());
-            var compat = extent
-                && elem.getParameters()[zz].getDataType().isCompatible(parameters[zz].getDataType(), provider);
 
-            match &= compat;
-            if (!same && compat)
-              reason.add(3);
-            var sameMode = elem.getParameters()[zz].getMode().equals(parameters[zz].getMode());
-            if (!sameMode)
-              reason.add(2);
+    // Use optimized method lookup
+    var candidates = constructor ? getConstructors() : getMethodsByName(method);
+
+    for (var elem : candidates) {
+      if (elem.getParameters().length != parameters.length)
+        continue;
+
+      var match = true;
+      Set<Integer> reason = new HashSet<>();
+      for (int zz = 0; zz < elem.getParameters().length; zz++) {
+        if (parameters[zz].getDataType() == DataType.UNKNOWN) {
+          reason.add(1);
+        } else {
+          var extent = ((elem.getParameters()[zz].getExtent() == 0) && (parameters[zz].getExtent() == 0))
+              || ((elem.getParameters()[zz].getExtent() != 0) && (parameters[zz].getExtent() != 0));
+
+          // Early exit if extent doesn't match
+          if (!extent) {
+            match = false;
+            break;
           }
-        }
-        if (match) {
-          list01.add(Triplet.of(this, elem, reason));
+
+          var same = elem.getParameters()[zz].getDataType().equals(parameters[zz].getDataType());
+          var compat = elem.getParameters()[zz].getDataType().isCompatible(parameters[zz].getDataType(), provider);
+
+          if (!compat) {
+            match = false;
+            break;
+          }
+
+          if (!same)
+            reason.add(3);
+          var sameMode = elem.getParameters()[zz].getMode().equals(parameters[zz].getMode());
+          if (!sameMode)
+            reason.add(2);
         }
       }
+      if (match) {
+        list01.add(Triplet.of(this, elem, reason));
+      }
     }
+
     if (list01.size() > 1) {
       // If multiple methods match, the following rules apply:
       // * If there was a null (?) parameter, then don't return anything (ambiguous)
@@ -222,6 +281,7 @@ public interface ITypeInfo {
       // Single match, return this one
       return Pair.of(list01.get(0).getO1(), list01.get(0).getO2());
     }
+
     if (!constructor) {
       // Check parent class only when looking for methods
       var parent = provider.apply(getParentTypeName());

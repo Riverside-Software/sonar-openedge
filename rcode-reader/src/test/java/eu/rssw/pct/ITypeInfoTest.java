@@ -40,6 +40,7 @@ import eu.rssw.pct.elements.IMethodElement;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.ITypeInfo.ParameterDescriptor;
 import eu.rssw.pct.elements.ParameterMode;
+import eu.rssw.pct.elements.fixed.ConstructorElement;
 import eu.rssw.pct.elements.fixed.MethodElement;
 import eu.rssw.pct.elements.fixed.Parameter;
 import eu.rssw.pct.elements.fixed.TypeInfo;
@@ -515,6 +516,87 @@ public class ITypeInfoTest {
     assertEquals(new TypeInfo("HelloWorld", false, false, "", "").toUpperCaseAcronym(), "HW");
     assertEquals(new TypeInfo("com.progress.Hello-World_%IDislikeSymbols", false, false, "", "").toUpperCaseAcronym(),
         "HWIDS");
+  }
+
+  // ========================================
+  // Phase 8: Cache and optimization tests
+  // ========================================
+
+  @Test
+  public void testGetMethodsByName() {
+    var typeInfo = new TypeInfo("TestClass", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("method01", false, DataType.VOID));
+    typeInfo.addMethod(new MethodElement("method01", false, DataType.VOID,
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER)));
+    typeInfo.addMethod(new MethodElement("method02", false, DataType.CHARACTER));
+    typeInfo.addMethod(new MethodElement("METHOD01", false, DataType.INTEGER)); // Different case
+
+    // getMethodsByName should return all methods with the same name (case-insensitive)
+    var methods01 = typeInfo.getMethodsByName("method01");
+    assertEquals(methods01.size(), 3);
+
+    var methods02 = typeInfo.getMethodsByName("METHOD02");
+    assertEquals(methods02.size(), 1);
+
+    var methods03 = typeInfo.getMethodsByName("nonExistent");
+    assertEquals(methods03.size(), 0);
+  }
+
+  @Test
+  public void testGetConstructors() {
+    var typeInfo = new TypeInfo("TestClass", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new ConstructorElement("TestClass"));
+    typeInfo.addMethod(new ConstructorElement("TestClass",
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER)));
+    typeInfo.addMethod(new MethodElement("someMethod", false, DataType.VOID));
+
+    var constructors = typeInfo.getConstructors();
+    assertEquals(constructors.size(), 2);
+
+    // All should be constructors
+    for (var ctor : constructors) {
+      assertTrue(ctor.isConstructor());
+    }
+  }
+
+  @Test
+  public void testMethodIndexCacheInvalidation() {
+    var typeInfo = new TypeInfo("TestClass", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("method01", false, DataType.VOID));
+
+    // First access - builds index
+    assertEquals(typeInfo.getMethodsByName("method01").size(), 1);
+
+    // Add another method - should invalidate cache
+    typeInfo.addMethod(new MethodElement("method01", false, DataType.CHARACTER));
+
+    // Should reflect the new method
+    assertEquals(typeInfo.getMethodsByName("method01").size(), 2);
+  }
+
+  @Test
+  public void testOptimizedMethodResolution() {
+    // Test that method resolution still works correctly with the optimized index
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+
+    var typeInfo = new TypeInfo("TestClass", false, false, "Progress.Lang.Object", "");
+    // Add many methods to test performance optimization impact
+    for (int i = 0; i < 100; i++) {
+      typeInfo.addMethod(new MethodElement("method" + i, false, DataType.VOID,
+          new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.INTEGER)));
+    }
+    // Add the method we're looking for
+    typeInfo.addMethod(new MethodElement("targetMethod", false, DataType.CHARACTER,
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER)));
+    map.put(typeInfo.getTypeName(), typeInfo);
+
+    // Resolution should still work correctly
+    var result = typeInfo.getMethod(map::get, "targetMethod",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT)});
+
+    assertNotNull(result);
+    assertEquals(result.getO2().getName(), "targetMethod");
+    assertEquals(result.getO2().getReturnType(), DataType.CHARACTER);
   }
 
 }

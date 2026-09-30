@@ -23,7 +23,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gson.annotations.JsonAdapter;
 
@@ -64,6 +66,10 @@ public class TypeInfo implements ITypeInfo {
   private final Collection<ITableElement> tables = new ArrayList<>();
   private final Collection<IBufferElement> buffers = new ArrayList<>();
 
+  // Method index for fast lookup by name (lazily initialized)
+  private transient Map<String, List<IMethodElement>> methodIndex;
+  private transient List<IMethodElement> constructorCache;
+
   public TypeInfo() {
     // No-op
   }
@@ -87,6 +93,9 @@ public class TypeInfo implements ITypeInfo {
     methods.add(element);
     if (element.isStatic())
       this.flags = this.flags | HAS_STATICS;
+    // Invalidate caches when methods are added
+    methodIndex = null;
+    constructorCache = null;
   }
 
   public void addProperty(IPropertyElement element) {
@@ -296,6 +305,40 @@ public class TypeInfo implements ITypeInfo {
 
   protected boolean isDotNet() {
     return (flags & IS_DOTNET) != 0;
+  }
+
+  /**
+   * Build the method index for fast lookup by name.
+   * Called lazily on first access.
+   */
+  private void buildMethodIndex() {
+    if (methodIndex != null)
+      return;
+
+    methodIndex = new HashMap<>();
+    constructorCache = new ArrayList<>();
+
+    for (var method : methods) {
+      if (method.isConstructor()) {
+        constructorCache.add(method);
+      } else {
+        var key = method.getName().toUpperCase();
+        methodIndex.computeIfAbsent(key, k -> new ArrayList<>()).add(method);
+      }
+    }
+  }
+
+  @Override
+  public Collection<IMethodElement> getMethodsByName(String name) {
+    buildMethodIndex();
+    var result = methodIndex.get(name.toUpperCase());
+    return result == null ? Collections.emptyList() : result;
+  }
+
+  @Override
+  public Collection<IMethodElement> getConstructors() {
+    buildMethodIndex();
+    return constructorCache;
   }
 
 }
