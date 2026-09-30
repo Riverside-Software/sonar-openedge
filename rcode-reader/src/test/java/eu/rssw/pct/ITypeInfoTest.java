@@ -517,4 +517,144 @@ public class ITypeInfoTest {
         "HWIDS");
   }
 
+  /**
+   * Test extent compatibility: scalar to scalar
+   */
+  @Test
+  public void testExtentScalarToScalar() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+    BuiltinClasses.getBuiltinClasses(OpenEdgeVersion.V117).forEach(it -> map.put(it.getTypeName(), it));
+
+    var typeInfo = new TypeInfo("TestClass", false, false, "Progress.Lang.Object", "");
+    // Method with scalar parameter (extent = 0)
+    typeInfo.addMethod(new MethodElement("method01", false, DataType.VOID,
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER)));
+    map.put(typeInfo.getTypeName(), typeInfo);
+
+    // Scalar actual -> scalar formal: should match
+    var val1 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT)});
+    assertNotNull(val1);
+
+    // Array actual -> scalar formal: should NOT match
+    var val2 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 5, ParameterMode.INPUT)});
+    assertNull(val2);
+
+    // Indeterminate array actual -> scalar formal: should NOT match
+    var val3 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, -1, ParameterMode.INPUT)});
+    assertNull(val3);
+  }
+
+  /**
+   * Test extent compatibility: indeterminate array accepts any array
+   */
+  @Test
+  public void testExtentIndeterminateArray() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+    BuiltinClasses.getBuiltinClasses(OpenEdgeVersion.V117).forEach(it -> map.put(it.getTypeName(), it));
+
+    var typeInfo = new TypeInfo("TestClass", false, false, "Progress.Lang.Object", "");
+    // Method with indeterminate array parameter (extent = -1)
+    typeInfo.addMethod(new MethodElement("method01", false, DataType.VOID,
+        new Parameter(1, "prm1", -1, ParameterMode.INPUT, DataType.CHARACTER)));
+    map.put(typeInfo.getTypeName(), typeInfo);
+
+    // Indeterminate array actual -> indeterminate array formal: should match
+    var val1 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, -1, ParameterMode.INPUT)});
+    assertNotNull(val1);
+
+    // Fixed-size array actual -> indeterminate array formal: should match
+    var val2 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 5, ParameterMode.INPUT)});
+    assertNotNull(val2);
+
+    // Different fixed-size array actual -> indeterminate array formal: should match
+    var val3 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 10, ParameterMode.INPUT)});
+    assertNotNull(val3);
+
+    // Scalar actual -> indeterminate array formal: should NOT match
+    var val4 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT)});
+    assertNull(val4);
+  }
+
+  /**
+   * Test extent compatibility: fixed-size array
+   */
+  @Test
+  public void testExtentFixedSizeArray() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+    BuiltinClasses.getBuiltinClasses(OpenEdgeVersion.V117).forEach(it -> map.put(it.getTypeName(), it));
+
+    var typeInfo = new TypeInfo("TestClass", false, false, "Progress.Lang.Object", "");
+    // Method with fixed-size array parameter (extent = 5)
+    typeInfo.addMethod(new MethodElement("method01", false, DataType.VOID,
+        new Parameter(1, "prm1", 5, ParameterMode.INPUT, DataType.CHARACTER)));
+    map.put(typeInfo.getTypeName(), typeInfo);
+
+    // Same fixed-size array actual: should match
+    var val1 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 5, ParameterMode.INPUT)});
+    assertNotNull(val1);
+
+    // Different fixed-size array actual: should match (any array to any array is compatible)
+    var val2 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 10, ParameterMode.INPUT)});
+    assertNotNull(val2);
+
+    // Indeterminate array actual -> fixed-size array formal: should match
+    var val3 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, -1, ParameterMode.INPUT)});
+    assertNotNull(val3);
+
+    // Scalar actual -> fixed-size array formal: should NOT match
+    var val4 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT)});
+    assertNull(val4);
+  }
+
+  /**
+   * Test extent with method overloading: both arrays match, returns first added
+   */
+  @Test
+  public void testExtentOverloadingBothMatch() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+    BuiltinClasses.getBuiltinClasses(OpenEdgeVersion.V117).forEach(it -> map.put(it.getTypeName(), it));
+
+    var typeInfo = new TypeInfo("TestClass", false, false, "Progress.Lang.Object", "");
+    // Method with indeterminate array (extent = -1)
+    var methodIndet = new MethodElement("method01", false, DataType.INTEGER,
+        new Parameter(1, "prm1", -1, ParameterMode.INPUT, DataType.CHARACTER));
+    // Method with fixed-size array (extent = 5)
+    var methodFixed = new MethodElement("method01", false, DataType.CHARACTER,
+        new Parameter(1, "prm1", 5, ParameterMode.INPUT, DataType.CHARACTER));
+    typeInfo.addMethod(methodIndet);
+    typeInfo.addMethod(methodFixed);
+    map.put(typeInfo.getTypeName(), typeInfo);
+
+    // Fixed-size array with exact match: both methods match (any array to any array)
+    // Returns first added which is methodIndet
+    var val1 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 5, ParameterMode.INPUT)});
+    assertNotNull(val1);
+    // Since both match and we're in exact match mode, first added wins
+    assertEquals(val1.getO2().getReturnType(), DataType.INTEGER);
+
+    // Indeterminate array: both methods match
+    var val2 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, -1, ParameterMode.INPUT)});
+    assertNotNull(val2);
+    assertEquals(val2.getO2().getReturnType(), DataType.INTEGER);
+
+    // Different fixed-size array: both methods match
+    var val3 = typeInfo.getMethod(map::get, "method01",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 10, ParameterMode.INPUT)});
+    assertNotNull(val3);
+    assertEquals(val3.getO2().getReturnType(), DataType.INTEGER);
+  }
+
 }

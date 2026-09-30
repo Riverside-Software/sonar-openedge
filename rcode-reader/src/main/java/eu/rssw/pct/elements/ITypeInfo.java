@@ -133,6 +133,7 @@ public interface ITypeInfo {
         for (int zz = 0; zz < elem.getParameters().length; zz++) {
           match &= elem.getParameters()[zz].getDataType().equals(parameters[zz].getDataType());
           match &= elem.getParameters()[zz].getMode().equals(parameters[zz].getMode());
+          // For exact match, use strict extent comparison (same as before)
           match &= ((elem.getParameters()[zz].getExtent() == 0) && (parameters[zz].getExtent() == 0))
               || ((elem.getParameters()[zz].getExtent() != 0) && (parameters[zz].getExtent() != 0));
         }
@@ -182,10 +183,9 @@ public interface ITypeInfo {
           if (parameters[zz].getDataType() == DataType.UNKNOWN) {
             reason.add(1);
           } else {
-            var extent = ((elem.getParameters()[zz].getExtent() == 0) && (parameters[zz].getExtent() == 0))
-                || ((elem.getParameters()[zz].getExtent() != 0) && (parameters[zz].getExtent() != 0));
-            var same = extent && elem.getParameters()[zz].getDataType().equals(parameters[zz].getDataType());
-            var compat = extent
+            var extentCompat = isExtentCompatible(elem.getParameters()[zz].getExtent(), parameters[zz].getExtent());
+            var same = extentCompat && elem.getParameters()[zz].getDataType().equals(parameters[zz].getDataType());
+            var compat = extentCompat
                 && elem.getParameters()[zz].getDataType().isCompatible(parameters[zz].getDataType(), provider);
 
             match &= compat;
@@ -412,6 +412,26 @@ public interface ITypeInfo {
     getMethods().stream().filter(it -> it.isConstructor()).map(it -> Pair.of(this, it)).forEach(pairConsumer);
 
     return list;
+  }
+
+  /**
+   * Checks if the actual extent is compatible with the formal extent.
+   * Rules (compatible match):
+   * - Scalar (0) to scalar (0): compatible
+   * - Any array (!= 0) to any array (!= 0): compatible
+   * - Scalar cannot be passed to array and vice versa
+   */
+  private static boolean isExtentCompatible(int formalExtent, int actualExtent) {
+    // Scalar to scalar
+    if (formalExtent == 0 && actualExtent == 0) {
+      return true;
+    }
+    // Any array to any array
+    if (formalExtent != 0 && actualExtent != 0) {
+      return true;
+    }
+    // Scalar to array or array to scalar: incompatible
+    return false;
   }
 
   public static class ParameterDescriptor {
