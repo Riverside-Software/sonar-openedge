@@ -611,7 +611,6 @@ public class ITypeInfoTest {
   @Test
   public void testMostSpecificJsonHierarchy() {
     for (var version : OpenEdgeVersion.values()) {
-      var provider = VERSION_TYPE_INFO_PROVIDER.apply(version);
       HashMap<String, ITypeInfo> map = new HashMap<>();
       BuiltinClasses.getBuiltinClasses(version).forEach(it -> map.put(it.getTypeName(), it));
 
