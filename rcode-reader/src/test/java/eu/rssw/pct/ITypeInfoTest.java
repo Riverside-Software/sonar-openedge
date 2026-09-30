@@ -517,4 +517,132 @@ public class ITypeInfoTest {
         "HWIDS");
   }
 
+  /**
+   * Test most specific match with class hierarchy.
+   * When multiple methods accept compatible class types, the most specific one should be selected.
+   */
+  @Test
+  public void testMostSpecificClassMatch() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+    for (var version : OpenEdgeVersion.values()) {
+      map.clear();
+      BuiltinClasses.getBuiltinClasses(version).forEach(it -> map.put(it.getTypeName(), it));
+
+      // Create a class hierarchy: GrandChild -> Child -> Parent -> Progress.Lang.Object
+      var parentClass = new TypeInfo("rssw.Parent", false, false, "Progress.Lang.Object", "");
+      var childClass = new TypeInfo("rssw.Child", false, false, "rssw.Parent", "");
+      var grandChildClass = new TypeInfo("rssw.GrandChild", false, false, "rssw.Child", "");
+      map.put(parentClass.getTypeName(), parentClass);
+      map.put(childClass.getTypeName(), childClass);
+      map.put(grandChildClass.getTypeName(), grandChildClass);
+
+      // Create a class with overloaded methods accepting different levels of the hierarchy
+      var typeInfo = new TypeInfo("rssw.TestClass", false, false, "Progress.Lang.Object", "");
+      var methodParent = new MethodElement("process", false, DataType.INTEGER,
+          new Parameter(1, "obj", 0, ParameterMode.INPUT, new DataType("rssw.Parent")));
+      var methodChild = new MethodElement("process", false, DataType.CHARACTER,
+          new Parameter(1, "obj", 0, ParameterMode.INPUT, new DataType("rssw.Child")));
+      var methodGrandChild = new MethodElement("process", false, DataType.LOGICAL,
+          new Parameter(1, "obj", 0, ParameterMode.INPUT, new DataType("rssw.GrandChild")));
+      typeInfo.addMethod(methodParent);
+      typeInfo.addMethod(methodChild);
+      typeInfo.addMethod(methodGrandChild);
+      map.put(typeInfo.getTypeName(), typeInfo);
+
+      // When passing GrandChild, should find GrandChild method (exact match)
+      var result1 = typeInfo.getMethod(map::get, "process",
+          new ParameterDescriptor[] {new ParameterDescriptor(new DataType("rssw.GrandChild"), 0, ParameterMode.INPUT)});
+      assertNotNull(result1);
+      assertEquals(result1.getO2().getReturnType(), DataType.LOGICAL);
+
+      // When passing Child, should find Child method (exact match)
+      var result2 = typeInfo.getMethod(map::get, "process",
+          new ParameterDescriptor[] {new ParameterDescriptor(new DataType("rssw.Child"), 0, ParameterMode.INPUT)});
+      assertNotNull(result2);
+      assertEquals(result2.getO2().getReturnType(), DataType.CHARACTER);
+
+      // When passing Parent, should find Parent method (exact match)
+      var result3 = typeInfo.getMethod(map::get, "process",
+          new ParameterDescriptor[] {new ParameterDescriptor(new DataType("rssw.Parent"), 0, ParameterMode.INPUT)});
+      assertNotNull(result3);
+      assertEquals(result3.getO2().getReturnType(), DataType.INTEGER);
+    }
+  }
+
+  /**
+   * Test that when passing a subclass, the most specific compatible method is selected.
+   */
+  @Test
+  public void testMostSpecificCompatibleClassMatch() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+    for (var version : OpenEdgeVersion.values()) {
+      map.clear();
+      BuiltinClasses.getBuiltinClasses(version).forEach(it -> map.put(it.getTypeName(), it));
+
+      // Create class hierarchy
+      var parentClass = new TypeInfo("rssw.Parent2", false, false, "Progress.Lang.Object", "");
+      var childClass = new TypeInfo("rssw.Child2", false, false, "rssw.Parent2", "");
+      var grandChildClass = new TypeInfo("rssw.GrandChild2", false, false, "rssw.Child2", "");
+      map.put(parentClass.getTypeName(), parentClass);
+      map.put(childClass.getTypeName(), childClass);
+      map.put(grandChildClass.getTypeName(), grandChildClass);
+
+      // Create class with methods for Parent and Child only (not GrandChild)
+      var typeInfo = new TypeInfo("rssw.TestClass2", false, false, "Progress.Lang.Object", "");
+      var methodParent = new MethodElement("process", false, DataType.INTEGER,
+          new Parameter(1, "obj", 0, ParameterMode.INPUT, new DataType("rssw.Parent2")));
+      var methodChild = new MethodElement("process", false, DataType.CHARACTER,
+          new Parameter(1, "obj", 0, ParameterMode.INPUT, new DataType("rssw.Child2")));
+      typeInfo.addMethod(methodParent);
+      typeInfo.addMethod(methodChild);
+      map.put(typeInfo.getTypeName(), typeInfo);
+
+      // When passing GrandChild, should find Child method (most specific compatible)
+      var result = typeInfo.getMethod(map::get, "process",
+          new ParameterDescriptor[] {new ParameterDescriptor(new DataType("rssw.GrandChild2"), 0, ParameterMode.INPUT)});
+      assertNotNull(result);
+      assertEquals(result.getO2().getReturnType(), DataType.CHARACTER);
+    }
+  }
+
+  /**
+   * Test most specific match with Progress.Lang.Object hierarchy.
+   */
+  @Test
+  public void testMostSpecificJsonHierarchy() {
+    for (var version : OpenEdgeVersion.values()) {
+      var provider = VERSION_TYPE_INFO_PROVIDER.apply(version);
+      HashMap<String, ITypeInfo> map = new HashMap<>();
+      BuiltinClasses.getBuiltinClasses(version).forEach(it -> map.put(it.getTypeName(), it));
+
+      // Create class with methods accepting PLO and JsonObject
+      var typeInfo = new TypeInfo("rssw.JsonProcessor", false, false, "Progress.Lang.Object", "");
+      var methodPLO = new MethodElement("handle", false, DataType.INTEGER,
+          new Parameter(1, "obj", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object")));
+      var methodJson = new MethodElement("handle", false, DataType.CHARACTER,
+          new Parameter(1, "obj", 0, ParameterMode.INPUT, new DataType("Progress.Json.ObjectModel.JsonObject")));
+      typeInfo.addMethod(methodPLO);
+      typeInfo.addMethod(methodJson);
+      map.put(typeInfo.getTypeName(), typeInfo);
+
+      // When passing JsonObject, should find JsonObject method (most specific)
+      var result1 = typeInfo.getMethod(map::get, "handle",
+          new ParameterDescriptor[] {new ParameterDescriptor(new DataType("Progress.Json.ObjectModel.JsonObject"), 0, ParameterMode.INPUT)});
+      assertNotNull(result1);
+      assertEquals(result1.getO2().getReturnType(), DataType.CHARACTER);
+
+      // When passing PLO, should find PLO method (exact match)
+      var result2 = typeInfo.getMethod(map::get, "handle",
+          new ParameterDescriptor[] {new ParameterDescriptor(new DataType("Progress.Lang.Object"), 0, ParameterMode.INPUT)});
+      assertNotNull(result2);
+      assertEquals(result2.getO2().getReturnType(), DataType.INTEGER);
+
+      // When passing JsonArray (sibling of JsonObject, both extend JsonConstruct), should find PLO method
+      var result3 = typeInfo.getMethod(map::get, "handle",
+          new ParameterDescriptor[] {new ParameterDescriptor(new DataType("Progress.Json.ObjectModel.JsonArray"), 0, ParameterMode.INPUT)});
+      assertNotNull(result3);
+      assertEquals(result3.getO2().getReturnType(), DataType.INTEGER);
+    }
+  }
+
 }

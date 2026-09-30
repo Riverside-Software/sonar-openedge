@@ -205,18 +205,29 @@ public interface ITypeInfo {
       // If multiple methods match, the following rules apply:
       // * If there was a null (?) parameter, then don't return anything (ambiguous)
       // * If matches involve only parameter mode, we return the first one (ambiguity is accepted)
-      // * If matches involve only parameter type, we return the first one (ambiguity is accepted)
+      // * If matches involve only parameter type, we return the most specific one (by class hierarchy)
       // * If matches involve both parameter type and mode, we return the first one involving only mode
       var anyUnknown = list01.stream().anyMatch(it -> it.getO3().contains(1));
       var paramModeList = list01.stream().filter(it -> it.getO3().contains(2)).toList();
       var paramTypeList = list01.stream().filter(it -> it.getO3().contains(3)).toList();
       if (!anyUnknown) {
-        if (!paramModeList.isEmpty() && paramTypeList.isEmpty())
+        if (!paramModeList.isEmpty() && paramTypeList.isEmpty()) {
           return Pair.of(paramModeList.get(0).getO1(), paramModeList.get(0).getO2());
-        else if (!paramTypeList.isEmpty() && paramModeList.isEmpty())
-          return Pair.of(paramTypeList.get(0).getO1(), paramTypeList.get(0).getO2());
-        else
+        } else if (!paramTypeList.isEmpty() && paramModeList.isEmpty()) {
+          // Only type differences: select the most specific method
+          int bestScore = Integer.MIN_VALUE;
+          int bestIndex = 0;
+          for (int i = 0; i < paramTypeList.size(); i++) {
+            int score = computeSpecificityScore(paramTypeList.get(i).getO2(), parameters, provider);
+            if (score > bestScore) {
+              bestScore = score;
+              bestIndex = i;
+            }
+          }
+          return Pair.of(paramTypeList.get(bestIndex).getO1(), paramTypeList.get(bestIndex).getO2());
+        } else {
           return Pair.of(paramModeList.get(0).getO1(), paramModeList.get(0).getO2());
+        }
       }
     } else if (list01.size() == 1) {
       // Single match, return this one
@@ -412,6 +423,82 @@ public interface ITypeInfo {
     getMethods().stream().filter(it -> it.isConstructor()).map(it -> Pair.of(this, it)).forEach(pairConsumer);
 
     return list;
+  }
+
+  /**
+   * Computes a specificity score for a method candidate.
+   * Higher score means the method is more specific to the provided parameters.
+   *
+   * Scoring rules for types:
+   * - Exact type match: 1000 points per parameter
+   * - Class type with hierarchy match: 500 - (distance * 50) points (closer = higher)
+   * - Compatible primitive type: 100 points per parameter
+   *
+   * Scoring rules for modes:
+   * - Exact mode match: 10 points per parameter
+   * - Compatible mode: 0 points
+   */
+  private static int computeSpecificityScore(IMethodElement method, ParameterDescriptor[] params,
+      Function<String, ITypeInfo> provider) {
+    int score = 0;
+    for (int i = 0; i < method.getParameters().length; i++) {
+      var methodType = method.getParameters()[i].getDataType();
+      var paramType = params[i].getDataType();
+      var methodMode = method.getParameters()[i].getMode();
+      var paramMode = params[i].getMode();
+
+      // Score for type match
+      if (methodType.equals(paramType)) {
+        // Exact match = maximum score
+        score += 1000;
+      } else if (methodType.getPrimitive() == PrimitiveDataType.CLASS
+          && paramType.getPrimitive() == PrimitiveDataType.CLASS) {
+        // Class type: score inversely proportional to hierarchy distance
+        int distance = computeHierarchyDistance(methodType.getClassName(), paramType.getClassName(), provider);
+        score += Math.max(0, 500 - (distance * 50));
+      } else {
+        // Compatible primitive type but not exact
+        score += 100;
+      }
+
+      // Score for mode match (lower priority than type)
+      if (methodMode.equals(paramMode)) {
+        score += 10;
+      }
+    }
+    return score;
+  }
+
+  /**
+   * Computes the distance in the inheritance hierarchy between two classes.
+   * Returns 0 if identical, 1 if direct parent, etc.
+   */
+  private static int computeHierarchyDistance(String targetClass, String sourceClass,
+      Function<String, ITypeInfo> provider) {
+    if (targetClass == null || sourceClass == null) {
+      return Integer.MAX_VALUE;
+    }
+    if (targetClass.equalsIgnoreCase(sourceClass)) {
+      return 0;
+    }
+
+    var info = provider.apply(sourceClass);
+    int distance = 1;
+    while (info != null && distance <= 20) { // Safety limit to prevent infinite loops
+      // Check direct parent
+      if (targetClass.equalsIgnoreCase(info.getParentTypeName())) {
+        return distance;
+      }
+      // Check interfaces
+      for (var iface : info.getInterfaces()) {
+        if (targetClass.equalsIgnoreCase(iface)) {
+          return distance;
+        }
+      }
+      info = provider.apply(info.getParentTypeName());
+      distance++;
+    }
+    return distance;
   }
 
   public static class ParameterDescriptor {
