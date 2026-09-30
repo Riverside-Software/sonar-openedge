@@ -198,7 +198,16 @@ public class TreeParserRootSymbolScope extends TreeParserSymbolScope {
       return ds;
     }
 
-    // TODO Lookup in parent classes
+    // Lookup in parent classes
+    ITypeInfo info = typeInfo;
+    while (info != null) {
+      var elem = info.getDataset(name);
+      if (elem != null) {
+        // Create a minimal Dataset wrapper for the rcode element
+        return new Dataset(name, this);
+      }
+      info = refSession.getTypeInfo(info.getParentTypeName());
+    }
     return null;
   }
 
