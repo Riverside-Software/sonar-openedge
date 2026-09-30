@@ -517,4 +517,183 @@ public class ITypeInfoTest {
         "HWIDS");
   }
 
+  /**
+   * Test that methods defined in implemented interfaces are found via getExactMatch
+   */
+  @Test
+  public void testInterfaceMethodResolutionExactMatch() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+
+    // Create interface with a method
+    var iface = new TypeInfo("rssw.IService", true, false, "Progress.Lang.Object", "");
+    iface.addMethod(new MethodElement("process", false, DataType.VOID,
+        new Parameter(1, "data", 0, ParameterMode.INPUT, DataType.CHARACTER)));
+    map.put(iface.getTypeName(), iface);
+
+    // Create class implementing the interface
+    var impl = new TypeInfo("rssw.ServiceImpl", false, false, "Progress.Lang.Object", "", "rssw.IService");
+    map.put(impl.getTypeName(), impl);
+
+    // Method should be found via interface
+    var result = impl.getExactMatchMethod(map::get, "process",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT)});
+    assertNotNull(result);
+    assertEquals(result.getO1().getTypeName(), "rssw.IService");
+    assertEquals(result.getO2().getName(), "process");
+  }
+
+  /**
+   * Test that methods defined in implemented interfaces are found via getCompatibleMatch
+   */
+  @Test
+  public void testInterfaceMethodResolutionCompatibleMatch() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+
+    // Create interface with a method expecting LONGCHAR
+    var iface = new TypeInfo("rssw.IService", true, false, "Progress.Lang.Object", "");
+    iface.addMethod(new MethodElement("process", false, DataType.VOID,
+        new Parameter(1, "data", 0, ParameterMode.INPUT, DataType.LONGCHAR)));
+    map.put(iface.getTypeName(), iface);
+
+    // Create class implementing the interface (no local methods)
+    var impl = new TypeInfo("rssw.ServiceImpl", false, false, "Progress.Lang.Object", "", "rssw.IService");
+    map.put(impl.getTypeName(), impl);
+
+    // CHARACTER should be compatible with LONGCHAR via interface method
+    var result = impl.getMethod(map::get, "process",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT)});
+    assertNotNull(result);
+    assertEquals(result.getO1().getTypeName(), "rssw.IService");
+  }
+
+  /**
+   * Test that local class method takes precedence over interface method
+   */
+  @Test
+  public void testLocalMethodTakesPrecedenceOverInterface() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+
+    // Create interface with a method
+    var iface = new TypeInfo("rssw.IService", true, false, "Progress.Lang.Object", "");
+    iface.addMethod(new MethodElement("process", false, DataType.CHARACTER,
+        new Parameter(1, "data", 0, ParameterMode.INPUT, DataType.CHARACTER)));
+    map.put(iface.getTypeName(), iface);
+
+    // Create class implementing the interface with its own implementation
+    var impl = new TypeInfo("rssw.ServiceImpl", false, false, "Progress.Lang.Object", "", "rssw.IService");
+    impl.addMethod(new MethodElement("process", false, DataType.INTEGER,
+        new Parameter(1, "data", 0, ParameterMode.INPUT, DataType.CHARACTER)));
+    map.put(impl.getTypeName(), impl);
+
+    // Should find the local method, not the interface one
+    var result = impl.getExactMatchMethod(map::get, "process",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT)});
+    assertNotNull(result);
+    assertEquals(result.getO1().getTypeName(), "rssw.ServiceImpl");
+    assertEquals(result.getO2().getReturnType(), DataType.INTEGER);
+  }
+
+  /**
+   * Test method resolution with multiple interfaces
+   */
+  @Test
+  public void testMultipleInterfacesMethodResolution() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+
+    // Create first interface
+    var iface1 = new TypeInfo("rssw.IServiceA", true, false, "Progress.Lang.Object", "");
+    iface1.addMethod(new MethodElement("processA", false, DataType.VOID,
+        new Parameter(1, "data", 0, ParameterMode.INPUT, DataType.CHARACTER)));
+    map.put(iface1.getTypeName(), iface1);
+
+    // Create second interface
+    var iface2 = new TypeInfo("rssw.IServiceB", true, false, "Progress.Lang.Object", "");
+    iface2.addMethod(new MethodElement("processB", false, DataType.VOID,
+        new Parameter(1, "data", 0, ParameterMode.INPUT, DataType.INTEGER)));
+    map.put(iface2.getTypeName(), iface2);
+
+    // Create class implementing both interfaces
+    var impl = new TypeInfo("rssw.MultiServiceImpl", false, false, "Progress.Lang.Object", "",
+        "rssw.IServiceA", "rssw.IServiceB");
+    map.put(impl.getTypeName(), impl);
+
+    // Should find method from first interface
+    var result1 = impl.getMethod(map::get, "processA",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT)});
+    assertNotNull(result1);
+    assertEquals(result1.getO1().getTypeName(), "rssw.IServiceA");
+
+    // Should find method from second interface
+    var result2 = impl.getMethod(map::get, "processB",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.INTEGER, 0, ParameterMode.INPUT)});
+    assertNotNull(result2);
+    assertEquals(result2.getO1().getTypeName(), "rssw.IServiceB");
+  }
+
+  /**
+   * Test method resolution in inherited interface (interface extending another interface)
+   */
+  @Test
+  public void testInheritedInterfaceMethodResolution() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+
+    // Create base interface
+    var baseIface = new TypeInfo("rssw.IBaseService", true, false, "Progress.Lang.Object", "");
+    baseIface.addMethod(new MethodElement("baseMethod", false, DataType.VOID));
+    map.put(baseIface.getTypeName(), baseIface);
+
+    // Create extended interface (inherits from base)
+    var extIface = new TypeInfo("rssw.IExtendedService", true, false, "Progress.Lang.Object", "",
+        "rssw.IBaseService");
+    extIface.addMethod(new MethodElement("extendedMethod", false, DataType.VOID));
+    map.put(extIface.getTypeName(), extIface);
+
+    // Create class implementing extended interface
+    var impl = new TypeInfo("rssw.ServiceImpl", false, false, "Progress.Lang.Object", "",
+        "rssw.IExtendedService");
+    map.put(impl.getTypeName(), impl);
+
+    // Should find method from extended interface
+    var result1 = impl.getMethod(map::get, "extendedMethod", new ParameterDescriptor[] {});
+    assertNotNull(result1);
+    assertEquals(result1.getO1().getTypeName(), "rssw.IExtendedService");
+
+    // Should find method from base interface (via interface inheritance)
+    var result2 = impl.getMethod(map::get, "baseMethod", new ParameterDescriptor[] {});
+    assertNotNull(result2);
+    assertEquals(result2.getO1().getTypeName(), "rssw.IBaseService");
+  }
+
+  /**
+   * Test that parent class is searched after interfaces
+   */
+  @Test
+  public void testParentClassSearchedAfterInterfaces() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+
+    // Create interface with method1
+    var iface = new TypeInfo("rssw.IService", true, false, "Progress.Lang.Object", "");
+    iface.addMethod(new MethodElement("interfaceMethod", false, DataType.VOID));
+    map.put(iface.getTypeName(), iface);
+
+    // Create parent class with method2
+    var parent = new TypeInfo("rssw.BaseClass", false, false, "Progress.Lang.Object", "");
+    parent.addMethod(new MethodElement("parentMethod", false, DataType.VOID));
+    map.put(parent.getTypeName(), parent);
+
+    // Create child class implementing interface and extending parent
+    var child = new TypeInfo("rssw.ChildClass", false, false, "rssw.BaseClass", "", "rssw.IService");
+    map.put(child.getTypeName(), child);
+
+    // Should find interface method
+    var result1 = child.getMethod(map::get, "interfaceMethod", new ParameterDescriptor[] {});
+    assertNotNull(result1);
+    assertEquals(result1.getO1().getTypeName(), "rssw.IService");
+
+    // Should find parent method
+    var result2 = child.getMethod(map::get, "parentMethod", new ParameterDescriptor[] {});
+    assertNotNull(result2);
+    assertEquals(result2.getO1().getTypeName(), "rssw.BaseClass");
+  }
+
 }

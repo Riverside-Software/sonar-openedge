@@ -124,6 +124,7 @@ public interface ITypeInfo {
    */
   default Pair<ITypeInfo, IMethodElement> getExactMatch(Function<String, ITypeInfo> provider, String method,
       boolean constructor, ParameterDescriptor[] parameters) {
+    // 1. Search in current class
     for (var elem : getMethods()) {
       var cond1 = constructor && elem.isConstructor() && (elem.getParameters().length == parameters.length);
       var cond2 = !constructor && !elem.isConstructor() && method.equalsIgnoreCase(elem.getName())
@@ -140,7 +141,19 @@ public interface ITypeInfo {
           return Pair.of(this, elem);
       }
     }
+
     if (!constructor) {
+      // 2. Search in implemented interfaces
+      for (var str : getInterfaces()) {
+        var iface = provider.apply(str);
+        if (iface != null) {
+          var result = iface.getExactMatch(provider, method, false, parameters);
+          if (result != null)
+            return result;
+        }
+      }
+
+      // 3. Search in parent class
       var parent = provider.apply(getParentTypeName());
       if (parent != null)
         return parent.getExactMatch(provider, method, constructor, parameters);
@@ -171,7 +184,60 @@ public interface ITypeInfo {
     // No enum for the reason as I don't want it to be public
     // 1 -> Unknown data type used, 2 -> ParameterMode difference, 3 -> Parameter datatype difference
     List<Triplet<ITypeInfo, IMethodElement, Set<Integer>>> list01 = new ArrayList<>();
-    for (var elem : getMethods()) {
+
+    // 1. Collect matches from current class
+    collectCompatibleMethods(this, provider, method, constructor, parameters, list01);
+
+    // 2. If no match in current class and not looking for constructor, search in interfaces
+    if (list01.isEmpty() && !constructor) {
+      for (var str : getInterfaces()) {
+        var iface = provider.apply(str);
+        if (iface != null) {
+          collectCompatibleMethods(iface, provider, method, false, parameters, list01);
+        }
+      }
+    }
+
+    // 3. Select best match from collected candidates
+    if (list01.size() > 1) {
+      // If multiple methods match, the following rules apply:
+      // * If there was a null (?) parameter, then don't return anything (ambiguous)
+      // * If matches involve only parameter mode, we return the first one (ambiguity is accepted)
+      // * If matches involve only parameter type, we return the first one (ambiguity is accepted)
+      // * If matches involve both parameter type and mode, we return the first one involving only mode
+      var anyUnknown = list01.stream().anyMatch(it -> it.getO3().contains(1));
+      var paramModeList = list01.stream().filter(it -> it.getO3().contains(2)).toList();
+      var paramTypeList = list01.stream().filter(it -> it.getO3().contains(3)).toList();
+      if (!anyUnknown) {
+        if (!paramModeList.isEmpty() && paramTypeList.isEmpty())
+          return Pair.of(paramModeList.get(0).getO1(), paramModeList.get(0).getO2());
+        else if (!paramTypeList.isEmpty() && paramModeList.isEmpty())
+          return Pair.of(paramTypeList.get(0).getO1(), paramTypeList.get(0).getO2());
+        else
+          return Pair.of(paramModeList.get(0).getO1(), paramModeList.get(0).getO2());
+      }
+    } else if (list01.size() == 1) {
+      // Single match, return this one
+      return Pair.of(list01.get(0).getO1(), list01.get(0).getO2());
+    }
+
+    // 4. If still no match and not looking for constructor, search in parent class
+    if (!constructor) {
+      var parent = provider.apply(getParentTypeName());
+      if (parent != null)
+        return parent.getCompatibleMatchMethod(provider, method, parameters);
+    }
+
+    return null;
+  }
+
+  /**
+   * Helper method to collect compatible methods from a type into a result list.
+   */
+  private static void collectCompatibleMethods(ITypeInfo type, Function<String, ITypeInfo> provider, String method,
+      boolean constructor, ParameterDescriptor[] parameters,
+      List<Triplet<ITypeInfo, IMethodElement, Set<Integer>>> results) {
+    for (var elem : type.getMethods()) {
       var cond1 = constructor && elem.isConstructor() && (elem.getParameters().length == parameters.length);
       var cond2 = !constructor && !elem.isConstructor() && method.equalsIgnoreCase(elem.getName())
           && (elem.getParameters().length == parameters.length);
@@ -197,39 +263,10 @@ public interface ITypeInfo {
           }
         }
         if (match) {
-          list01.add(Triplet.of(this, elem, reason));
+          results.add(Triplet.of(type, elem, reason));
         }
       }
     }
-    if (list01.size() > 1) {
-      // If multiple methods match, the following rules apply:
-      // * If there was a null (?) parameter, then don't return anything (ambiguous)
-      // * If matches involve only parameter mode, we return the first one (ambiguity is accepted)
-      // * If matches involve only parameter type, we return the first one (ambiguity is accepted)
-      // * If matches involve both parameter type and mode, we return the first one involving only mode
-      var anyUnknown = list01.stream().anyMatch(it -> it.getO3().contains(1));
-      var paramModeList = list01.stream().filter(it -> it.getO3().contains(2)).toList();
-      var paramTypeList = list01.stream().filter(it -> it.getO3().contains(3)).toList();
-      if (!anyUnknown) {
-        if (!paramModeList.isEmpty() && paramTypeList.isEmpty())
-          return Pair.of(paramModeList.get(0).getO1(), paramModeList.get(0).getO2());
-        else if (!paramTypeList.isEmpty() && paramModeList.isEmpty())
-          return Pair.of(paramTypeList.get(0).getO1(), paramTypeList.get(0).getO2());
-        else
-          return Pair.of(paramModeList.get(0).getO1(), paramModeList.get(0).getO2());
-      }
-    } else if (list01.size() == 1) {
-      // Single match, return this one
-      return Pair.of(list01.get(0).getO1(), list01.get(0).getO2());
-    }
-    if (!constructor) {
-      // Check parent class only when looking for methods
-      var parent = provider.apply(getParentTypeName());
-      if (parent != null)
-        return parent.getCompatibleMatchMethod(provider, method, parameters);
-    }
-
-    return null;
   }
 
   /**
