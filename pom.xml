@@ -58,7 +58,7 @@
     <maven.compiler.target>17</maven.compiler.target>
     <sonar.cpd.exclusions>**/SelectorUtils.java</sonar.cpd.exclusions>
     <sonar.coverage.exclusions>**/SelectorUtils.java</sonar.coverage.exclusions>
-    <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../coverage-report/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+    <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/coverage-report/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     <!-- Dependencies -->
     <slf4j.version>1.7.36</slf4j.version>
     <json.version>20260719</json.version>
@@ -93,7 +93,7 @@
         <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
-          <version>0.8.12</version>
+          <version>0.8.15</version>
         </plugin>
       </plugins>
     </pluginManagement>
