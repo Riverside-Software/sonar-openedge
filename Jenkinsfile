@@ -21,7 +21,7 @@ pipeline {
         checkout([$class: 'GitSCM', branches: scm.branches, extensions: scm.extensions + [[$class: 'CleanCheckout']], userRemoteConfigs: [[credentialsId: scm.userRemoteConfigs.credentialsId[0], url: scm.userRemoteConfigs.url[0], refspec: '+refs/heads/develop:refs/remotes/origin/develop']] ])
         script {
           sh '> author.txt git log --format="%ae" -n 1'
-          withEnv(["PATH+MVN=${tool name: 'Maven 3', type: 'maven'}/bin", "JAVA_HOME=${tool name: 'JDK21', type: 'jdk'}"]) {
+          withEnv(["PATH+MVN=${tool name: 'Maven 3', type: 'maven'}/bin", "JAVA_HOME=${tool name: 'JDK17', type: 'jdk'}"]) {
             if ("main" == env.BRANCH_NAME) {
               withSecrets() {
                 configFileProvider([configFile(fileId: 'MvnSettingsRSSW', variable: 'MAVEN_SETTINGS')]) {
@@ -46,7 +46,7 @@ pipeline {
     stage ('🔍 SonarQube analysis') {
       steps {
         script {
-          withEnv(["PATH+MVN=${tool name: 'Maven 3', type: 'maven'}/bin", "JAVA_HOME=${tool name: 'JDK21', type: 'jdk'}"]) {
+          withEnv(["PATH+MVN=${tool name: 'Maven 3', type: 'maven'}/bin", "JAVA_HOME=${tool name: 'JDK17', type: 'jdk'}"]) {
             withSonarQubeEnv(credentialsId: 'SQToken', installationName: 'RSSW') {
               if (("main" == env.BRANCH_NAME) || ("develop" == env.BRANCH_NAME)) {
                 sh "mvn -Dsonar.branch.name=${env.BRANCH_NAME} sonar:sonar"
