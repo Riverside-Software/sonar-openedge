@@ -60,10 +60,10 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.10</version>
+        <version>${jacoco.version}</version>
         <executions>
           <execution>
-            <id>report</id>
+            <id>report-aggregate</id>
             <phase>verify</phase>
             <goals>
               <goal>report-aggregate</goal>
