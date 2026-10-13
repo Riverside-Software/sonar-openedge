@@ -39,28 +39,23 @@ import org.slf4j.LoggerFactory;
 public class InputSource {
   private static final Logger LOGGER = LoggerFactory.getLogger(InputSource.class);
 
-  // TODO Almost sure this field is useless
-  private final int sourceNum;
-
   private final String fileContent;
   private final int fileIndex;
   private final boolean macroExpansion;
 
   private int nextCol = 0;
   private int nextLine = 1;
-  private int currPos;
+  private int currPos; 
   private String currAnalyzeSuspend = null;
 
-  public InputSource(int sourceNum, String src, int fileIndex) {
-    this.sourceNum = sourceNum;
+  public InputSource(String src, int fileIndex) {
     this.fileIndex = fileIndex;
     this.macroExpansion = false;
     this.fileContent = src;
   }
 
-  public InputSource(int sourceNum, String str, int fileIndex, int line, int col) {
+  public InputSource(String str, int fileIndex, int line, int col) {
     LOGGER.trace("New InputSource object for macro element '{}'", str);
-    this.sourceNum = sourceNum;
     this.fileContent = str;
     this.fileIndex = fileIndex;
     this.macroExpansion = true;
@@ -68,9 +63,8 @@ public class InputSource {
     this.nextCol = col;
   }
 
-  public InputSource(int sourceNum, File file, Charset charset, int fileIndex, boolean skipXCode) throws IOException {
+  public InputSource(File file, Charset charset, int fileIndex, boolean skipXCode) throws IOException {
     LOGGER.trace("New InputSource object for file '{}'", file.getName());
-    this.sourceNum = sourceNum;
     this.fileIndex = fileIndex;
     this.macroExpansion = false;
     try (var input = Files.newInputStream(file.toPath())) {
@@ -86,9 +80,8 @@ public class InputSource {
     }
   }
 
-  public InputSource(int sourceNum, String fileName, byte[] src, Charset charset, int fileIndex, boolean skipXCode) throws IOException {
+  public InputSource(String fileName, byte[] src, Charset charset, int fileIndex, boolean skipXCode) throws IOException {
     LOGGER.trace("New InputSource object for include stream '{}'", fileName);
-    this.sourceNum = sourceNum;
     this.fileIndex = fileIndex;
     this.macroExpansion = false;
     if (isXCoded(src)) {
@@ -132,10 +125,6 @@ public class InputSource {
 
   public boolean isMacroExpansion() {
     return macroExpansion;
-  }
-
-  public int getSourceNum() {
-    return sourceNum;
   }
 
   public int getNextCol() {

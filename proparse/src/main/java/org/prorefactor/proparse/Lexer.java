@@ -77,7 +77,6 @@ public class Lexer implements IPreprocessor {
   private final LinkedList<IncludeFile> includeVector = new LinkedList<>();
   private IncludeFile currentInclude;
   private InputSource currentInput;
-  private int sourceCounter;
   private int ppCurrChar;
   // Current character, before being lowercased
   private int currInt;
@@ -86,12 +85,11 @@ public class Lexer implements IPreprocessor {
   private int currFile;
   private int currLine;
   private int currCol;
-  private int currSourceNum;
   private boolean currMacroExpansion;
   private boolean keepProparseDirective = false;
 
   private StringBuilder currText = new StringBuilder();
-  private FilePos prevChar = new FilePos(0, 1, 1, 0);
+  private FilePos prevChar = new FilePos(0, 1, 1);
   private boolean prevMacroExpansion;
 
   private FilePos macroStartPos;
@@ -133,14 +131,13 @@ public class Lexer implements IPreprocessor {
     this.prepro = prepro;
     this.factory = new ProTokenFactory();
     try {
-      currentInput = new InputSource(0, fileName, src, prepro.getCharset(), 0, true);
+      currentInput = new InputSource(fileName, src, prepro.getCharset(), 0, true);
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }
     currentInclude = new IncludeFile(fileName, currentInput);
     currFile = addFilename(fileName);
     includeVector.add(currentInclude);
-    currSourceNum = currentInput.getSourceNum();
 
     getChar(); // We always assume "currChar" is available.
   }
@@ -203,7 +200,7 @@ public class Lexer implements IPreprocessor {
         getChar();
         return makeToken(ABLNodeType.INCLUDEDIRECTIVE, includeDirectiveText);
       }
-      tokenStartPos = new FilePos(currFile, currLine, currCol, currSourceNum);
+      tokenStartPos = new FilePos(currFile, currLine, currCol);
       currText.setLength(1);
       currText.setCharAt(0, (char) currInt);
 
@@ -501,7 +498,7 @@ public class Lexer implements IPreprocessor {
     if (currChar == ':') {
       // Elvis token only created if next character is not a whitespace
       ProToken unknownVal = makeToken(ABLNodeType.UNKNOWNVALUE);
-      CharPos colonCharPos = new CharPos(currChar, currFile, currLine, currCol, currSourceNum);
+      CharPos colonCharPos = new CharPos(currChar, currFile, currLine, currCol);
       getChar();
       if (Character.isWhitespace(currChar)) {
         // Return UNKNOWN_VALUE and preserve LEXCOLON for next iteration
@@ -667,9 +664,9 @@ public class Lexer implements IPreprocessor {
         preserveDrop();
       } else {
         // Fix current end position
-        prevChar = new FilePos(prevChar.file, prevChar.line, prevChar.col - 1, prevChar.sourceNum);
+        prevChar = new FilePos(prevChar.file, prevChar.line, prevChar.col - 1);
         ProToken tok = makeToken(ABLNodeType.QSTRING);
-        prevChar = new FilePos(prevChar.file, prevChar.line, prevChar.col + 1, prevChar.sourceNum);
+        prevChar = new FilePos(prevChar.file, prevChar.line, prevChar.col + 1);
         return tok;
       }
     } // currChar==':'
@@ -1232,7 +1229,7 @@ public class Lexer implements IPreprocessor {
   }
 
   private void getChar() {
-    prevChar = new FilePos(currFile, currLine, currCol, currSourceNum);
+    prevChar = new FilePos(currFile, currLine, currCol);
     prevMacroExpansion = currMacroExpansion;
     currInt = ppGetChar();
     currChar = Character.toLowerCase(currInt);
@@ -1266,7 +1263,6 @@ public class Lexer implements IPreprocessor {
       .setEndLine(prevChar.line) //
       .setEndCharPositionInLine(prevChar.col + 1) //
       .setMacroExpansion(prevMacroExpansion) //
-      .setMacroSourceNum(tokenStartPos.sourceNum) //
       .setAnalyzeSuspend(getCurrentAnalyzeSuspend()) //
       .setNestedComments(nestedComment) //
       .setIncludeStack(incStack) //
@@ -1326,13 +1322,12 @@ public class Lexer implements IPreprocessor {
    * (!gotLookahead) laGet();
    */
   private void laGet() {
-    CharPos saveChar = new CharPos(ppCurrChar, currFile, currLine, currCol, currSourceNum);
+    CharPos saveChar = new CharPos(ppCurrChar, currFile, currLine, currCol);
     ppGetRawChar();
-    la = new CharPos(ppCurrChar, currFile, currLine, currCol, currSourceNum);
+    la = new CharPos(ppCurrChar, currFile, currLine, currCol);
     currFile = saveChar.file;
     currLine = saveChar.line;
     currCol = saveChar.col;
-    currSourceNum = saveChar.sourceNum;
     ppCurrChar = saveChar.ch;
   }
 
@@ -1340,7 +1335,6 @@ public class Lexer implements IPreprocessor {
     currFile = la.file;
     currLine = la.line;
     currCol = la.col;
-    currSourceNum = la.sourceNum;
     ppCurrChar = la.ch;
     la = null;
   }
@@ -1410,7 +1404,7 @@ public class Lexer implements IPreprocessor {
     // as soon as we look ahead to the following character, we lose
     // our file/line/col, and that's why we need to preserve.
     preserve = true;
-    preservedChar = new CharPos(currChar, currFile, currLine, currCol, currSourceNum);
+    preservedChar = new CharPos(currChar, currFile, currLine, currCol);
   }
 
   private void preserveDrop() {
@@ -1536,7 +1530,6 @@ public class Lexer implements IPreprocessor {
           currFile = currentInput.getFileIndex();
           currLine = currentInput.getNextLine();
           currCol = currentInput.getNextCol();
-          currSourceNum = currentInput.getSourceNum();
           currMacroExpansion = currentInput.isMacroExpansion();
           ppCurrChar = ' ';
           return;
@@ -1545,7 +1538,6 @@ public class Lexer implements IPreprocessor {
           currLine = currentInput.getNextLine();
           currCol = currentInput.getNextCol();
           ppCurrChar = currentInput.get(); // might be another EOF
-          currSourceNum = currentInput.getSourceNum();
           currMacroExpansion = currentInput.isMacroExpansion();
           break;
         default:
@@ -1555,7 +1547,7 @@ public class Lexer implements IPreprocessor {
   }
 
   private void ppMacroReference() {
-    macroStartPos = new FilePos(currFile, currLine, currCol, currSourceNum);
+    macroStartPos = new FilePos(currFile, currLine, currCol);
     // Preserve the macro reference start point, because textStart get messed with if this macro reference itself
     // contains any macro references.
     FilePos refPos = new FilePos(macroStartPos);
@@ -1580,7 +1572,7 @@ public class Lexer implements IPreprocessor {
       if (keepProparseDirective) { 
         // We are within a GLOB | SCOP define, so we keep the directive as is
         ppCurrChar = '{';
-        currentInput = new InputSource(++sourceCounter, refText.substring(1), refPos.file, refPos.line, refPos.col);
+        currentInput = new InputSource(refText.substring(1), refPos.file, refPos.line, refPos.col);
         currentInclude.addInputSource(currentInput);
         prepro.getLstListener().macroRef(refPos.line, refPos.col, currLine, currCol + 1, "_proparse_");
       } else {
@@ -1590,7 +1582,6 @@ public class Lexer implements IPreprocessor {
         proparseDirectiveText = refText.substring(12, closingCurly).trim();
         // This will be counted as a source whether picked up here or picked
         // up as a normal macro ref.
-        ++sourceCounter;
         prepro.getLstListener().macroRef(refPos.line, refPos.col, currLine, currCol + 1, "_proparse_");
         prepro.getLstListener().macroRefEnd();
       }
@@ -1703,7 +1694,6 @@ public class Lexer implements IPreprocessor {
         // ppNewInclude() will throw UncheckedIOException if file not found or cannot be opened.
         // Unlike currline and currcol, currfile is only updated with a push/pop of the input stack.
         currFile = currentInput.getFileIndex();
-        currSourceNum = currentInput.getSourceNum();
         prepro.getLstListener().include(refPos.line, refPos.col, currLine, currCol + 1, currFile, includeFilename);
         // Add the arguments to the new include object.
         int argNum = 1;
@@ -1739,7 +1729,6 @@ public class Lexer implements IPreprocessor {
 
   private void ppNewMacroRef2(String theText, FilePos refPos) {
     if (theText.isEmpty()) {
-      ++sourceCounter;
       prepro.getLstListener().macroRefEnd();
       return;
     }
@@ -1747,7 +1736,7 @@ public class Lexer implements IPreprocessor {
     // because we can have &ENDIF inside a preprocesstoken
     // For a macro/argument expansion, we use the file/line/col of
     // the opening curly '{' of the ref file, for all characters/tokens.
-    currentInput = new InputSource(++sourceCounter, theText, refPos.file, refPos.line, refPos.col);
+    currentInput = new InputSource(theText, refPos.file, refPos.line, refPos.col);
     currentInclude.addInputSource(currentInput);
     currentInput.setNextLine(refPos.line);
     currentInput.setNextCol(refPos.col);
@@ -1859,11 +1848,10 @@ public class Lexer implements IPreprocessor {
     }
 
     if (includeCache2.get(idx) != null) {
-      currentInput = new InputSource(++sourceCounter, includeCache2.get(idx), idx);
+      currentInput = new InputSource(includeCache2.get(idx), idx);
     } else {
       try {
-        currentInput = new InputSource(++sourceCounter, incFile, prepro.getCharset(), idx,
-            prepro.getProparseSettings().getSkipXCode());
+        currentInput = new InputSource(incFile, prepro.getCharset(), idx, prepro.getProparseSettings().getSkipXCode());
         includeCache2.put(idx, currentInput.getContent());
       } catch (IOException caught) {
         throw new UncheckedIOException(caught);

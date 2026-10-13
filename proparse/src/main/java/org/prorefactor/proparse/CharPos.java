@@ -19,14 +19,12 @@ public final class CharPos {
   final int file;
   final int line;
   final int col;
-  final int sourceNum;
 
-  public CharPos(int ch, int file, int line, int col, int sourceNum) {
+  public CharPos(int ch, int file, int line, int col) {
     this.ch = ch;
     this.file = file;
     this.line = line;
     this.col = col;
-    this.sourceNum = sourceNum;
   }
 
   public int getFile() {
@@ -41,7 +39,4 @@ public final class CharPos {
     return col;
   }
 
-  public int getSourceNum() {
-    return sourceNum;
-  }
 }

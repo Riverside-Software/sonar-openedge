@@ -137,13 +137,6 @@ public class JPNode {
   }
 
   /**
-   * @see ProToken#getMacroSourceNum()
-   */
-  public int getSourceNum() {
-    return token.getMacroSourceNum();
-  }
-
-  /**
    * @see ProToken#getLine()
    */
   public int getLine() {
