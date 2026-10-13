@@ -14,6 +14,7 @@
  ********************************************************************************/
 package org.prorefactor.proparse;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -63,34 +64,21 @@ public class InputSource {
     this.nextCol = col;
   }
 
-  public InputSource(File file, Charset charset, int fileIndex, boolean skipXCode) throws IOException {
+  public InputSource(File file, Charset charset, int fileIndex, XCodeWrapper wrapper) throws IOException {
     LOGGER.trace("New InputSource object for file '{}'", file.getName());
     this.fileIndex = fileIndex;
     this.macroExpansion = false;
-    try (var input = Files.newInputStream(file.toPath())) {
-      var src = input.readAllBytes();
-      if (isXCoded(src)) {
-        if (skipXCode)
-          this.fileContent = " ";
-        else
-          throw new XCodedFileException(file.getName());
-      } else {
-        this.fileContent = new String(src, charset);
-      }
+    try (var input = wrapper.wrap(Files.newInputStream(file.toPath()), file.getName())) {
+      this.fileContent = new String(input.readAllBytes(), charset);
     }
   }
 
-  public InputSource(String fileName, byte[] src, Charset charset, int fileIndex, boolean skipXCode) throws IOException {
+  public InputSource(String fileName, byte[] src, Charset charset, int fileIndex, XCodeWrapper wrapper) throws IOException {
     LOGGER.trace("New InputSource object for include stream '{}'", fileName);
     this.fileIndex = fileIndex;
     this.macroExpansion = false;
-    if (isXCoded(src)) {
-      if (skipXCode)
-        this.fileContent = " ";
-      else
-        throw new XCodedFileException(fileName);
-    } else {
-      this.fileContent = new String(src, charset);
+    try (var input = wrapper.wrap(new ByteArrayInputStream(src), fileName)) {
+      this.fileContent = new String(input.readAllBytes(), charset);
     }
   }
 
@@ -154,10 +142,6 @@ public class InputSource {
 
   public String getContent() {
     return fileContent;
-  }
-
-  private static boolean isXCoded(byte[] src) {
-    return (src.length > 0) && ((src[0] == 0x11) || (src[0] == 0x13));
   }
 
 }

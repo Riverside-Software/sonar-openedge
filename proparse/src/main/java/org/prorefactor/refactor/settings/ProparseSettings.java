@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.prorefactor.proparse.DefaultXCodeWrapper;
+import org.prorefactor.proparse.XCodeWrapper;
+
 public class ProparseSettings implements IProparseSettings {
   private final boolean multiParse;
   private final boolean proparseDirectives;
@@ -27,7 +30,6 @@ public class ProparseSettings implements IProparseSettings {
   private final OperatingSystem os;
   private final int processArchitecture;
   private final boolean batchMode;
-  private final boolean skipXCode;
   private final String propath;
   private final String proversion;
   private final List<String> path = new ArrayList<>();
@@ -37,7 +39,7 @@ public class ProparseSettings implements IProparseSettings {
   private Integer customProcessArchitecture;
   private Boolean customBatchMode;
   private String customProversion;
-  private Boolean customSkipXCode;
+  private XCodeWrapper xcodeWrapper;
   private char[] tokenStartChars;
   private boolean antlrTokenInsertion = false;
   private boolean antlrTokenDeletion = false;
@@ -62,7 +64,7 @@ public class ProparseSettings implements IProparseSettings {
     this.propath = propath;
     this.proversion = proversion;
     this.processArchitecture = processArchitecture;
-    this.skipXCode = skipXCode;
+    this.xcodeWrapper = new DefaultXCodeWrapper(skipXCode);
     path.addAll(Arrays.asList(propath.split(",")));
   }
 
@@ -117,8 +119,8 @@ public class ProparseSettings implements IProparseSettings {
   }
 
   @Override
-  public boolean getSkipXCode() {
-    return customSkipXCode == null ? skipXCode : customSkipXCode;
+  public XCodeWrapper getXCodeWrapper() {
+    return xcodeWrapper;
   }
 
   @Override
@@ -187,7 +189,7 @@ public class ProparseSettings implements IProparseSettings {
   }
 
   public void setCustomSkipXCode(boolean skipXCode) {
-    this.customSkipXCode = skipXCode;
+    this.xcodeWrapper = new DefaultXCodeWrapper(skipXCode);
   }
 
   public void setTokenStartChars(char[] tokenStartChars) {

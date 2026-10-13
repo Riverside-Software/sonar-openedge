@@ -131,7 +131,7 @@ public class Lexer implements IPreprocessor {
     this.prepro = prepro;
     this.factory = new ProTokenFactory();
     try {
-      currentInput = new InputSource(fileName, src, prepro.getCharset(), 0, true);
+      currentInput = new InputSource(fileName, src, prepro.getCharset(), 0, prepro.getProparseSettings().getXCodeWrapper());
     } catch (IOException caught) {
       throw new UncheckedIOException(caught);
     }
@@ -1851,7 +1851,8 @@ public class Lexer implements IPreprocessor {
       currentInput = new InputSource(includeCache2.get(idx), idx);
     } else {
       try {
-        currentInput = new InputSource(incFile, prepro.getCharset(), idx, prepro.getProparseSettings().getSkipXCode());
+        currentInput = new InputSource(incFile, prepro.getCharset(), idx,
+            prepro.getProparseSettings().getXCodeWrapper());
         includeCache2.put(idx, currentInput.getContent());
       } catch (IOException caught) {
         throw new UncheckedIOException(caught);
