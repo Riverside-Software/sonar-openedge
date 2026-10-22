@@ -38,7 +38,9 @@ public final class ProfilerUtils {
   }
 
   public static final ProfilerSession getProfilerSession(Path path) throws IOException {
-    return getProfilerSession(Files.newInputStream(path));
+    try (InputStream input = Files.newInputStream(path)) {
+      return getProfilerSession(input);
+    }
   }
 
   public static final ProfilerSession getProfilerSession(InputStream input) throws IOException {
