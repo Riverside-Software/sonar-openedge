@@ -28,15 +28,12 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.SonarProduct;
-import org.sonar.api.batch.fs.FilePredicate;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
-import org.sonar.api.batch.sensor.issue.NewIssue;
-import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.plugins.openedge.api.Constants;
 import org.sonar.plugins.openedge.foundation.InputFileUtils;
@@ -65,7 +62,6 @@ public class OpenEdgeWarningsSensor implements Sensor {
     descriptor.onlyOnLanguage(Constants.LANGUAGE_KEY).name(getClass().getSimpleName());
   }
 
-
   @Override
   public void execute(SensorContext context) {
     if (context.runtime().getProduct() == SonarProduct.SONARLINT)
@@ -83,14 +79,17 @@ public class OpenEdgeWarningsSensor implements Sensor {
     }
 
     FilePredicates predicates = context.fileSystem().predicates();
-    for (InputFile file : context.fileSystem().inputFiles(predicates.and(
-        predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
+    for (InputFile file : context.fileSystem().inputFiles(
+        predicates.and(predicates.hasLanguage(Constants.LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
       if (skipUnchangedFiles && !components.isChanged(context, file)) {
         LOG.debug("Skip {} as it is unchanged in this branch", file);
         continue;
       }
-      processFile(context, file);
-      warningsImportNum++;
+      var listingFile = settings.getWarningsFile(file);
+      if ((listingFile != null) && (listingFile.exists())) {
+        processFile(context, file, listingFile);
+        warningsImportNum++;
+      }
       if (context.isCancelled()) {
         LOG.info("Analysis cancelled...");
         return;
@@ -99,62 +98,56 @@ public class OpenEdgeWarningsSensor implements Sensor {
     LOG.info("{} warning files imported", warningsImportNum);
   }
 
-  private void processFile(SensorContext context, InputFile file) {
-    File listingFile = settings.getWarningsFile(file);
-    if ((listingFile != null) && (listingFile.exists())) {
-      LOG.debug("Import warnings for {}", file);
-
-      try {
-        WarningsProcessor processor = new WarningsProcessor();
-        Files.asCharSource(listingFile, StandardCharsets.UTF_8).readLines(processor);
-        for (Warning w : processor.getResult()) {
-          RuleKey ruleKey = RuleKey.of(Constants.STD_REPOSITORY_KEY,
-              OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY + "." + w.msgNum);
-          boolean isManagedByCABL = OpenEdgeRulesDefinition.isWarningManagedByCABL(w.msgNum);
-          if (context.activeRules().find(ruleKey) == null) {
-            if (isManagedByCABL)
-              // Rule is managed by CABL *and* is specifically inactive in the profile, so the issue is discarded
-              continue;
-            else {
-              // Not managed by CABL, we use the default rule
-              ruleKey = RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY);
-              // And append message number so it's easier to find warning reported by compiler
-              w.msg = w.msg + " (" + w.msgNum + ")";
-            }
-          }
-
-          FilePredicate fp1 = context.fileSystem().predicates().hasRelativePath(w.file);
-          FilePredicate fp2 = context.fileSystem().predicates().hasAbsolutePath(
-              context.fileSystem().baseDir().toPath().resolve(w.file).normalize().toString());
-
-          // TODO FilePredicate.or() doesn't work...
-          InputFile target = context.fileSystem().inputFile(fp1);
-          if (target == null) {
-            target = context.fileSystem().inputFile(fp2);
-          }
-
-          if (target != null) {
-            LOG.debug("Warning File {} - Line {} - Message {}", target, w.line, w.msg);
-            NewIssue issue = context.newIssue().forRule(ruleKey);
-            NewIssueLocation location = issue.newLocation().on(target);
-            if (w.line > 0) {
-              location.at(target.selectLine(w.line));
-            }
-            if (target == file) {
-              location.message(w.msg);
-            } else {
-              location.message("From " + InputFileUtils.getRelativePath(file, context.fileSystem()) + " - " + w.msg);
-            }
-            issue.at(location).save();
-          } else {
-            LOG.info("Found warning on non-existing file {}", w.file);
+  private void processFile(SensorContext context, InputFile file, File listingFile) {
+    try {
+      var processor = new WarningsProcessor();
+      Files.asCharSource(listingFile, StandardCharsets.UTF_8).readLines(processor);
+      for (var w : processor.getResult()) {
+        var ruleKey = RuleKey.of(Constants.STD_REPOSITORY_KEY,
+            OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY + "." + w.msgNum);
+        var isManagedByCABL = OpenEdgeRulesDefinition.isWarningManagedByCABL(w.msgNum);
+        if (context.activeRules().find(ruleKey) == null) {
+          if (isManagedByCABL)
+            // Rule is managed by CABL *and* is specifically inactive in the profile, so the issue is discarded
+            continue;
+          else {
+            // Not managed by CABL, we use the default rule
+            ruleKey = RuleKey.of(Constants.STD_REPOSITORY_KEY, OpenEdgeRulesDefinition.COMPILER_WARNING_RULEKEY);
+            // And append message number so it's easier to find warning reported by compiler
+            w.msg = w.msg + " (" + w.msgNum + ")";
           }
         }
 
-      } catch (IOException caught) {
-        // Nothing...
+        var preds = context.fileSystem().predicates();
+        var fp1 = preds.hasRelativePath(w.file);
+        var fp2 = preds.hasAbsolutePath(context.fileSystem().baseDir().toPath().resolve(w.file).normalize().toString());
+        var target = context.fileSystem().inputFile(fp1);
+        if (target == null)
+          target = context.fileSystem().inputFile(fp2);
+
+        if (target != null) {
+          reportIssue(context, file, target, w, ruleKey);
+        } else {
+          LOG.info("Found warning on non-existing file {}", w.file);
+        }
       }
+    } catch (IOException caught) {
+      // Nothing...
     }
+  }
+
+  private void reportIssue(SensorContext context, InputFile file, InputFile target, Warning w, RuleKey ruleKey) {
+    LOG.debug("Warning File {} - Line {} - Message {}", target, w.line, w.msg);
+    var issue = context.newIssue().forRule(ruleKey);
+    var location = issue.newLocation().on(target);
+    if ((w.line > 0) && (w.line <= target.lines())) {
+      location.at(target.selectLine(w.line));
+    }
+    if (target == file)
+      location.message(w.msg);
+    else
+      location.message("From " + InputFileUtils.getRelativePath(file, context.fileSystem()) + " - " + w.msg);
+    issue.at(location).save();
   }
 
   private class WarningsProcessor implements LineProcessor<List<Warning>> {
