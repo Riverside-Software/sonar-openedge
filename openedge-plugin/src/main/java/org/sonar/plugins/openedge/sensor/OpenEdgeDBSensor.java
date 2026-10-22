@@ -20,6 +20,7 @@
 package org.sonar.plugins.openedge.sensor;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,10 +59,10 @@ public class OpenEdgeDBSensor implements Sensor {
     FilePredicates predicates = sensorContext.fileSystem().predicates();
     for (InputFile file : sensorContext.fileSystem().inputFiles(
         predicates.and(predicates.hasLanguage(Constants.DB_LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
-      try {
+      try (InputStream inputStream = file.inputStream()) {
         LOG.info("Analyzing {}", file);
 
-        DatabaseDescription desc = DumpFileUtils.getDatabaseDescription(file.inputStream(), file.charset(),
+        DatabaseDescription desc = DumpFileUtils.getDatabaseDescription(inputStream, file.charset(),
             Files.getNameWithoutExtension(file.filename()));
         sensorContext.newMeasure().on(file).forMetric((Metric) OpenEdgeMetrics.NUM_TABLES).withValue(
             desc.getTables().size()).save();

@@ -44,7 +44,9 @@ public final class DumpFileUtils {
   }
 
   public static final ParseTree getDumpFileParseTree(Path path) throws IOException {
-    return getDumpFileParseTree(Files.newInputStream(path), null);
+    try (var inputStream = Files.newInputStream(path)) {
+      return getDumpFileParseTree(inputStream, null);
+    }
   }
 
   /**
