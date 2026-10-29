@@ -14,6 +14,7 @@
  ********************************************************************************/
 package org.prorefactor.core.nodetypes;
 
+import org.prorefactor.core.ABLNodeType;
 import org.prorefactor.core.JPNode;
 import org.prorefactor.core.ProToken;
 
@@ -35,6 +36,9 @@ public class ArrayReferenceNode extends ExpressionNode {
 
   @Override
   public int getExtent() {
+    // <code>x[n FOR m]</code> syntax: return array even though this is not accepted as a method parameter
+    if (findDirectChild(ABLNodeType.FOR) == null)
+      return 0;
     return getDirectChildren().get(0).asIExpression().getExtent();
   }
 
