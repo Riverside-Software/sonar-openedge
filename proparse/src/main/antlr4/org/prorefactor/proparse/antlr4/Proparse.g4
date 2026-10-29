@@ -639,7 +639,7 @@ expression:
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 expressionTerm:
-    expressionTerm ( OBJCOLON | ELVIS ) methodName methodParamList # exprTermMethodCall
+    expressionTerm { support.unknownMethodCallsAllowed() }? ( OBJCOLON | ELVIS ) methodName methodParamList # exprTermMethodCall
   | expressionTerm ( OBJCOLON | ELVIS ) attributeName              # exprTermAttribute
   | expressionTerm DOUBLECOLON memberName methodParamList?         # exprTermNamedMember
   | expressionTerm LEFTBRACE expression ( FOR constant )? RIGHTBRACE # exprTermArray
@@ -2250,8 +2250,9 @@ fieldEqualDynamicNew:
 
 dynamicNew:
     { support.disallowUnknownMethodCalls(); }
-    DYNAMICNEW expression parameterList
+    DYNAMICNEW expression
     { support.allowUnknownMethodCalls(); }
+    parameterList
   ;
 
 editorPhrase:
