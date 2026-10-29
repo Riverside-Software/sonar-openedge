@@ -943,6 +943,47 @@ public class ExpressionEngineTest extends AbstractProparseTest {
     assertNull(exp4.getMethodElement());
   }
 
+  @BeforeMethod(dependsOnMethods = "setUp")
+  public void beforeObjectMethod07() {
+    var typeInfo = new TypeInfo("rssw.test.Class11", false, false, "Progress.Lang.Object", "");
+    typeInfo.addMethod(new MethodElement("method01", true, DataType.VOID, //
+        new Parameter(1, "prm1", 0, ParameterMode.INPUT, DataType.CHARACTER)));
+    session.injectTypeInfo(typeInfo);
+  }
+
+  // https://github.com/vscode-abl/vscode-abl/issues/629
+  @Test
+  public void testObjectMethod07() {
+    var unit = getParseUnit("""
+        define variable xx as character extent 10 no-undo.
+        define temp-table tt1 field fld1 as character extent 5.
+        rssw.test.Class11:method01(xx).
+        rssw.test.Class11:method01(xx[5]).
+        rssw.test.Class11:method01(tt1.fld1[2]).
+        """, session);
+    unit.treeParser01();
+
+    var nodes = unit.getTopNode().queryExpressions();
+    assertEquals(nodes.size(), 3);
+
+    // Whole extent passed to scalar parameter: no match
+    assertTrue(nodes.get(0) instanceof MethodCallNode);
+    var exp = (MethodCallNode) nodes.get(0);
+    assertNull(exp.getMethodElement());
+
+    // Extent element of variable
+    assertTrue(nodes.get(1) instanceof MethodCallNode);
+    var exp2 = (MethodCallNode) nodes.get(1);
+    assertNotNull(exp2.getMethodElement());
+    assertEquals(exp2.getDataType().getPrimitive(), PrimitiveDataType.VOID);
+
+    // Extent element of temp-table field
+    assertTrue(nodes.get(2) instanceof MethodCallNode);
+    var exp3 = (MethodCallNode) nodes.get(2);
+    assertNotNull(exp3.getMethodElement());
+    assertEquals(exp3.getDataType().getPrimitive(), PrimitiveDataType.VOID);
+  }
+
   @Test
   public void testFunctions() {
     ParseUnit unit = getParseUnit(
