@@ -1729,6 +1729,22 @@ public class ParserTest extends AbstractProparseTest {
   }
 
   @Test
+  public void testRunOnServerAttribute() {
+    var code = """
+        run xxx.p on session:first-server(input 1, input 2, ?, output xx).
+        """;
+    var unit = getParseUnit(code, session);
+    unit.treeParser01();
+    assertFalse(unit.hasSyntaxError());
+    var list01 = unit.getTopNode().queryStateHead(ABLNodeType.RUN);
+    assertEquals(list01.size(), 1);
+    var stmt01 = list01.get(0);
+    var list02 = stmt01.getDirectChildren(ABLNodeType.PARAMETER_LIST);
+    assertEquals(list02.size(), 1);
+    assertEquals(list02.get(0).getDirectChildren(ABLNodeType.PARAMETER_ITEM).size(), 4);
+  }
+
+  @Test
   public void testWaitForSet() {
     var unit = getParseUnit("WAIT-FOR xObj:methodName() SET this-object:attrName.", session);
     unit.treeParser01();
