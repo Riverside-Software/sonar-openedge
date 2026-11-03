@@ -332,6 +332,14 @@ public class ParserTest extends AbstractProparseTest {
   }
 
   @Test
+  public void testAnnotationKeywordAsFieldName() {
+    ParseUnit unit = getParseUnit("def temp-table foo field annotation as char.", session);
+    unit.parse();
+    assertFalse(unit.hasSyntaxError());
+    assertEquals(unit.getTopNode().queryStateHead(ABLNodeType.DEFINE).size(), 1);
+  }
+
+  @Test
   public void testInputFunction() {
     String code = """
         define variable fillIn1 as int view-as fill-in.
