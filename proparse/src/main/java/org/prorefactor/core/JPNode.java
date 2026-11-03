@@ -32,6 +32,7 @@ import org.prorefactor.core.nodetypes.AttributeReferenceNode;
 import org.prorefactor.core.nodetypes.BuiltinFunctionNode;
 import org.prorefactor.core.nodetypes.CanFindNode;
 import org.prorefactor.core.nodetypes.ConstantNode;
+import org.prorefactor.core.nodetypes.DatasetHandleRefNode;
 import org.prorefactor.core.nodetypes.EnteredFunction;
 import org.prorefactor.core.nodetypes.FieldRefNode;
 import org.prorefactor.core.nodetypes.IExpression;
@@ -51,6 +52,7 @@ import org.prorefactor.core.nodetypes.SingleArgumentExpression;
 import org.prorefactor.core.nodetypes.StatementBlockNode;
 import org.prorefactor.core.nodetypes.StatementNode;
 import org.prorefactor.core.nodetypes.SystemHandleNode;
+import org.prorefactor.core.nodetypes.TableHandleRefNode;
 import org.prorefactor.core.nodetypes.TwoArgumentsExpression;
 import org.prorefactor.core.nodetypes.TypeNameNode;
 import org.prorefactor.core.nodetypes.UserFunctionCallNode;
@@ -132,13 +134,6 @@ public class JPNode {
    */
   public int getType() {
     return token.getNodeType().getType();
-  }
-
-  /**
-   * @see ProToken#getMacroSourceNum()
-   */
-  public int getSourceNum() {
-    return token.getMacroSourceNum();
   }
 
   /**
@@ -1133,11 +1128,17 @@ public class JPNode {
           case WIDGET_REF:
             node = new WidgetNode(tok, up, num, hasChildren);
             break;
+          case DATASET_HANDLE_REF:
+            node = new DatasetHandleRefNode(tok, up, num, hasChildren);
+            break;
+          case TABLE_HANDLE_REF:
+            node = new TableHandleRefNode(tok, up, num, hasChildren);
+            break;
           case BUILTIN_FUNCTION:
             node = new BuiltinFunctionNode(tok, up, num, hasChildren);
             break;
           case NEW_TYPE_REF:
-            node = new NewTypeNode(tok, up, num, hasChildren);
+            node = new NewTypeNode(tok, up, num, hasChildren, "");
             break;
           case FIELD_REF:
             node = new FieldRefNode(tok, up, num, hasChildren);

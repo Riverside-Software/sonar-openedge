@@ -1204,6 +1204,21 @@ public class TreeParserVariableDefinition extends AbstractBlockProparseListener 
   }
 
   @Override
+  public void enterDefineAnnotationPropertyStatement(DefineAnnotationPropertyStatementContext ctx) {
+    Variable v = defineVariable(ctx, support.getNode(ctx), ctx.n.getText(), Variable.Type.PROPERTY);
+    defAs(ctx.datatype());
+    if (ctx.initialConstant() != null)
+      defineInitialValue((Variable) currSymbol, ctx.initialConstant().varStatementInitialValue());
+
+    stack.push(v);
+  }
+
+  @Override
+  public void exitDefineAnnotationPropertyStatement(DefineAnnotationPropertyStatementContext ctx) {
+    addToSymbolScope(stack.pop());
+  }
+
+  @Override
   public void enterDefinePropertyStatement(DefinePropertyStatementContext ctx) {
     Variable v = defineVariable(ctx, support.getNode(ctx), ctx.n.getText(), Variable.Type.PROPERTY);
     for (DefinePropertyModifierContext ctx2 : ctx.definePropertyModifier()) {

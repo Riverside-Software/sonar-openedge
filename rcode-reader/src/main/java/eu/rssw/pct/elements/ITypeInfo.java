@@ -124,7 +124,9 @@ public interface ITypeInfo {
    */
   default Pair<ITypeInfo, IMethodElement> getExactMatch(Function<String, ITypeInfo> provider, String method,
       boolean constructor, ParameterDescriptor[] parameters) {
+
     for (var elem : getMethods()) {
+      // Search in current class
       var cond1 = constructor && elem.isConstructor() && (elem.getParameters().length == parameters.length);
       var cond2 = !constructor && !elem.isConstructor() && method.equalsIgnoreCase(elem.getName())
           && (elem.getParameters().length == parameters.length);
@@ -140,7 +142,19 @@ public interface ITypeInfo {
           return Pair.of(this, elem);
       }
     }
+
     if (!constructor) {
+      // Search in interfaces
+      for (var str : getInterfaces()) {
+        var iface = provider.apply(str);
+        if (iface != null) {
+          var result = iface.getExactMatch(provider, method, false, parameters);
+          if (result != null)
+            return result;
+        }
+      }
+
+      // Search in parent class
       var parent = provider.apply(getParentTypeName());
       if (parent != null)
         return parent.getExactMatch(provider, method, constructor, parameters);
@@ -171,7 +185,68 @@ public interface ITypeInfo {
     // No enum for the reason as I don't want it to be public
     // 1 -> Unknown data type used, 2 -> ParameterMode difference, 3 -> Parameter datatype difference
     List<Triplet<ITypeInfo, IMethodElement, Set<Integer>>> list01 = new ArrayList<>();
-    for (var elem : getMethods()) {
+
+    // Collect matches from current class
+    collectCompatibleMethods(this, provider, method, constructor, parameters, list01);
+
+    // If no match in current class and not looking for constructor, search in interfaces
+    if (list01.isEmpty() && !constructor) {
+      for (var str : getInterfaces()) {
+        var iface = provider.apply(str);
+        if (iface != null) {
+          collectCompatibleMethods(iface, provider, method, false, parameters, list01);
+        }
+      }
+    }
+
+    // Select best match from collected candidates
+    if (list01.size() > 1) {
+      // If multiple methods match, the following rules apply:
+      // * If there was a null (?) parameter, then don't return anything (ambiguous)
+      // * If matches involve only parameter mode, we return the first one (ambiguity is accepted)
+      // * If matches involve only parameter type, we return the most specific one (by class hierarchy)
+      // * If matches involve both parameter type and mode, we return the most specific one among the methods with
+      // the same parameter modes. If no such method exists, we return the first one with a mode difference
+      var anyUnknown = list01.stream().anyMatch(it -> it.getO3().contains(1));
+      var paramModeList = list01.stream().filter(it -> it.getO3().contains(2)).toList();
+      var paramTypeList = list01.stream().filter(it -> it.getO3().contains(3)).toList();
+      if (!anyUnknown) {
+        if (!paramModeList.isEmpty() && paramTypeList.isEmpty()) {
+          return Pair.of(paramModeList.get(0).getO1(), paramModeList.get(0).getO2());
+        } else if (!paramTypeList.isEmpty() && paramModeList.isEmpty()) {
+          // Only type differences: select the most specific method
+          var best = getMostSpecific(paramTypeList, parameters, provider);
+          return Pair.of(best.getO1(), best.getO2());
+        } else {
+          // Type and mode differences: select the most specific method among those with same modes
+          var sameModeList = list01.stream().filter(it -> !it.getO3().contains(2)).toList();
+          var best = sameModeList.isEmpty() ? paramModeList.get(0)
+              : getMostSpecific(sameModeList, parameters, provider);
+          return Pair.of(best.getO1(), best.getO2());
+        }
+      }
+    } else if (list01.size() == 1) {
+      // Single match, return this one
+      return Pair.of(list01.get(0).getO1(), list01.get(0).getO2());
+    }
+
+    // If still no match and not looking for constructor, search in parent class
+    if (!constructor) {
+      var parent = provider.apply(getParentTypeName());
+      if (parent != null)
+        return parent.getCompatibleMatchMethod(provider, method, parameters);
+    }
+
+    return null;
+  }
+
+  /**
+   * Helper method to collect compatible methods from a type into a result list
+   */
+  private static void collectCompatibleMethods(ITypeInfo type, Function<String, ITypeInfo> provider, String method,
+      boolean constructor, ParameterDescriptor[] parameters,
+      List<Triplet<ITypeInfo, IMethodElement, Set<Integer>>> results) {
+    for (var elem : type.getMethods()) {
       var cond1 = constructor && elem.isConstructor() && (elem.getParameters().length == parameters.length);
       var cond2 = !constructor && !elem.isConstructor() && method.equalsIgnoreCase(elem.getName())
           && (elem.getParameters().length == parameters.length);
@@ -197,39 +272,10 @@ public interface ITypeInfo {
           }
         }
         if (match) {
-          list01.add(Triplet.of(this, elem, reason));
+          results.add(Triplet.of(type, elem, reason));
         }
       }
     }
-    if (list01.size() > 1) {
-      // If multiple methods match, the following rules apply:
-      // * If there was a null (?) parameter, then don't return anything (ambiguous)
-      // * If matches involve only parameter mode, we return the first one (ambiguity is accepted)
-      // * If matches involve only parameter type, we return the first one (ambiguity is accepted)
-      // * If matches involve both parameter type and mode, we return the first one involving only mode
-      var anyUnknown = list01.stream().anyMatch(it -> it.getO3().contains(1));
-      var paramModeList = list01.stream().filter(it -> it.getO3().contains(2)).toList();
-      var paramTypeList = list01.stream().filter(it -> it.getO3().contains(3)).toList();
-      if (!anyUnknown) {
-        if (!paramModeList.isEmpty() && paramTypeList.isEmpty())
-          return Pair.of(paramModeList.get(0).getO1(), paramModeList.get(0).getO2());
-        else if (!paramTypeList.isEmpty() && paramModeList.isEmpty())
-          return Pair.of(paramTypeList.get(0).getO1(), paramTypeList.get(0).getO2());
-        else
-          return Pair.of(paramModeList.get(0).getO1(), paramModeList.get(0).getO2());
-      }
-    } else if (list01.size() == 1) {
-      // Single match, return this one
-      return Pair.of(list01.get(0).getO1(), list01.get(0).getO2());
-    }
-    if (!constructor) {
-      // Check parent class only when looking for methods
-      var parent = provider.apply(getParentTypeName());
-      if (parent != null)
-        return parent.getCompatibleMatchMethod(provider, method, parameters);
-    }
-
-    return null;
   }
 
   /**
@@ -294,6 +340,23 @@ public interface ITypeInfo {
     return null;
   }
 
+  default Pair<ITypeInfo, IVariableElement> lookupVariable(Function<String, ITypeInfo> typeInfoProvider,
+      String varName) {
+    for (var elem : getVariables()) {
+      if (varName.equalsIgnoreCase(elem.getName())) {
+        return Pair.of(this, elem);
+      }
+    }
+    var parent = typeInfoProvider.apply(getParentTypeName());
+    if (parent != null) {
+      var parentProp = parent.lookupVariable(typeInfoProvider, varName);
+      if (parentProp != null)
+        return parentProp;
+    }
+
+    return null;
+  }
+
   /**
    * Return all properties of this type, including inherited properties.
    */
@@ -323,6 +386,30 @@ public interface ITypeInfo {
 
     // Then from class itself
     getProperties().stream().map(it -> Pair.of(this, it)).forEach(pairConsumer);
+
+    return list;
+  }
+
+  /**
+   * Return all variables of this type, including inherited variables.
+   */
+  default List<Pair<ITypeInfo, IVariableElement>> getAllVariables(Function<String, ITypeInfo> typeInfoProvider) {
+    // Result
+    var list = new ArrayList<Pair<ITypeInfo, IVariableElement>>();
+    Consumer<Pair<ITypeInfo, IVariableElement>> pairConsumer = item -> {
+      // Remove existing variables with same name (which shouldn't happen in theory as variables can't be overidden)
+      list.removeAll(
+          list.stream().filter(it -> it.getO2().getName().equalsIgnoreCase(item.getO2().getName())).toList());
+      list.add(item);
+    };
+
+    // Add variables from parent
+    var parent = typeInfoProvider.apply(getParentTypeName());
+    if (parent != null)
+      parent.getAllVariables(typeInfoProvider).forEach(pairConsumer);
+
+    // Then from class itself
+    getVariables().stream().map(it -> Pair.of(this, it)).forEach(pairConsumer);
 
     return list;
   }
@@ -373,13 +460,99 @@ public interface ITypeInfo {
     return list;
   }
 
-  default IVariableElement lookupVariable(String varName) {
-    for (var elem : getVariables()) {
-      if (varName.equalsIgnoreCase(elem.getName())) {
-        return elem;
+  /**
+   * Return candidate with the highest specificity score (first one in case of equality)
+   */
+  private static Triplet<ITypeInfo, IMethodElement, Set<Integer>> getMostSpecific(
+      List<Triplet<ITypeInfo, IMethodElement, Set<Integer>>> candidates, ParameterDescriptor[] params,
+      Function<String, ITypeInfo> provider) {
+    var best = candidates.get(0);
+    int bestScore = Integer.MIN_VALUE;
+    for (var candidate : candidates) {
+      int score = computeSpecificityScore(candidate.getO2(), params, provider);
+      if (score > bestScore) {
+        bestScore = score;
+        best = candidate;
       }
     }
-    return null;
+    return best;
+  }
+
+  /**
+   * Computes a specificity score for a method candidate.
+   * Higher score means the method is more specific to the provided parameters.
+   *
+   * Scoring rules for types:
+   * - Exact type match: 1000 points per parameter
+   * - Class type with hierarchy match: 500 - (distance * 50) points (closer = higher)
+   * - Compatible primitive type: 100 points per parameter
+   *
+   * Scoring rules for modes:
+   * - Exact mode match: 10 points per parameter
+   * - Compatible mode: 0 points
+   */
+  private static int computeSpecificityScore(IMethodElement method, ParameterDescriptor[] params,
+      Function<String, ITypeInfo> provider) {
+    int score = 0;
+    for (int i = 0; i < method.getParameters().length; i++) {
+      var methodType = method.getParameters()[i].getDataType();
+      var paramType = params[i].getDataType();
+      var methodMode = method.getParameters()[i].getMode();
+      var paramMode = params[i].getMode();
+
+      // Score for type match
+      if (methodType.equals(paramType)) {
+        // Exact match = maximum score
+        score += 1000;
+      } else if (methodType.getPrimitive() == PrimitiveDataType.CLASS
+          && paramType.getPrimitive() == PrimitiveDataType.CLASS) {
+        // Class type: score inversely proportional to hierarchy distance
+        int distance = computeHierarchyDistance(methodType.getClassName(), paramType.getClassName(), provider);
+        score += Math.max(0, 500 - (Math.min(distance, 10) * 50));
+      } else {
+        // Compatible primitive type but not exact
+        score += 100;
+      }
+
+      // Score for mode match (lower priority than type)
+      if (methodMode.equals(paramMode)) {
+        score += 10;
+      }
+    }
+    return score;
+  }
+
+  /**
+   * Computes the distance in the inheritance hierarchy between two classes.
+   * Returns 0 if identical, 1 if direct parent, etc. Returns Integer.MAX_VALUE if not found.
+   */
+  private static int computeHierarchyDistance(String targetClass, String sourceClass,
+      Function<String, ITypeInfo> provider) {
+    if (targetClass == null || sourceClass == null) {
+      return Integer.MAX_VALUE;
+    }
+    if (targetClass.equalsIgnoreCase(sourceClass)) {
+      return 0;
+    }
+
+    var info = provider.apply(sourceClass);
+    int distance = 1;
+    while (info != null && distance <= 20) { // Safety limit to prevent infinite loops
+      // Check direct parent
+      if (targetClass.equalsIgnoreCase(info.getParentTypeName())) {
+        return distance;
+      }
+      // Check interfaces
+      for (var iface : info.getInterfaces()) {
+        if (targetClass.equalsIgnoreCase(iface)) {
+          return distance;
+        }
+      }
+      info = provider.apply(info.getParentTypeName());
+      distance++;
+    }
+    // Not found in hierarchy
+    return Integer.MAX_VALUE;
   }
 
   public static class ParameterDescriptor {

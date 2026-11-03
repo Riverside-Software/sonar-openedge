@@ -35,7 +35,10 @@ public class SystemHandleNode extends ExpressionNode {
 
   @Override
   public DataType getDataType() {
-    switch (getFirstChild().getNodeType()) {
+    var firstChild = getFirstChild();
+    if (firstChild == null)
+      return DataType.HANDLE;
+    switch (firstChild.getNodeType()) {
       case SUPER:
         var typeInfo = getTopLevelParent().getTypeInfo();
         if ((typeInfo == null) || BuiltinClasses.PLO_CLASSNAME.equals(typeInfo.getTypeName()))
@@ -47,7 +50,6 @@ public class SystemHandleNode extends ExpressionNode {
       default:
         return DataType.HANDLE;
     }
-
   }
 
   DataType getAttributeDataType(String id) {

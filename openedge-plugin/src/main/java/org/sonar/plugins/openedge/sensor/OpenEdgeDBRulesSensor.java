@@ -20,6 +20,7 @@
 package org.sonar.plugins.openedge.sensor;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -68,10 +69,10 @@ public class OpenEdgeDBRulesSensor implements Sensor {
     FilePredicates predicates = context.fileSystem().predicates();
     for (InputFile file : context.fileSystem().inputFiles(
         predicates.and(predicates.hasLanguage(Constants.DB_LANGUAGE_KEY), predicates.hasType(Type.MAIN)))) {
-      try {
+      try (InputStream inputStream = file.inputStream()) {
         LOG.debug("Generating ParseTree for dump file {}", file);
         long time = System.currentTimeMillis();
-        ParseTree tree = DumpFileUtils.getDumpFileParseTree(file.inputStream(), file.charset());
+        ParseTree tree = DumpFileUtils.getDumpFileParseTree(inputStream, file.charset());
         parseTime += (System.currentTimeMillis() - time);
 
         for (Map.Entry<ActiveRule, OpenEdgeDumpFileCheck> entry : components.getDumpFileRules().entrySet()) {

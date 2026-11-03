@@ -73,12 +73,8 @@ public class BuiltinClasses {
       for (var clz : clzArray.builtinClasses) {
         if ("Progress.Lang.Object".equals(clz.name) || "Progress.Lang.Enum".equals(clz.name))
           continue;
-        var typeInfo = new TypeInfo();
-        if (clz.interfaces == null) {
-          typeInfo = new TypeInfo(clz.name, clz.iface, clz.isAbstract, clz.superClass, "");
-        } else {
-          typeInfo = new TypeInfo(clz.name, clz.iface, clz.isAbstract, clz.superClass, "", clz.interfaces);
-        }
+        var typeInfo = new TypeInfo(clz.name, clz.iface, clz.isAbstract, clz.superClass, "",
+            clz.interfaces == null ? new String[] {} : clz.interfaces);
 
         // All enums have this default method
         if (clz.enums != null) {
@@ -106,9 +102,9 @@ public class BuiltinClasses {
                 params[paramEntry.number - 1] = prm;
               }
             }
-            var method = new MethodElement(
-                methodEntry.name, methodEntry.isStatic, methodEntry.returnDataType.equals("OBJECT")
-                    ? new DataType(methodEntry.returnName) : DataType.get(methodEntry.returnDataType),
+            var method = new MethodElement(methodEntry.name, methodEntry.isStatic, methodEntry.isAbstract,
+                methodEntry.returnDataType.equals("OBJECT") ? new DataType(methodEntry.returnName)
+                    : DataType.get(methodEntry.returnDataType),
                 methodEntry.extent, params);
             typeInfo.addMethod(method);
           }

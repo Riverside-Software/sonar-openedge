@@ -343,6 +343,12 @@ public class DataType {
           || (paramDataType.primDataType == PrimitiveDataType.DATASET_HANDLE)
           || (paramDataType.primDataType == PrimitiveDataType.TABLE_HANDLE)
           || (paramDataType.primDataType == PrimitiveDataType.COMPONENT_HANDLE);
+    } else if (primDataType == PrimitiveDataType.DATASET) {
+      return (paramDataType.primDataType == PrimitiveDataType.DATASET)
+          || (paramDataType.primDataType == PrimitiveDataType.DATASET_HANDLE);
+    } else if (primDataType == PrimitiveDataType.TABLE) {
+      return (paramDataType.primDataType == PrimitiveDataType.TABLE)
+          || (paramDataType.primDataType == PrimitiveDataType.TABLE_HANDLE);
     } else if (primDataType == PrimitiveDataType.CLASS) {
       var info = provider.apply(className);
       if (info == null) {

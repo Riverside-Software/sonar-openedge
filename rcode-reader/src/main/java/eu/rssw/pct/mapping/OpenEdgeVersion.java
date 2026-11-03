@@ -25,7 +25,8 @@ public enum OpenEdgeVersion {
   V117,
   V122,
   V128,
-  V130;
+  V130,
+  V131;
 
   public String getMetaschema() {
     switch (this) {
@@ -35,7 +36,7 @@ public enum OpenEdgeVersion {
         return "/doc/12.2/meta.txt";
       case V128:
         return "/doc/12.8/meta.txt";
-      case V130:
+      case V130, V131:
         return "/doc/13.0/meta.txt";
     }
     return "/doc/12.8/meta.txt";
@@ -49,7 +50,7 @@ public enum OpenEdgeVersion {
         return "doc/12.2/syshdl.json";
       case V128:
         return "doc/12.8/syshdl.json";
-      case V130:
+      case V130, V131:
         return "doc/13.0/syshdl.json";
     }
     return "doc/12.8/syshdl.json";
@@ -65,6 +66,8 @@ public enum OpenEdgeVersion {
         return "doc/12.8/classes.json";
       case V130:
         return "doc/13.0/classes.json";
+      case V131:
+        return "doc/13.1/classes.json";
     }
     return "doc/12.8/classes.json";
   }
@@ -77,12 +80,12 @@ public enum OpenEdgeVersion {
         return "doc/12.2/classDoc.json";
       case V128:
         return "doc/12.8/classDoc.json";
-      case V130:
+      case V130, V131:
         return "doc/13.0/classDoc.json";
     }
     return "doc/12.8/classDoc.json";
   }
-  
+
   public String getFunctionsDocumentationPath() {
     switch (this) {
       case V117:
@@ -91,7 +94,7 @@ public enum OpenEdgeVersion {
         return "doc/12.2/functionsDoc.json";
       case V128:
         return "doc/12.8/functionsDoc.json";
-      case V130:
+      case V130, V131:
         return "doc/13.0/functionsDoc.json";
     }
     return "doc/12.8/functionsDoc.json";
@@ -103,8 +106,10 @@ public enum OpenEdgeVersion {
       return V128;
     if (version.startsWith("11."))
       return V117;
-    if (version.startsWith("13."))
+    if (version.startsWith("13.0"))
       return V130;
+    if (version.startsWith("13.1"))
+      return V131;
     var pos = version.indexOf('.');
     if ((pos == -1) || (pos == version.length() - 1))
       return V128;

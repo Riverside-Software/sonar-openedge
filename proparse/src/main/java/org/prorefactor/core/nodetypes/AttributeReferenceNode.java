@@ -53,14 +53,14 @@ public class AttributeReferenceNode extends ExpressionNode {
     if (node.getFirstChild().getNodeType() == ABLNodeType.THISOBJECT) {
       var typeInfo = root.getTypeInfoProvider().apply(root.getClassName());
       property = typeInfo == null ? null : typeInfo.lookupProperty(root.getTypeInfoProvider(), attributeName);
-      var v1 = (typeInfo != null) && (property == null) ? typeInfo.lookupVariable(attributeName) : null;
-      variable = v1 == null ? null : Pair.of(typeInfo, v1);
+      variable = (typeInfo != null) && (property == null)
+          ? typeInfo.lookupVariable(root.getTypeInfoProvider(), attributeName) : null;
     } else if (node.getFirstChild().getNodeType() == ABLNodeType.SUPER) {
       var typeInfo = root.getTypeInfoProvider().apply(root.getClassName());
       typeInfo = typeInfo == null ? null : root.getTypeInfoProvider().apply(typeInfo.getParentTypeName());
       property = typeInfo == null ? null : typeInfo.lookupProperty(root.getTypeInfoProvider(), attributeName);
-      var v1 = (typeInfo != null) && (property == null) ? typeInfo.lookupVariable(attributeName) : null;
-      variable = v1 == null ? null : Pair.of(typeInfo, v1);
+      variable = (typeInfo != null) && (property == null)
+          ? typeInfo.lookupVariable(root.getTypeInfoProvider(), attributeName) : null;
     } else {
       returnDataType = node.getAttributeDataType(attributeName.toUpperCase());
     }
@@ -69,8 +69,8 @@ public class AttributeReferenceNode extends ExpressionNode {
   private void handleFieldRefNode(FieldRefNode node, ProgramRootNode root) {
     if (node.isStaticReference()) {
       property = node.getStaticReference().lookupProperty(root.getTypeInfoProvider(), attributeName);
-      var v1 = (property == null) ? node.getStaticReference().lookupVariable(attributeName) : null;
-      variable = v1 == null ? null : Pair.of(node.getStaticReference(), v1);
+      variable = (property == null)
+          ? node.getStaticReference().lookupVariable(root.getTypeInfoProvider(), attributeName) : null;
     } else if (node.getSymbol() instanceof Event) {
       // Events only have Publish / Subscribe, no properties
     } else if ("input-value".equalsIgnoreCase(attributeName)) {
@@ -85,8 +85,8 @@ public class AttributeReferenceNode extends ExpressionNode {
     if (dataType.getPrimitive() == PrimitiveDataType.CLASS) {
       var typeInfo = root.getTypeInfoProvider().apply(dataType.getClassName());
       property = typeInfo == null ? null : typeInfo.lookupProperty(root.getTypeInfoProvider(), attributeName);
-      var v1 = (typeInfo != null) && (property == null) ? typeInfo.lookupVariable(attributeName) : null;
-      variable = v1 == null ? null : Pair.of(typeInfo, v1);
+      variable = (typeInfo != null) && (property == null)
+          ? typeInfo.lookupVariable(root.getTypeInfoProvider(), attributeName) : null;
     } else {
       // Resolve datatype directly with the attribute name
       returnDataType = getStandardAttributeDataType(attributeName.toUpperCase());

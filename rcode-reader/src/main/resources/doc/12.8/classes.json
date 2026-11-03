@@ -5,13 +5,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Enum",
-      "enumNames": [
-        "Unexpected",
-        "APSV",
-        "SOAP",
-        "REST",
-        "WEB"
-      ],
+      "enumNames": ["Unexpected", "APSV", "SOAP", "REST", "WEB"],
       "methods": [],
       "properties": []
     },
@@ -32,6 +26,7 @@
         {
           "name": "CancelRequest",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -54,6 +49,7 @@
         {
           "name": "TerminateSession",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -76,6 +72,7 @@
         {
           "name": "TerminateFreeSessions",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -91,12 +88,14 @@
         {
           "name": "StopAgent",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "InitiateDebugger",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -112,6 +111,7 @@
         {
           "name": "DynamicPropertiesUpdate",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -127,6 +127,7 @@
         {
           "name": "TerminateFreeSession",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -142,6 +143,7 @@
         {
           "name": "DebugTest",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -192,6 +194,7 @@
         {
           "name": "TerminateSession",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -214,6 +217,7 @@
         {
           "name": "TrackABLObjects",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -229,6 +233,7 @@
         {
           "name": "GetABLObjectsReport",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -244,6 +249,7 @@
         {
           "name": "GetABLObjectsReport",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -266,12 +272,14 @@
         {
           "name": "TrackingABLObjects",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "TrackMemoryUse",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -287,6 +295,7 @@
         {
           "name": "GetMemoryUseReport",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -302,6 +311,7 @@
         {
           "name": "GetMemoryUseReport",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -324,12 +334,14 @@
         {
           "name": "TrackingMemoryUse",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "StopAgent",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -352,6 +364,7 @@
         {
           "name": "PushProfilerData",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -381,6 +394,7 @@
         {
           "name": "GetProfilerSettings",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -396,18 +410,21 @@
         {
           "name": "flushDeferredLog",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "resetDeferredLog",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "ResetDynamicABLSessionLimit",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -423,6 +440,7 @@
         {
           "name": "SetDynamicABLSessionLimit",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -459,6 +477,7 @@
         {
           "name": "GetValue",
           "static": false,
+          "abstract": false,
           "returnDataType": "CHARACTER",
           "returnExtent": "0",
           "parameters": [
@@ -546,10 +565,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Enum",
-      "enumNames": [
-        "Open",
-        "Required"
-      ],
+      "enumNames": ["Open", "Required"],
       "methods": [],
       "properties": []
     },
@@ -558,11 +574,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Enum",
-      "enumNames": [
-        "None",
-        "Warn",
-        "Fail"
-      ],
+      "enumNames": ["None", "Warn", "Fail"],
       "methods": [],
       "properties": []
     },
@@ -571,7 +583,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.SysError",
-      "interfaces": "Progress.Lang.Error",
+      "interfaces": ["Progress.Lang.Error"],
       "methods": [],
       "properties": []
     },
@@ -677,6 +689,7 @@
         {
           "name": "Is",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -697,11 +710,12 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.BPM.Filter.ITaskFilter",
+      "interfaces": ["Progress.BPM.Filter.ITaskFilter"],
       "methods": [
         {
           "name": "Is",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -737,11 +751,12 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.BPM.Filter.ITaskFilter",
+      "interfaces": ["Progress.BPM.Filter.ITaskFilter"],
       "methods": [
         {
           "name": "Is",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -777,11 +792,12 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.BPM.Filter.ITaskFilter",
+      "interfaces": ["Progress.BPM.Filter.ITaskFilter"],
       "methods": [
         {
           "name": "Is",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -824,11 +840,12 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.BPM.Filter.ITaskFilter",
+      "interfaces": ["Progress.BPM.Filter.ITaskFilter"],
       "methods": [
         {
           "name": "Is",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -864,11 +881,12 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.BPM.Filter.ITaskFilter",
+      "interfaces": ["Progress.BPM.Filter.ITaskFilter"],
       "methods": [
         {
           "name": "Is",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -904,11 +922,12 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.BPM.Filter.ITaskFilter",
+      "interfaces": ["Progress.BPM.Filter.ITaskFilter"],
       "methods": [
         {
           "name": "Is",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -944,11 +963,12 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.BPM.Filter.ITaskFilter",
+      "interfaces": ["Progress.BPM.Filter.ITaskFilter"],
       "methods": [
         {
           "name": "Is",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -984,11 +1004,12 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.BPM.Filter.ITaskFilter",
+      "interfaces": ["Progress.BPM.Filter.ITaskFilter"],
       "methods": [
         {
           "name": "Is",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -1024,11 +1045,12 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.BPM.Filter.ITaskFilter",
+      "interfaces": ["Progress.BPM.Filter.ITaskFilter"],
       "methods": [
         {
           "name": "Is",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -1075,6 +1097,7 @@
         {
           "name": "GetDataSlots",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.BPM.DataSlot",
           "returnExtent": "-1"
@@ -1082,6 +1105,7 @@
         {
           "name": "UpdateDataSlots",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -1098,6 +1122,7 @@
         {
           "name": "ActivateWorkstep",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -1113,6 +1138,7 @@
         {
           "name": "ActivateWorkstep",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -1143,6 +1169,7 @@
         {
           "name": "CompleteWorkstep",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -1158,6 +1185,7 @@
         {
           "name": "CompleteWorkstep",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -1188,6 +1216,7 @@
         {
           "name": "Remove",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         }
@@ -1219,12 +1248,14 @@
         {
           "name": "Complete",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "Assign",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -1240,6 +1271,7 @@
         {
           "name": "Reassign",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -1255,6 +1287,7 @@
         {
           "name": "GetDataSlots",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.BPM.DataSlot",
           "returnExtent": "-1"
@@ -1262,18 +1295,21 @@
         {
           "name": "MakeAvailable",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "GetAvailablePresentationTypes",
           "static": false,
+          "abstract": false,
           "returnDataType": "CHARACTER",
           "returnExtent": "0"
         },
         {
           "name": "GetPresentationUI",
           "static": false,
+          "abstract": false,
           "returnDataType": "CHARACTER",
           "returnExtent": "0",
           "parameters": [
@@ -1349,6 +1385,7 @@
         {
           "name": "Connect",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -1371,6 +1408,7 @@
         {
           "name": "Disconnect",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -1386,6 +1424,7 @@
         {
           "name": "StartProcess",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.BPM.Process",
           "returnExtent": "0",
@@ -1402,6 +1441,7 @@
         {
           "name": "GetTask",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.BPM.Task",
           "returnExtent": "0",
@@ -1418,12 +1458,14 @@
         {
           "name": "GetProcessTemplateNames",
           "static": false,
+          "abstract": false,
           "returnDataType": "CHARACTER",
           "returnExtent": "-1"
         },
         {
           "name": "GetAssignedTasks",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.BPM.Task",
           "returnExtent": "-1"
@@ -1431,6 +1473,7 @@
         {
           "name": "GetAvailableTasks",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.BPM.Task",
           "returnExtent": "-1"
@@ -1438,6 +1481,7 @@
         {
           "name": "GetDataSlotTemplates",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.BPM.DataSlotTemplate",
           "returnExtent": "-1",
@@ -1454,6 +1498,7 @@
         {
           "name": "StartProcess",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.BPM.Process",
           "returnExtent": "0",
@@ -1478,6 +1523,7 @@
         {
           "name": "StartProcess",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.BPM.Process",
           "returnExtent": "0",
@@ -1516,6 +1562,7 @@
         {
           "name": "Connect",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -1531,6 +1578,7 @@
         {
           "name": "GetAssignedTasks",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.BPM.Task",
           "returnExtent": "-1",
@@ -1548,6 +1596,7 @@
         {
           "name": "GetAvailableTasks",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.BPM.Task",
           "returnExtent": "-1",
@@ -1565,6 +1614,7 @@
         {
           "name": "GetAssignedTasks",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.BPM.Task",
           "returnExtent": "-1",
@@ -1589,6 +1639,7 @@
         {
           "name": "GetAvailableTasks",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.BPM.Task",
           "returnExtent": "-1",
@@ -1613,6 +1664,7 @@
         {
           "name": "GetProcess",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.BPM.Process",
           "returnExtent": "0",
@@ -1629,6 +1681,7 @@
         {
           "name": "GetProcess",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.BPM.Process",
           "returnExtent": "0",
@@ -1645,6 +1698,7 @@
         {
           "name": "StartProcess",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.BPM.Process",
           "returnExtent": "0",
@@ -1690,6 +1744,7 @@
         {
           "name": "GetProcess",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.BPM.Process",
           "returnExtent": "0",
@@ -1713,6 +1768,7 @@
         {
           "name": "GetProcesses",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.BPM.Process",
           "returnExtent": "-1"
@@ -1720,6 +1776,7 @@
         {
           "name": "Connect",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -1735,6 +1792,7 @@
         {
           "name": "GetClientPrincipal",
           "static": false,
+          "abstract": false,
           "returnDataType": "HANDLE",
           "returnExtent": "0"
         }
@@ -1771,11 +1829,16 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.Collections.IMap,Progress.Collections.ICollection,Progress.Collections.IIterable",
+      "interfaces": [
+        "Progress.Collections.IMap",
+        "Progress.Collections.ICollection",
+        "Progress.Collections.IIterable"
+      ],
       "methods": [
         {
           "name": "GetIterator",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Collections.IIterator",
           "returnExtent": "0"
@@ -1783,6 +1846,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -1807,6 +1871,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -1831,6 +1896,7 @@
         {
           "name": "ContainsKey",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -1847,6 +1913,7 @@
         {
           "name": "Remove",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -1863,6 +1930,7 @@
         {
           "name": "GetValue",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Lang.Object",
           "returnExtent": "0",
@@ -1880,6 +1948,7 @@
         {
           "name": "TryGetValue",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -1904,12 +1973,14 @@
         {
           "name": "Clear",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0"
         },
         {
           "name": "AddAll",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -1926,6 +1997,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -1942,6 +2014,7 @@
         {
           "name": "Contains",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -1958,6 +2031,7 @@
         {
           "name": "Remove",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -2046,17 +2120,19 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.Collections.IIterator",
+      "interfaces": ["Progress.Collections.IIterator"],
       "methods": [
         {
           "name": "MoveNext",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "Reset",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0"
         }
@@ -2075,11 +2151,12 @@
       "interface": true,
       "abstract": false,
       "superclass": "null",
-      "interfaces": "Progress.Collections.IIterable",
+      "interfaces": ["Progress.Collections.IIterable"],
       "methods": [
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -2096,6 +2173,7 @@
         {
           "name": "AddAll",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -2112,12 +2190,14 @@
         {
           "name": "Clear",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0"
         },
         {
           "name": "Contains",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -2134,6 +2214,7 @@
         {
           "name": "Remove",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -2170,6 +2251,7 @@
         {
           "name": "CompareTo",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -2194,6 +2276,7 @@
         {
           "name": "Compare",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -2226,6 +2309,7 @@
         {
           "name": "Equals",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -2250,6 +2334,7 @@
         {
           "name": "HashCode",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -2274,6 +2359,7 @@
         {
           "name": "Equals",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -2290,6 +2376,7 @@
         {
           "name": "HashCode",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0"
         }
@@ -2304,6 +2391,7 @@
         {
           "name": "GetIterator",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Collections.IIterator",
           "returnExtent": "0"
@@ -2319,12 +2407,14 @@
         {
           "name": "MoveNext",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "Reset",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0"
         }
@@ -2343,11 +2433,15 @@
       "interface": true,
       "abstract": false,
       "superclass": "null",
-      "interfaces": "Progress.Collections.ICollection,Progress.Collections.IIterable",
+      "interfaces": [
+        "Progress.Collections.ICollection",
+        "Progress.Collections.IIterable"
+      ],
       "methods": [
         {
           "name": "IndexOf",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -2364,6 +2458,7 @@
         {
           "name": "Insert",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -2387,6 +2482,7 @@
         {
           "name": "Insert",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -2410,6 +2506,7 @@
         {
           "name": "RemoveAt",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -2425,6 +2522,7 @@
         {
           "name": "Get",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Lang.Object",
           "returnExtent": "0",
@@ -2441,6 +2539,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Lang.Object",
           "returnExtent": "0",
@@ -2470,11 +2569,15 @@
       "interface": true,
       "abstract": false,
       "superclass": "null",
-      "interfaces": "Progress.Collections.ICollection,Progress.Collections.IIterable",
+      "interfaces": [
+        "Progress.Collections.ICollection",
+        "Progress.Collections.IIterable"
+      ],
       "methods": [
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -2499,6 +2602,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -2523,6 +2627,7 @@
         {
           "name": "ContainsKey",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -2539,6 +2644,7 @@
         {
           "name": "Remove",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -2555,6 +2661,7 @@
         {
           "name": "GetValue",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Lang.Object",
           "returnExtent": "0",
@@ -2572,6 +2679,7 @@
         {
           "name": "TryGetValue",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -2608,11 +2716,15 @@
       "interface": true,
       "abstract": false,
       "superclass": "null",
-      "interfaces": "Progress.Collections.ICollection,Progress.Collections.IIterable",
+      "interfaces": [
+        "Progress.Collections.ICollection",
+        "Progress.Collections.IIterable"
+      ],
       "methods": [
         {
           "name": "Get",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Lang.Object",
           "returnExtent": "0",
@@ -2635,11 +2747,16 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.Collections.ISet,Progress.Collections.ICollection,Progress.Collections.IIterable",
+      "interfaces": [
+        "Progress.Collections.ISet",
+        "Progress.Collections.ICollection",
+        "Progress.Collections.IIterable"
+      ],
       "methods": [
         {
           "name": "GetIterator",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Collections.IIterator",
           "returnExtent": "0"
@@ -2647,6 +2764,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -2663,6 +2781,7 @@
         {
           "name": "Contains",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -2679,6 +2798,7 @@
         {
           "name": "Remove",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -2695,6 +2815,7 @@
         {
           "name": "Get",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Lang.Object",
           "returnExtent": "0",
@@ -2712,12 +2833,14 @@
         {
           "name": "Clear",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0"
         },
         {
           "name": "AddAll",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -2750,17 +2873,19 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.Collections.IIterator",
+      "interfaces": ["Progress.Collections.IIterator"],
       "methods": [
         {
           "name": "MoveNext",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "Reset",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0"
         }
@@ -2823,11 +2948,16 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.Collections.IList,Progress.Collections.ICollection,Progress.Collections.IIterable",
+      "interfaces": [
+        "Progress.Collections.IList",
+        "Progress.Collections.ICollection",
+        "Progress.Collections.IIterable"
+      ],
       "methods": [
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -2844,6 +2974,7 @@
         {
           "name": "Contains",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -2860,6 +2991,7 @@
         {
           "name": "Get",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Lang.Object",
           "returnExtent": "0",
@@ -2876,6 +3008,7 @@
         {
           "name": "IndexOf",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -2892,6 +3025,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Lang.Object",
           "returnExtent": "0",
@@ -2916,6 +3050,7 @@
         {
           "name": "Insert",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -2939,6 +3074,7 @@
         {
           "name": "GetIterator",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Collections.IIterator",
           "returnExtent": "0"
@@ -2946,6 +3082,7 @@
         {
           "name": "AddAll",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -2962,12 +3099,14 @@
         {
           "name": "Clear",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0"
         },
         {
           "name": "Remove",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -2984,6 +3123,7 @@
         {
           "name": "Insert",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -3007,6 +3147,7 @@
         {
           "name": "RemoveAt",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -3055,17 +3196,19 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.Collections.IIterator",
+      "interfaces": ["Progress.Collections.IIterator"],
       "methods": [
         {
           "name": "MoveNext",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "Reset",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0"
         }
@@ -3084,11 +3227,16 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.Collections.ISet,Progress.Collections.ICollection,Progress.Collections.IIterable",
+      "interfaces": [
+        "Progress.Collections.ISet",
+        "Progress.Collections.ICollection",
+        "Progress.Collections.IIterable"
+      ],
       "methods": [
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -3105,6 +3253,7 @@
         {
           "name": "Contains",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -3121,6 +3270,7 @@
         {
           "name": "GetIterator",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Collections.IIterator",
           "returnExtent": "0"
@@ -3128,6 +3278,7 @@
         {
           "name": "AddAll",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -3144,12 +3295,14 @@
         {
           "name": "Clear",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0"
         },
         {
           "name": "Remove",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -3166,6 +3319,7 @@
         {
           "name": "Get",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Lang.Object",
           "returnExtent": "0",
@@ -3229,17 +3383,19 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.Collections.IIterator",
+      "interfaces": ["Progress.Collections.IIterator"],
       "methods": [
         {
           "name": "MoveNext",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "Reset",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0"
         }
@@ -3258,17 +3414,32 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.Windows.Forms.BindingSource",
-      "interfaces": "System.ComponentModel.IComponent,System.IDisposable,System.ComponentModel.IBindingListView,System.ComponentModel.IBindingList,System.Collections.IList,System.Collections.ICollection,System.Collections.IEnumerable,System.ComponentModel.ITypedList,System.ComponentModel.ICancelAddNew,System.ComponentModel.ISupportInitializeNotification,System.ComponentModel.ISupportInitialize,System.Windows.Forms.ICurrencyManagerProvider",
+      "interfaces": [
+        "System.ComponentModel.IComponent",
+        "System.IDisposable",
+        "System.ComponentModel.IBindingListView",
+        "System.ComponentModel.IBindingList",
+        "System.Collections.IList",
+        "System.Collections.ICollection",
+        "System.Collections.IEnumerable",
+        "System.ComponentModel.ITypedList",
+        "System.ComponentModel.ICancelAddNew",
+        "System.ComponentModel.ISupportInitializeNotification",
+        "System.ComponentModel.ISupportInitialize",
+        "System.Windows.Forms.ICurrencyManagerProvider"
+      ],
       "methods": [
         {
           "name": "Assign",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "Refresh",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -3284,18 +3455,21 @@
         {
           "name": "Refresh",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0"
         },
         {
           "name": "RefreshAll",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0"
         },
         {
           "name": "SetFields",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -3325,6 +3499,7 @@
         {
           "name": "SetFields",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -3855,7 +4030,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.ComponentModel.PropertyDescriptor",
-      "interfaces": "System.Runtime.Serialization.ISerializable",
+      "interfaces": ["System.Runtime.Serialization.ISerializable"],
       "methods": [],
       "properties": [
         {
@@ -3995,7 +4170,11 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.Enum",
-      "interfaces": "System.IComparable,System.IFormattable,System.IConvertible",
+      "interfaces": [
+        "System.IComparable",
+        "System.IFormattable",
+        "System.IConvertible"
+      ],
       "enumNames": [
         "UNKNOWN",
         "CHARACTER",
@@ -4028,29 +4207,37 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.Object",
-      "interfaces": "System.ComponentModel.IEditableObject,System.ComponentModel.IDataErrorInfo,System.ComponentModel.ITypedList",
+      "interfaces": [
+        "System.ComponentModel.IEditableObject",
+        "System.ComponentModel.IDataErrorInfo",
+        "System.ComponentModel.ITypedList"
+      ],
       "methods": [
         {
           "name": "BeginEdit",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0"
         },
         {
           "name": "CancelEdit",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0"
         },
         {
           "name": "EndEdit",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0"
         },
         {
           "name": "GetItemProperties",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "System.ComponentModel.PropertyDescriptorCollection",
           "returnExtent": "0",
@@ -4068,6 +4255,7 @@
         {
           "name": "GetListName",
           "static": false,
+          "abstract": false,
           "returnDataType": "CHARACTER",
           "returnExtent": "0",
           "parameters": [
@@ -4196,11 +4384,12 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.Object",
-      "interfaces": "System.Runtime.Serialization.ISerializable",
+      "interfaces": ["System.Runtime.Serialization.ISerializable"],
       "methods": [
         {
           "name": "Dispose",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0"
         }
@@ -4310,6 +4499,14 @@
             }
           ]
         }
+      ],
+      "variables": [
+        {
+          "name": "_columns",
+          "static": false,
+          "dataType": "OBJECT",
+          "dataTypeName": "Progress.Data.ColumnPropDesc[]"
+        }
       ]
     },
     {
@@ -4337,6 +4534,7 @@
         {
           "name": "Serialize",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -4361,6 +4559,7 @@
         {
           "name": "Deserialize",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Lang.Object",
           "returnExtent": "0",
@@ -4388,11 +4587,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Enum",
-      "enumNames": [
-        "HostByteOrder",
-        "BigEndian",
-        "LittleEndian"
-      ],
+      "enumNames": ["HostByteOrder", "BigEndian", "LittleEndian"],
       "methods": [],
       "properties": []
     },
@@ -4485,6 +4680,7 @@
         {
           "name": "Read",
           "static": false,
+          "abstract": true,
           "returnDataType": "INT64",
           "returnExtent": "0",
           "parameters": [
@@ -4514,6 +4710,7 @@
         {
           "name": "Read",
           "static": false,
+          "abstract": false,
           "returnDataType": "INT64",
           "returnExtent": "0",
           "parameters": [
@@ -4529,6 +4726,7 @@
         {
           "name": "Read",
           "static": false,
+          "abstract": true,
           "returnDataType": "INT64",
           "returnExtent": "0",
           "parameters": [
@@ -4551,6 +4749,7 @@
         {
           "name": "Read",
           "static": false,
+          "abstract": true,
           "returnDataType": "INT64",
           "returnExtent": "0",
           "parameters": [
@@ -4573,6 +4772,7 @@
         {
           "name": "SkipBytes",
           "static": false,
+          "abstract": false,
           "returnDataType": "INT64",
           "returnExtent": "0",
           "parameters": [
@@ -4588,6 +4788,7 @@
         {
           "name": "Read",
           "static": false,
+          "abstract": false,
           "returnDataType": "INT64",
           "returnExtent": "0",
           "parameters": [
@@ -4603,6 +4804,7 @@
         {
           "name": "Close",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0"
         }
@@ -4629,6 +4831,7 @@
         {
           "name": "Serialize",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -4653,6 +4856,7 @@
         {
           "name": "Deserialize",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Lang.Object",
           "returnExtent": "0",
@@ -4699,72 +4903,84 @@
         {
           "name": "ReadLongChar",
           "static": false,
+          "abstract": false,
           "returnDataType": "LONGCHAR",
           "returnExtent": "0"
         },
         {
           "name": "ReadString",
           "static": false,
+          "abstract": false,
           "returnDataType": "CHARACTER",
           "returnExtent": "0"
         },
         {
           "name": "ReadINT64",
           "static": false,
+          "abstract": false,
           "returnDataType": "INT64",
           "returnExtent": "0"
         },
         {
           "name": "ReadLong",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0"
         },
         {
           "name": "ReadShort",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0"
         },
         {
           "name": "ReadFloat",
           "static": false,
+          "abstract": false,
           "returnDataType": "DECIMAL",
           "returnExtent": "0"
         },
         {
           "name": "ReadDouble",
           "static": false,
+          "abstract": false,
           "returnDataType": "DECIMAL",
           "returnExtent": "0"
         },
         {
           "name": "ReadByte",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0"
         },
         {
           "name": "ReadUnsignedShort",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0"
         },
         {
           "name": "ReadUnsignedLong",
           "static": false,
+          "abstract": false,
           "returnDataType": "INT64",
           "returnExtent": "0"
         },
         {
           "name": "AvailableBytes",
           "static": false,
+          "abstract": false,
           "returnDataType": "INT64",
           "returnExtent": "0"
         },
         {
           "name": "Reset",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -4827,6 +5043,7 @@
         {
           "name": "Write",
           "static": false,
+          "abstract": false,
           "returnDataType": "INT64",
           "returnExtent": "0",
           "parameters": [
@@ -4849,6 +5066,7 @@
         {
           "name": "Write",
           "static": false,
+          "abstract": false,
           "returnDataType": "INT64",
           "returnExtent": "0",
           "parameters": [
@@ -4871,6 +5089,7 @@
         {
           "name": "WriteInt64",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -4886,6 +5105,7 @@
         {
           "name": "WriteLong",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -4901,6 +5121,7 @@
         {
           "name": "WriteFloat",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -4916,6 +5137,7 @@
         {
           "name": "WriteByte",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -4931,6 +5153,7 @@
         {
           "name": "WriteShort",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -4946,6 +5169,7 @@
         {
           "name": "WriteDouble",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -4961,6 +5185,7 @@
         {
           "name": "WriteUnsignedShort",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -4976,6 +5201,7 @@
         {
           "name": "WriteUnsignedLong",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -4991,6 +5217,7 @@
         {
           "name": "SetByteOrder",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -5007,6 +5234,7 @@
         {
           "name": "Clear",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0"
         }
@@ -5061,6 +5289,7 @@
         {
           "name": "Write",
           "static": false,
+          "abstract": true,
           "returnDataType": "INT64",
           "returnExtent": "0",
           "parameters": [
@@ -5090,6 +5319,7 @@
         {
           "name": "Write",
           "static": false,
+          "abstract": false,
           "returnDataType": "INT64",
           "returnExtent": "0",
           "parameters": [
@@ -5105,6 +5335,7 @@
         {
           "name": "Write",
           "static": false,
+          "abstract": true,
           "returnDataType": "INT64",
           "returnExtent": "0",
           "parameters": [
@@ -5120,6 +5351,7 @@
         {
           "name": "Write",
           "static": false,
+          "abstract": true,
           "returnDataType": "INT64",
           "returnExtent": "0",
           "parameters": [
@@ -5135,6 +5367,7 @@
         {
           "name": "Write",
           "static": false,
+          "abstract": false,
           "returnDataType": "INT64",
           "returnExtent": "0",
           "parameters": [
@@ -5150,12 +5383,14 @@
         {
           "name": "Close",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0"
         },
         {
           "name": "Flush",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0"
         }
@@ -5178,7 +5413,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.SysError",
-      "interfaces": "Progress.Lang.Error",
+      "interfaces": ["Progress.Lang.Error"],
       "methods": [],
       "properties": []
     },
@@ -5201,7 +5436,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Json.JsonError",
-      "interfaces": "Progress.Lang.Error",
+      "interfaces": ["Progress.Lang.Error"],
       "methods": [],
       "properties": [
         {
@@ -5220,6 +5455,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5235,6 +5471,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5250,6 +5487,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5265,6 +5503,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5280,6 +5519,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5295,6 +5535,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5310,6 +5551,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5325,6 +5567,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5340,6 +5583,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5355,6 +5599,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5370,6 +5615,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5385,6 +5631,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5400,6 +5647,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5415,6 +5663,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5430,6 +5679,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5445,6 +5695,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5460,6 +5711,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5475,6 +5727,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5490,6 +5743,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5506,6 +5760,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5522,6 +5777,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5538,6 +5794,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5554,6 +5811,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5569,6 +5827,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5584,6 +5843,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5599,6 +5859,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5614,6 +5875,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5629,6 +5891,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5644,6 +5907,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5659,6 +5923,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5674,6 +5939,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5689,6 +5955,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5704,6 +5971,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5719,6 +5987,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5734,6 +6003,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5756,6 +6026,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5778,6 +6049,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5800,6 +6072,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5822,6 +6095,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5844,6 +6118,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5866,6 +6141,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5888,6 +6164,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5910,6 +6187,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5932,6 +6210,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5954,6 +6233,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5976,6 +6256,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -5998,6 +6279,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6020,6 +6302,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6042,6 +6325,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6064,6 +6348,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6086,6 +6371,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6108,6 +6394,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6130,6 +6417,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6153,6 +6441,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6176,6 +6465,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6199,6 +6489,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6222,6 +6513,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6244,6 +6536,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6266,6 +6559,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6288,6 +6582,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6310,6 +6605,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6332,6 +6628,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6354,6 +6651,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6376,6 +6674,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6398,6 +6697,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6420,6 +6720,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6442,6 +6743,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6464,6 +6766,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6486,12 +6789,14 @@
         {
           "name": "AddNull",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0"
         },
         {
           "name": "AddNull",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6507,6 +6812,7 @@
         {
           "name": "AddNull",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6529,6 +6835,7 @@
         {
           "name": "AddNumber",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6544,6 +6851,7 @@
         {
           "name": "AddNumber",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6566,6 +6874,7 @@
         {
           "name": "AddNumber",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6581,6 +6890,7 @@
         {
           "name": "AddNumber",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6603,6 +6913,7 @@
         {
           "name": "Clone",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Lang.Object",
           "returnExtent": "0"
@@ -6610,6 +6921,7 @@
         {
           "name": "GetType",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6625,12 +6937,14 @@
         {
           "name": "GetJsonText",
           "static": false,
+          "abstract": false,
           "returnDataType": "LONGCHAR",
           "returnExtent": "0"
         },
         {
           "name": "GetJsonText",
           "static": false,
+          "abstract": false,
           "returnDataType": "LONGCHAR",
           "returnExtent": "0",
           "parameters": [
@@ -6646,6 +6960,7 @@
         {
           "name": "GetJsonText",
           "static": false,
+          "abstract": false,
           "returnDataType": "LONGCHAR",
           "returnExtent": "-1",
           "parameters": [
@@ -6668,6 +6983,7 @@
         {
           "name": "GetCharacter",
           "static": false,
+          "abstract": false,
           "returnDataType": "CHARACTER",
           "returnExtent": "0",
           "parameters": [
@@ -6683,6 +6999,7 @@
         {
           "name": "GetCharacter",
           "static": false,
+          "abstract": false,
           "returnDataType": "CHARACTER",
           "returnExtent": "-1",
           "parameters": [
@@ -6705,6 +7022,7 @@
         {
           "name": "GetCOMHandle",
           "static": false,
+          "abstract": false,
           "returnDataType": "COMPONENT_HANDLE",
           "returnExtent": "0",
           "parameters": [
@@ -6720,6 +7038,7 @@
         {
           "name": "GetCOMHandle",
           "static": false,
+          "abstract": false,
           "returnDataType": "COMPONENT_HANDLE",
           "returnExtent": "-1",
           "parameters": [
@@ -6742,6 +7061,7 @@
         {
           "name": "GetDate",
           "static": false,
+          "abstract": false,
           "returnDataType": "DATE",
           "returnExtent": "0",
           "parameters": [
@@ -6757,6 +7077,7 @@
         {
           "name": "GetDate",
           "static": false,
+          "abstract": false,
           "returnDataType": "DATE",
           "returnExtent": "-1",
           "parameters": [
@@ -6779,6 +7100,7 @@
         {
           "name": "GetDatetime",
           "static": false,
+          "abstract": false,
           "returnDataType": "DATETIME",
           "returnExtent": "0",
           "parameters": [
@@ -6794,6 +7116,7 @@
         {
           "name": "GetDatetime",
           "static": false,
+          "abstract": false,
           "returnDataType": "DATETIME",
           "returnExtent": "-1",
           "parameters": [
@@ -6816,6 +7139,7 @@
         {
           "name": "GetDatetimeTZ",
           "static": false,
+          "abstract": false,
           "returnDataType": "DATETIME_TZ",
           "returnExtent": "0",
           "parameters": [
@@ -6831,6 +7155,7 @@
         {
           "name": "GetDatetimeTZ",
           "static": false,
+          "abstract": false,
           "returnDataType": "DATETIME_TZ",
           "returnExtent": "-1",
           "parameters": [
@@ -6853,6 +7178,7 @@
         {
           "name": "GetDecimal",
           "static": false,
+          "abstract": false,
           "returnDataType": "DECIMAL",
           "returnExtent": "0",
           "parameters": [
@@ -6868,6 +7194,7 @@
         {
           "name": "GetDecimal",
           "static": false,
+          "abstract": false,
           "returnDataType": "DECIMAL",
           "returnExtent": "-1",
           "parameters": [
@@ -6890,6 +7217,7 @@
         {
           "name": "GetHandle",
           "static": false,
+          "abstract": false,
           "returnDataType": "HANDLE",
           "returnExtent": "0",
           "parameters": [
@@ -6905,6 +7233,7 @@
         {
           "name": "GetHandle",
           "static": false,
+          "abstract": false,
           "returnDataType": "HANDLE",
           "returnExtent": "-1",
           "parameters": [
@@ -6927,6 +7256,7 @@
         {
           "name": "GetInt64",
           "static": false,
+          "abstract": false,
           "returnDataType": "INT64",
           "returnExtent": "0",
           "parameters": [
@@ -6942,6 +7272,7 @@
         {
           "name": "GetInt64",
           "static": false,
+          "abstract": false,
           "returnDataType": "INT64",
           "returnExtent": "-1",
           "parameters": [
@@ -6964,6 +7295,7 @@
         {
           "name": "GetInteger",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -6979,6 +7311,7 @@
         {
           "name": "GetInteger",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "-1",
           "parameters": [
@@ -7001,6 +7334,7 @@
         {
           "name": "GetJsonArray",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Json.ObjectModel.JsonArray",
           "returnExtent": "0",
@@ -7017,6 +7351,7 @@
         {
           "name": "GetJsonArray",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Json.ObjectModel.JsonArray",
           "returnExtent": "-1",
@@ -7040,6 +7375,7 @@
         {
           "name": "GetJsonObject",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Json.ObjectModel.JsonObject",
           "returnExtent": "0",
@@ -7056,6 +7392,7 @@
         {
           "name": "GetJsonObject",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Json.ObjectModel.JsonObject",
           "returnExtent": "-1",
@@ -7079,6 +7416,7 @@
         {
           "name": "GetLogical",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7094,6 +7432,7 @@
         {
           "name": "GetLogical",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "-1",
           "parameters": [
@@ -7116,6 +7455,7 @@
         {
           "name": "GetLongchar",
           "static": false,
+          "abstract": false,
           "returnDataType": "LONGCHAR",
           "returnExtent": "0",
           "parameters": [
@@ -7131,6 +7471,7 @@
         {
           "name": "GetLongchar",
           "static": false,
+          "abstract": false,
           "returnDataType": "LONGCHAR",
           "returnExtent": "0",
           "parameters": [
@@ -7153,6 +7494,7 @@
         {
           "name": "GetLongchar",
           "static": false,
+          "abstract": false,
           "returnDataType": "LONGCHAR",
           "returnExtent": "-1",
           "parameters": [
@@ -7175,6 +7517,7 @@
         {
           "name": "GetLongchar",
           "static": false,
+          "abstract": false,
           "returnDataType": "LONGCHAR",
           "returnExtent": "-1",
           "parameters": [
@@ -7204,6 +7547,7 @@
         {
           "name": "GetMemptr",
           "static": false,
+          "abstract": false,
           "returnDataType": "MEMPTR",
           "returnExtent": "0",
           "parameters": [
@@ -7219,6 +7563,7 @@
         {
           "name": "GetMemptr",
           "static": false,
+          "abstract": false,
           "returnDataType": "MEMPTR",
           "returnExtent": "-1",
           "parameters": [
@@ -7241,6 +7586,7 @@
         {
           "name": "GetRaw",
           "static": false,
+          "abstract": false,
           "returnDataType": "RAW",
           "returnExtent": "0",
           "parameters": [
@@ -7256,6 +7602,7 @@
         {
           "name": "GetRaw",
           "static": false,
+          "abstract": false,
           "returnDataType": "RAW",
           "returnExtent": "-1",
           "parameters": [
@@ -7278,6 +7625,7 @@
         {
           "name": "GetRecid",
           "static": false,
+          "abstract": false,
           "returnDataType": "RECID",
           "returnExtent": "0",
           "parameters": [
@@ -7293,6 +7641,7 @@
         {
           "name": "GetRecid",
           "static": false,
+          "abstract": false,
           "returnDataType": "RECID",
           "returnExtent": "-1",
           "parameters": [
@@ -7315,6 +7664,7 @@
         {
           "name": "GetRowid",
           "static": false,
+          "abstract": false,
           "returnDataType": "ROWID",
           "returnExtent": "0",
           "parameters": [
@@ -7330,6 +7680,7 @@
         {
           "name": "GetRowid",
           "static": false,
+          "abstract": false,
           "returnDataType": "ROWID",
           "returnExtent": "-1",
           "parameters": [
@@ -7352,6 +7703,7 @@
         {
           "name": "IsNull",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7367,6 +7719,7 @@
         {
           "name": "Read",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7382,6 +7735,7 @@
         {
           "name": "Read",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7404,6 +7758,7 @@
         {
           "name": "Remove",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7419,6 +7774,7 @@
         {
           "name": "Remove",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7441,6 +7797,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7463,6 +7820,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7485,6 +7843,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7507,6 +7866,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7529,6 +7889,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7551,6 +7912,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7573,6 +7935,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7595,6 +7958,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7617,6 +7981,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7639,6 +8004,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7662,6 +8028,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7685,6 +8052,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7707,6 +8075,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7729,6 +8098,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7751,6 +8121,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7773,6 +8144,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7795,6 +8167,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7817,6 +8190,7 @@
         {
           "name": "SetNull",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -7832,6 +8206,7 @@
         {
           "name": "SetNumber",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8092,6 +8467,7 @@
         {
           "name": "Write",
           "static": false,
+          "abstract": true,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8107,6 +8483,7 @@
         {
           "name": "Write",
           "static": false,
+          "abstract": true,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8129,6 +8506,7 @@
         {
           "name": "Write",
           "static": false,
+          "abstract": true,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8158,6 +8536,7 @@
         {
           "name": "Write",
           "static": false,
+          "abstract": true,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8173,6 +8552,7 @@
         {
           "name": "Write",
           "static": false,
+          "abstract": true,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8195,6 +8575,7 @@
         {
           "name": "Write",
           "static": false,
+          "abstract": true,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8224,6 +8605,7 @@
         {
           "name": "Write",
           "static": false,
+          "abstract": true,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8239,6 +8621,7 @@
         {
           "name": "Write",
           "static": false,
+          "abstract": true,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8261,6 +8644,7 @@
         {
           "name": "Write",
           "static": false,
+          "abstract": true,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8290,6 +8674,7 @@
         {
           "name": "Write",
           "static": false,
+          "abstract": true,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8305,6 +8690,7 @@
         {
           "name": "Write",
           "static": false,
+          "abstract": true,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8327,6 +8713,7 @@
         {
           "name": "WriteFile",
           "static": false,
+          "abstract": true,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8342,6 +8729,7 @@
         {
           "name": "WriteFile",
           "static": false,
+          "abstract": true,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8364,6 +8752,7 @@
         {
           "name": "WriteFile",
           "static": false,
+          "abstract": true,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8393,6 +8782,7 @@
         {
           "name": "WriteStream",
           "static": false,
+          "abstract": true,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8408,6 +8798,7 @@
         {
           "name": "WriteStream",
           "static": false,
+          "abstract": true,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8430,6 +8821,7 @@
         {
           "name": "WriteStream",
           "static": false,
+          "abstract": true,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8476,6 +8868,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8498,6 +8891,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8520,6 +8914,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8542,6 +8937,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8564,6 +8960,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8586,6 +8983,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8608,6 +9006,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8630,6 +9029,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8652,6 +9052,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8674,6 +9075,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8697,6 +9099,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8720,6 +9123,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8742,6 +9146,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8764,6 +9169,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8786,6 +9192,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8808,6 +9215,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8830,6 +9238,7 @@
         {
           "name": "Add",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8852,6 +9261,7 @@
         {
           "name": "AddNull",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8867,6 +9277,7 @@
         {
           "name": "AddNumber",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -8889,12 +9300,14 @@
         {
           "name": "GetJsonText",
           "static": false,
+          "abstract": false,
           "returnDataType": "LONGCHAR",
           "returnExtent": "0"
         },
         {
           "name": "GetJsonText",
           "static": false,
+          "abstract": false,
           "returnDataType": "LONGCHAR",
           "returnExtent": "0",
           "parameters": [
@@ -8910,6 +9323,7 @@
         {
           "name": "Clone",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Lang.Object",
           "returnExtent": "0"
@@ -8917,12 +9331,14 @@
         {
           "name": "GetNames",
           "static": false,
+          "abstract": false,
           "returnDataType": "CHARACTER",
           "returnExtent": "-1"
         },
         {
           "name": "GetType",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -8938,6 +9354,7 @@
         {
           "name": "GetCharacter",
           "static": false,
+          "abstract": false,
           "returnDataType": "CHARACTER",
           "returnExtent": "0",
           "parameters": [
@@ -8953,6 +9370,7 @@
         {
           "name": "GetCOMHandle",
           "static": false,
+          "abstract": false,
           "returnDataType": "COMPONENT_HANDLE",
           "returnExtent": "0",
           "parameters": [
@@ -8968,6 +9386,7 @@
         {
           "name": "GetDate",
           "static": false,
+          "abstract": false,
           "returnDataType": "DATE",
           "returnExtent": "0",
           "parameters": [
@@ -8983,6 +9402,7 @@
         {
           "name": "GetDatetime",
           "static": false,
+          "abstract": false,
           "returnDataType": "DATETIME",
           "returnExtent": "0",
           "parameters": [
@@ -8998,6 +9418,7 @@
         {
           "name": "GetDatetimeTZ",
           "static": false,
+          "abstract": false,
           "returnDataType": "DATETIME_TZ",
           "returnExtent": "0",
           "parameters": [
@@ -9013,6 +9434,7 @@
         {
           "name": "GetDecimal",
           "static": false,
+          "abstract": false,
           "returnDataType": "DECIMAL",
           "returnExtent": "0",
           "parameters": [
@@ -9028,6 +9450,7 @@
         {
           "name": "GetHandle",
           "static": false,
+          "abstract": false,
           "returnDataType": "HANDLE",
           "returnExtent": "0",
           "parameters": [
@@ -9043,6 +9466,7 @@
         {
           "name": "GetInt64",
           "static": false,
+          "abstract": false,
           "returnDataType": "INT64",
           "returnExtent": "0",
           "parameters": [
@@ -9058,6 +9482,7 @@
         {
           "name": "GetInteger",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -9073,6 +9498,7 @@
         {
           "name": "GetJsonArray",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Json.ObjectModel.JsonArray",
           "returnExtent": "0",
@@ -9089,6 +9515,7 @@
         {
           "name": "GetJsonObject",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Json.ObjectModel.JsonObject",
           "returnExtent": "0",
@@ -9105,6 +9532,7 @@
         {
           "name": "GetLogical",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9120,6 +9548,7 @@
         {
           "name": "GetLongchar",
           "static": false,
+          "abstract": false,
           "returnDataType": "LONGCHAR",
           "returnExtent": "0",
           "parameters": [
@@ -9135,6 +9564,7 @@
         {
           "name": "GetLongchar",
           "static": false,
+          "abstract": false,
           "returnDataType": "LONGCHAR",
           "returnExtent": "0",
           "parameters": [
@@ -9157,6 +9587,7 @@
         {
           "name": "GetMemptr",
           "static": false,
+          "abstract": false,
           "returnDataType": "MEMPTR",
           "returnExtent": "0",
           "parameters": [
@@ -9172,6 +9603,7 @@
         {
           "name": "GetRaw",
           "static": false,
+          "abstract": false,
           "returnDataType": "RAW",
           "returnExtent": "0",
           "parameters": [
@@ -9187,6 +9619,7 @@
         {
           "name": "GetRecid",
           "static": false,
+          "abstract": false,
           "returnDataType": "RECID",
           "returnExtent": "0",
           "parameters": [
@@ -9202,6 +9635,7 @@
         {
           "name": "GetRowid",
           "static": false,
+          "abstract": false,
           "returnDataType": "ROWID",
           "returnExtent": "0",
           "parameters": [
@@ -9217,6 +9651,7 @@
         {
           "name": "Has",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9232,6 +9667,7 @@
         {
           "name": "IsNull",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9247,6 +9683,7 @@
         {
           "name": "Remove",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9262,6 +9699,7 @@
         {
           "name": "Read",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9277,6 +9715,7 @@
         {
           "name": "Read",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9299,6 +9738,7 @@
         {
           "name": "Read",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9328,6 +9768,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9350,6 +9791,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9372,6 +9814,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9394,6 +9837,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9416,6 +9860,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9438,6 +9883,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9460,6 +9906,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9482,6 +9929,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9504,6 +9952,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9526,6 +9975,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9549,6 +9999,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9572,6 +10023,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9594,6 +10046,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9616,6 +10069,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9638,6 +10092,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9660,6 +10115,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9682,6 +10138,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9704,6 +10161,7 @@
         {
           "name": "SetNull",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9719,6 +10177,7 @@
         {
           "name": "SetNumber",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -9755,6 +10214,7 @@
         {
           "name": "Parse",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Json.ObjectModel.JsonConstruct",
           "returnExtent": "0",
@@ -9771,6 +10231,7 @@
         {
           "name": "Parse",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Json.ObjectModel.JsonConstruct",
           "returnExtent": "0",
@@ -9787,6 +10248,7 @@
         {
           "name": "Parse",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Json.ObjectModel.JsonConstruct",
           "returnExtent": "0",
@@ -9803,6 +10265,7 @@
         {
           "name": "Parse",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Json.ObjectModel.JsonConstruct",
           "returnExtent": "0",
@@ -9819,6 +10282,7 @@
         {
           "name": "ParseFile",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Json.ObjectModel.JsonConstruct",
           "returnExtent": "0",
@@ -9845,11 +10309,12 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.ProError",
-      "interfaces": "Progress.Lang.Error",
+      "interfaces": ["Progress.Lang.Error"],
       "methods": [
         {
           "name": "AddMessage",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -9872,6 +10337,7 @@
         {
           "name": "RemoveMessage",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -9938,18 +10404,21 @@
         {
           "name": "IsInterface",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "IsFinal",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "New",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Lang.Object",
           "returnExtent": "0",
@@ -9967,6 +10436,7 @@
         {
           "name": "New",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Lang.Object",
           "returnExtent": "0"
@@ -9974,6 +10444,7 @@
         {
           "name": "Invoke",
           "static": false,
+          "abstract": false,
           "returnDataType": "RUNTYPE",
           "returnExtent": "0",
           "parameters": [
@@ -10005,6 +10476,7 @@
         {
           "name": "Invoke",
           "static": false,
+          "abstract": false,
           "returnDataType": "RUNTYPE",
           "returnExtent": "0",
           "parameters": [
@@ -10028,6 +10500,7 @@
         {
           "name": "Invoke",
           "static": false,
+          "abstract": false,
           "returnDataType": "RUNTYPE",
           "returnExtent": "0",
           "parameters": [
@@ -10043,6 +10516,7 @@
         {
           "name": "Invoke",
           "static": false,
+          "abstract": false,
           "returnDataType": "RUNTYPE",
           "returnExtent": "0",
           "parameters": [
@@ -10066,6 +10540,7 @@
         {
           "name": "GetPropertyValue",
           "static": false,
+          "abstract": false,
           "returnDataType": "RUNTYPE",
           "returnExtent": "0",
           "parameters": [
@@ -10089,6 +10564,7 @@
         {
           "name": "GetPropertyValue",
           "static": false,
+          "abstract": false,
           "returnDataType": "RUNTYPE",
           "returnExtent": "0",
           "parameters": [
@@ -10104,6 +10580,7 @@
         {
           "name": "GetPropertyValue",
           "static": false,
+          "abstract": false,
           "returnDataType": "RUNTYPE",
           "returnExtent": "0",
           "parameters": [
@@ -10134,6 +10611,7 @@
         {
           "name": "GetPropertyValue",
           "static": false,
+          "abstract": false,
           "returnDataType": "RUNTYPE",
           "returnExtent": "0",
           "parameters": [
@@ -10156,6 +10634,7 @@
         {
           "name": "SetPropertyValue",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -10186,6 +10665,7 @@
         {
           "name": "SetPropertyValue",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -10208,6 +10688,7 @@
         {
           "name": "SetPropertyValue",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -10245,6 +10726,7 @@
         {
           "name": "SetPropertyValue",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -10274,6 +10756,7 @@
         {
           "name": "GetMethod",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Method",
           "returnExtent": "0",
@@ -10298,6 +10781,7 @@
         {
           "name": "GetMethod",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Method",
           "returnExtent": "0",
@@ -10330,6 +10814,7 @@
         {
           "name": "GetMethods",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Method",
           "returnExtent": "-1"
@@ -10337,6 +10822,7 @@
         {
           "name": "GetMethods",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Method",
           "returnExtent": "-1",
@@ -10354,6 +10840,7 @@
         {
           "name": "GetConstructor",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Constructor",
           "returnExtent": "0",
@@ -10371,6 +10858,7 @@
         {
           "name": "GetConstructor",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Constructor",
           "returnExtent": "0",
@@ -10396,6 +10884,7 @@
         {
           "name": "GetConstructors",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Constructor",
           "returnExtent": "-1"
@@ -10403,6 +10892,7 @@
         {
           "name": "GetConstructors",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Constructor",
           "returnExtent": "-1",
@@ -10420,6 +10910,7 @@
         {
           "name": "IsA",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -10435,6 +10926,7 @@
         {
           "name": "IsA",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -10451,30 +10943,35 @@
         {
           "name": "HasStatics",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "IsAbstract",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "HasWidgetPool",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "IsSerializable",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "GetInterfaces",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Lang.Class",
           "returnExtent": "-1"
@@ -10482,30 +10979,35 @@
         {
           "name": "IsGeneric",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "IsIndexed",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "IsEnum",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "IsFlagsEnum",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         },
         {
           "name": "GetEnumName",
           "static": false,
+          "abstract": false,
           "returnDataType": "CHARACTER",
           "returnExtent": "0",
           "parameters": [
@@ -10521,6 +11023,7 @@
         {
           "name": "GetEnumValue",
           "static": false,
+          "abstract": false,
           "returnDataType": "INT64",
           "returnExtent": "0",
           "parameters": [
@@ -10536,18 +11039,21 @@
         {
           "name": "GetEnumNames",
           "static": false,
+          "abstract": false,
           "returnDataType": "CHARACTER",
           "returnExtent": "0"
         },
         {
           "name": "GetEnumValues",
           "static": false,
+          "abstract": false,
           "returnDataType": "CHARACTER",
           "returnExtent": "0"
         },
         {
           "name": "GetProperties",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Property",
           "returnExtent": "-1"
@@ -10555,6 +11061,7 @@
         {
           "name": "GetProperties",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Property",
           "returnExtent": "-1",
@@ -10572,6 +11079,7 @@
         {
           "name": "GetVariables",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Variable",
           "returnExtent": "-1"
@@ -10579,6 +11087,7 @@
         {
           "name": "GetVariables",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Variable",
           "returnExtent": "-1",
@@ -10596,6 +11105,7 @@
         {
           "name": "GetEvents",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Event",
           "returnExtent": "-1"
@@ -10603,6 +11113,7 @@
         {
           "name": "GetEvents",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Event",
           "returnExtent": "-1",
@@ -10620,6 +11131,7 @@
         {
           "name": "GetProperty",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Property",
           "returnExtent": "0",
@@ -10636,6 +11148,7 @@
         {
           "name": "GetProperty",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Property",
           "returnExtent": "0",
@@ -10660,6 +11173,7 @@
         {
           "name": "GetVariable",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Variable",
           "returnExtent": "0",
@@ -10676,6 +11190,7 @@
         {
           "name": "GetVariable",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Variable",
           "returnExtent": "0",
@@ -10700,6 +11215,7 @@
         {
           "name": "GetEvent",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Event",
           "returnExtent": "0",
@@ -10716,6 +11232,7 @@
         {
           "name": "GetEvent",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Event",
           "returnExtent": "0",
@@ -10740,6 +11257,7 @@
         {
           "name": "GetTypeArguments",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Lang.Class",
           "returnExtent": "-1"
@@ -10747,6 +11265,7 @@
         {
           "name": "GetTypeParameters",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Lang.Class",
           "returnExtent": "-1"
@@ -10754,6 +11273,7 @@
         {
           "name": "IsInstantiable",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         }
@@ -10786,12 +11306,14 @@
         {
           "name": "GetValue",
           "static": false,
+          "abstract": false,
           "returnDataType": "INT64",
           "returnExtent": "0"
         },
         {
           "name": "CompareTo",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -10817,6 +11339,7 @@
         {
           "name": "GetMessage",
           "static": false,
+          "abstract": false,
           "returnDataType": "CHARACTER",
           "returnExtent": "0",
           "parameters": [
@@ -10832,6 +11355,7 @@
         {
           "name": "GetMessageNum",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -10872,6 +11396,7 @@
         {
           "name": "IsFlagSet",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -10917,7 +11442,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.SysError",
-      "interfaces": "Progress.Lang.Error",
+      "interfaces": ["Progress.Lang.Error"],
       "methods": [],
       "properties": [
         {
@@ -10932,7 +11457,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.MessagingError",
-      "interfaces": "Progress.Lang.Error",
+      "interfaces": ["Progress.Lang.Error"],
       "methods": [],
       "properties": []
     },
@@ -10941,7 +11466,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.MessagingError",
-      "interfaces": "Progress.Lang.Error",
+      "interfaces": ["Progress.Lang.Error"],
       "methods": [],
       "properties": []
     },
@@ -10950,7 +11475,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.MessagingError",
-      "interfaces": "Progress.Lang.Error",
+      "interfaces": ["Progress.Lang.Error"],
       "methods": [],
       "properties": []
     },
@@ -10963,6 +11488,7 @@
         {
           "name": "GetClass",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Lang.Class",
           "returnExtent": "0"
@@ -10970,12 +11496,14 @@
         {
           "name": "ToString",
           "static": false,
+          "abstract": false,
           "returnDataType": "CHARACTER",
           "returnExtent": "0"
         },
         {
           "name": "Equals",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -10992,6 +11520,7 @@
         {
           "name": "Clone",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Lang.Object",
           "returnExtent": "0"
@@ -11013,12 +11542,14 @@
         {
           "name": "GetClientPrincipal",
           "static": false,
+          "abstract": false,
           "returnDataType": "HANDLE",
           "returnExtent": "0"
         },
         {
           "name": "SetClientPrincipal",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -11115,6 +11646,7 @@
         {
           "name": "SetParameter",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -11151,6 +11683,7 @@
         {
           "name": "SetParameter",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -11173,6 +11706,7 @@
         {
           "name": "Clear",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0"
         }
@@ -11209,11 +11743,12 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.Object",
-      "interfaces": "Progress.Lang.Error",
+      "interfaces": ["Progress.Lang.Error"],
       "methods": [
         {
           "name": "GetMessage",
           "static": false,
+          "abstract": false,
           "returnDataType": "CHARACTER",
           "returnExtent": "0",
           "parameters": [
@@ -11229,6 +11764,7 @@
         {
           "name": "GetMessageNum",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -11265,7 +11801,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.SysError",
-      "interfaces": "Progress.Lang.Error",
+      "interfaces": ["Progress.Lang.Error"],
       "methods": [],
       "properties": [
         {
@@ -11302,7 +11838,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.SysError",
-      "interfaces": "Progress.Lang.Error",
+      "interfaces": ["Progress.Lang.Error"],
       "methods": [],
       "properties": []
     },
@@ -11311,7 +11847,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Lang.ProError",
-      "interfaces": "Progress.Lang.Error",
+      "interfaces": ["Progress.Lang.Error"],
       "methods": [],
       "properties": []
     },
@@ -11347,6 +11883,7 @@
         {
           "name": "GetParameters",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Parameter",
           "returnExtent": "-1"
@@ -11354,6 +11891,7 @@
         {
           "name": "Invoke",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Lang.Object",
           "returnExtent": "0",
@@ -11445,6 +11983,7 @@
         {
           "name": "GetHandlerParameters",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Parameter",
           "returnExtent": "-1"
@@ -11452,6 +11991,7 @@
         {
           "name": "Subscribe",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -11483,6 +12023,7 @@
         {
           "name": "Subscribe",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -11513,6 +12054,7 @@
         {
           "name": "Subscribe",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -11543,6 +12085,7 @@
         {
           "name": "Subscribe",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -11566,6 +12109,7 @@
         {
           "name": "Subscribe",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -11588,6 +12132,7 @@
         {
           "name": "Subscribe",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -11610,6 +12155,7 @@
         {
           "name": "Publish",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -11634,6 +12180,7 @@
         {
           "name": "Publish",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -11713,6 +12260,7 @@
         {
           "name": "SetFlag",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Flags",
           "returnExtent": "0",
@@ -11730,6 +12278,7 @@
         {
           "name": "UnsetFlag",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Flags",
           "returnExtent": "0",
@@ -11747,6 +12296,7 @@
         {
           "name": "ToggleFlag",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Flags",
           "returnExtent": "0",
@@ -11773,6 +12323,7 @@
         {
           "name": "GetParameters",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.Parameter",
           "returnExtent": "-1"
@@ -11780,6 +12331,7 @@
         {
           "name": "Invoke",
           "static": false,
+          "abstract": false,
           "returnDataType": "RUNTYPE",
           "returnExtent": "0",
           "parameters": [
@@ -11804,6 +12356,7 @@
         {
           "name": "Invoke",
           "static": false,
+          "abstract": false,
           "returnDataType": "RUNTYPE",
           "returnExtent": "0",
           "parameters": [
@@ -11943,6 +12496,7 @@
         {
           "name": "SetFlag",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.ParameterMode",
           "returnExtent": "0",
@@ -11960,6 +12514,7 @@
         {
           "name": "UnsetFlag",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.ParameterMode",
           "returnExtent": "0",
@@ -11977,6 +12532,7 @@
         {
           "name": "ToggleFlag",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "Progress.Reflect.ParameterMode",
           "returnExtent": "0",
@@ -12054,6 +12610,7 @@
         {
           "name": "Get",
           "static": false,
+          "abstract": false,
           "returnDataType": "RUNTYPE",
           "returnExtent": "0",
           "parameters": [
@@ -12070,6 +12627,7 @@
         {
           "name": "Get",
           "static": false,
+          "abstract": false,
           "returnDataType": "RUNTYPE",
           "returnExtent": "0",
           "parameters": [
@@ -12093,12 +12651,14 @@
         {
           "name": "Get",
           "static": false,
+          "abstract": false,
           "returnDataType": "RUNTYPE",
           "returnExtent": "0"
         },
         {
           "name": "Get",
           "static": false,
+          "abstract": false,
           "returnDataType": "RUNTYPE",
           "returnExtent": "0",
           "parameters": [
@@ -12114,6 +12674,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -12137,6 +12698,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -12167,6 +12729,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -12182,6 +12745,7 @@
         {
           "name": "Set",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -12266,6 +12830,7 @@
         {
           "name": "GetAttribute",
           "static": false,
+          "abstract": false,
           "returnDataType": "CHARACTER",
           "returnExtent": "0",
           "parameters": [
@@ -12288,6 +12853,7 @@
         {
           "name": "GetAttributeNames",
           "static": false,
+          "abstract": false,
           "returnDataType": "CHARACTER",
           "returnExtent": "-1",
           "parameters": [
@@ -12303,12 +12869,14 @@
         {
           "name": "GetUserNames",
           "static": false,
+          "abstract": false,
           "returnDataType": "CHARACTER",
           "returnExtent": "-1"
         },
         {
           "name": "GetUserNamesByQuery",
           "static": false,
+          "abstract": false,
           "returnDataType": "CHARACTER",
           "returnExtent": "-1",
           "parameters": [
@@ -12324,6 +12892,7 @@
         {
           "name": "RemoveAttribute",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -12346,6 +12915,7 @@
         {
           "name": "SetAttribute",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -12375,6 +12945,7 @@
         {
           "name": "ValidatePassword",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -12397,6 +12968,7 @@
         {
           "name": "ValidatePassword",
           "static": false,
+          "abstract": false,
           "returnDataType": "LOGICAL",
           "returnExtent": "0",
           "parameters": [
@@ -12433,6 +13005,7 @@
         {
           "name": "ValidateUser",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -12534,6 +13107,7 @@
         {
           "name": "HandleRequest",
           "static": false,
+          "abstract": true,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -12563,6 +13137,7 @@
         {
           "name": "HandleRequest",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -12606,6 +13181,7 @@
         {
           "name": "HandleRequest",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0"
         }
@@ -12616,11 +13192,37 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.Windows.Forms.Form",
-      "interfaces": "System.ComponentModel.IComponent,System.IDisposable,System.Windows.Forms.UnsafeNativeMethods+IOleControl,System.Windows.Forms.UnsafeNativeMethods+IOleObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject,System.Windows.Forms.UnsafeNativeMethods+IOleWindow,System.Windows.Forms.UnsafeNativeMethods+IViewObject,System.Windows.Forms.UnsafeNativeMethods+IViewObject2,System.Windows.Forms.UnsafeNativeMethods+IPersist,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag,System.Windows.Forms.UnsafeNativeMethods+IPersistStorage,System.Windows.Forms.UnsafeNativeMethods+IQuickActivate,System.Windows.Forms.ISupportOleDropSource,System.Windows.Forms.IDropTarget,System.ComponentModel.ISynchronizeInvoke,System.Windows.Forms.IWin32Window,System.Windows.Forms.Layout.IArrangedElement,System.Windows.Forms.IBindableComponent,System.Windows.Forms.IKeyboardToolTip,System.Windows.Forms.IContainerControl,Progress.Windows.IForm,Progress.Windows.IFormCommon",
+      "interfaces": [
+        "System.ComponentModel.IComponent",
+        "System.IDisposable",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleControl",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleWindow",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject2",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersist",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStorage",
+        "System.Windows.Forms.UnsafeNativeMethods+IQuickActivate",
+        "System.Windows.Forms.ISupportOleDropSource",
+        "System.Windows.Forms.IDropTarget",
+        "System.ComponentModel.ISynchronizeInvoke",
+        "System.Windows.Forms.IWin32Window",
+        "System.Windows.Forms.Layout.IArrangedElement",
+        "System.Windows.Forms.IBindableComponent",
+        "System.Windows.Forms.IKeyboardToolTip",
+        "System.Windows.Forms.IContainerControl",
+        "Progress.Windows.IForm",
+        "Progress.Windows.IFormCommon"
+      ],
       "methods": [
         {
           "name": "SetWaitState",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -12636,6 +13238,7 @@
         {
           "name": "EnableForm",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [
@@ -12690,7 +13293,7 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.Object",
-      "interfaces": "Progress.Windows.IForm",
+      "interfaces": ["Progress.Windows.IForm"],
       "methods": [],
       "properties": [
         {
@@ -12742,7 +13345,32 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Windows.Form",
-      "interfaces": "System.ComponentModel.IComponent,System.IDisposable,System.Windows.Forms.UnsafeNativeMethods+IOleControl,System.Windows.Forms.UnsafeNativeMethods+IOleObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject,System.Windows.Forms.UnsafeNativeMethods+IOleWindow,System.Windows.Forms.UnsafeNativeMethods+IViewObject,System.Windows.Forms.UnsafeNativeMethods+IViewObject2,System.Windows.Forms.UnsafeNativeMethods+IPersist,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag,System.Windows.Forms.UnsafeNativeMethods+IPersistStorage,System.Windows.Forms.UnsafeNativeMethods+IQuickActivate,System.Windows.Forms.ISupportOleDropSource,System.Windows.Forms.IDropTarget,System.ComponentModel.ISynchronizeInvoke,System.Windows.Forms.IWin32Window,System.Windows.Forms.Layout.IArrangedElement,System.Windows.Forms.IBindableComponent,System.Windows.Forms.IKeyboardToolTip,System.Windows.Forms.IContainerControl,Progress.Windows.IForm,Progress.Windows.IFormCommon",
+      "interfaces": [
+        "System.ComponentModel.IComponent",
+        "System.IDisposable",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleControl",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleWindow",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject2",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersist",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStorage",
+        "System.Windows.Forms.UnsafeNativeMethods+IQuickActivate",
+        "System.Windows.Forms.ISupportOleDropSource",
+        "System.Windows.Forms.IDropTarget",
+        "System.ComponentModel.ISynchronizeInvoke",
+        "System.Windows.Forms.IWin32Window",
+        "System.Windows.Forms.Layout.IArrangedElement",
+        "System.Windows.Forms.IBindableComponent",
+        "System.Windows.Forms.IKeyboardToolTip",
+        "System.Windows.Forms.IContainerControl",
+        "Progress.Windows.IForm",
+        "Progress.Windows.IFormCommon"
+      ],
       "methods": [],
       "properties": [
         {
@@ -12782,7 +13410,30 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.Windows.Forms.UserControl",
-      "interfaces": "System.ComponentModel.IComponent,System.IDisposable,System.Windows.Forms.UnsafeNativeMethods+IOleControl,System.Windows.Forms.UnsafeNativeMethods+IOleObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject,System.Windows.Forms.UnsafeNativeMethods+IOleWindow,System.Windows.Forms.UnsafeNativeMethods+IViewObject,System.Windows.Forms.UnsafeNativeMethods+IViewObject2,System.Windows.Forms.UnsafeNativeMethods+IPersist,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag,System.Windows.Forms.UnsafeNativeMethods+IPersistStorage,System.Windows.Forms.UnsafeNativeMethods+IQuickActivate,System.Windows.Forms.ISupportOleDropSource,System.Windows.Forms.IDropTarget,System.ComponentModel.ISynchronizeInvoke,System.Windows.Forms.IWin32Window,System.Windows.Forms.Layout.IArrangedElement,System.Windows.Forms.IBindableComponent,System.Windows.Forms.IKeyboardToolTip,System.Windows.Forms.IContainerControl",
+      "interfaces": [
+        "System.ComponentModel.IComponent",
+        "System.IDisposable",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleControl",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleWindow",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject2",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersist",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStorage",
+        "System.Windows.Forms.UnsafeNativeMethods+IQuickActivate",
+        "System.Windows.Forms.ISupportOleDropSource",
+        "System.Windows.Forms.IDropTarget",
+        "System.ComponentModel.ISynchronizeInvoke",
+        "System.Windows.Forms.IWin32Window",
+        "System.Windows.Forms.Layout.IArrangedElement",
+        "System.Windows.Forms.IBindableComponent",
+        "System.Windows.Forms.IKeyboardToolTip",
+        "System.Windows.Forms.IContainerControl"
+      ],
       "methods": [],
       "properties": [],
       "constructors": [
@@ -12796,7 +13447,30 @@
       "interface": false,
       "abstract": false,
       "superClass": "Progress.Windows.UserControl",
-      "interfaces": "System.ComponentModel.IComponent,System.IDisposable,System.Windows.Forms.UnsafeNativeMethods+IOleControl,System.Windows.Forms.UnsafeNativeMethods+IOleObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject,System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject,System.Windows.Forms.UnsafeNativeMethods+IOleWindow,System.Windows.Forms.UnsafeNativeMethods+IViewObject,System.Windows.Forms.UnsafeNativeMethods+IViewObject2,System.Windows.Forms.UnsafeNativeMethods+IPersist,System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit,System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag,System.Windows.Forms.UnsafeNativeMethods+IPersistStorage,System.Windows.Forms.UnsafeNativeMethods+IQuickActivate,System.Windows.Forms.ISupportOleDropSource,System.Windows.Forms.IDropTarget,System.ComponentModel.ISynchronizeInvoke,System.Windows.Forms.IWin32Window,System.Windows.Forms.Layout.IArrangedElement,System.Windows.Forms.IBindableComponent,System.Windows.Forms.IKeyboardToolTip,System.Windows.Forms.IContainerControl",
+      "interfaces": [
+        "System.ComponentModel.IComponent",
+        "System.IDisposable",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleControl",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleInPlaceActiveObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IOleWindow",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject",
+        "System.Windows.Forms.UnsafeNativeMethods+IViewObject2",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersist",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStreamInit",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistPropertyBag",
+        "System.Windows.Forms.UnsafeNativeMethods+IPersistStorage",
+        "System.Windows.Forms.UnsafeNativeMethods+IQuickActivate",
+        "System.Windows.Forms.ISupportOleDropSource",
+        "System.Windows.Forms.IDropTarget",
+        "System.ComponentModel.ISynchronizeInvoke",
+        "System.Windows.Forms.IWin32Window",
+        "System.Windows.Forms.Layout.IArrangedElement",
+        "System.Windows.Forms.IBindableComponent",
+        "System.Windows.Forms.IKeyboardToolTip",
+        "System.Windows.Forms.IContainerControl"
+      ],
       "methods": [],
       "properties": [
         {
@@ -12816,11 +13490,16 @@
       "interface": false,
       "abstract": false,
       "superClass": "System.Object",
-      "interfaces": "Progress.Lang.Error,System.Runtime.Serialization.ISerializable,System.Runtime.InteropServices._Exception",
+      "interfaces": [
+        "Progress.Lang.Error",
+        "System.Runtime.Serialization.ISerializable",
+        "System.Runtime.InteropServices._Exception"
+      ],
       "methods": [
         {
           "name": "GetMessage",
           "static": false,
+          "abstract": false,
           "returnDataType": "CHARACTER",
           "returnExtent": "0",
           "parameters": [
@@ -12836,6 +13515,7 @@
         {
           "name": "GetMessageNum",
           "static": false,
+          "abstract": false,
           "returnDataType": "INTEGER",
           "returnExtent": "0",
           "parameters": [
@@ -12851,6 +13531,7 @@
         {
           "name": "GetBaseException",
           "static": false,
+          "abstract": false,
           "returnDataType": "OBJECT",
           "returnDataTypeName": "System.Exception",
           "returnExtent": "0"
@@ -12858,6 +13539,7 @@
         {
           "name": "GetObjectData",
           "static": false,
+          "abstract": false,
           "returnDataType": "VOID",
           "returnExtent": "0",
           "parameters": [

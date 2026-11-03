@@ -89,7 +89,7 @@ public abstract class OpenEdgeCheck<T> {
   public void reportIssue(InputFile file, int lineNumber, String msg) {
     NewIssue issue = context.newIssue().forRule(getRuleKey());
     NewIssueLocation loc = issue.newLocation().on(file).message(msg);
-    if (lineNumber > 0) {
+    if ((lineNumber > 0) && (lineNumber <= file.lines())) {
       loc.at(file.selectLine(lineNumber));
     }
     issue.at(loc).save();

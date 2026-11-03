@@ -17,6 +17,7 @@ package org.prorefactor.refactor.settings;
 
 import java.util.List;
 
+import org.prorefactor.proparse.XCodeWrapper;
 import org.prorefactor.refactor.settings.ProparseSettings.OperatingSystem;
 
 public interface IProparseSettings {
@@ -32,7 +33,7 @@ public interface IProparseSettings {
   String getProversion();
   String getWindowSystem();
   Integer getProcessArchitecture();
-  boolean getSkipXCode();
+  XCodeWrapper getXCodeWrapper();
 
   char[] getTokenStartChars();
   boolean allowAntlrTokenInsertion();

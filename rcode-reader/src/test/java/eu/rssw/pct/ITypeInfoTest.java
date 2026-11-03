@@ -28,6 +28,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 import org.prorefactor.core.Pair;
@@ -43,6 +44,7 @@ import eu.rssw.pct.elements.ParameterMode;
 import eu.rssw.pct.elements.fixed.MethodElement;
 import eu.rssw.pct.elements.fixed.Parameter;
 import eu.rssw.pct.elements.fixed.TypeInfo;
+import eu.rssw.pct.elements.fixed.VariableElement;
 
 public class ITypeInfoTest {
   private static final Function<OpenEdgeVersion, Function<String, ITypeInfo>> VERSION_TYPE_INFO_PROVIDER = version -> {
@@ -326,6 +328,28 @@ public class ITypeInfoTest {
   }
 
   @Test
+  public void test08() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+
+    var typeInfo = new TypeInfo("pkg.ParentTestClass", false, false, "Progress.Lang.Object", "");
+    typeInfo.addVariable(new VariableElement("var1", DataType.INT64));
+    var typeInfo2 = new TypeInfo("pkg.ChildTestClass", false, false, "pkg.ParentTestClass", "");
+    typeInfo2.addVariable(new VariableElement("var2", DataType.CHARACTER));
+    map.put(typeInfo.getTypeName(), typeInfo);
+    map.put(typeInfo2.getTypeName(), typeInfo2);
+
+    assertEquals(typeInfo.getAllVariables(map::get).size(), 1);
+    var var0 = typeInfo.getAllVariables(map::get).get(0);
+    assertEquals(var0.getO1(), typeInfo);
+
+    assertEquals(typeInfo2.getAllVariables(map::get).size(), 2);
+    var var1 = typeInfo2.getAllVariables(map::get).get(0);
+    assertEquals(var1.getO1(), typeInfo);
+    var var2 = typeInfo2.getAllVariables(map::get).get(1);
+    assertEquals(var2.getO1(), typeInfo2);
+  }
+
+  @Test
   public void testUnknownDataType() {
     for (var version : OpenEdgeVersion.values()) {
       var provider = VERSION_TYPE_INFO_PROVIDER.apply(version);
@@ -492,6 +516,349 @@ public class ITypeInfoTest {
     assertEquals(new TypeInfo("HelloWorld", false, false, "", "").toUpperCaseAcronym(), "HW");
     assertEquals(new TypeInfo("com.progress.Hello-World_%IDislikeSymbols", false, false, "", "").toUpperCaseAcronym(),
         "HWIDS");
+  }
+
+  /**
+   * Test that methods defined in implemented interfaces are found via getExactMatch
+   */
+  @Test
+  public void testInterfaceMethodResolutionExactMatch() {
+    Map<String, ITypeInfo> map = new HashMap<>();
+
+    // Create interface with a method
+    var iface = new TypeInfo("rssw.IService", true, false, "Progress.Lang.Object", "");
+    iface.addMethod(new MethodElement("process", false, DataType.VOID,
+        new Parameter(1, "data", 0, ParameterMode.INPUT, DataType.CHARACTER)));
+    map.put(iface.getTypeName(), iface);
+
+    // Create class implementing the interface
+    var impl = new TypeInfo("rssw.ServiceImpl", false, false, "Progress.Lang.Object", "", "rssw.IService");
+    map.put(impl.getTypeName(), impl);
+
+    // Method should be found via interface
+    var result = impl.getExactMatchMethod(map::get, "process",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT)});
+    assertNotNull(result);
+    assertEquals(result.getO1().getTypeName(), "rssw.IService");
+    assertEquals(result.getO2().getName(), "process");
+  }
+
+  /**
+   * Test that methods defined in implemented interfaces are found via getCompatibleMatch
+   */
+  @Test
+  public void testInterfaceMethodResolutionCompatibleMatch() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+
+    // Create interface with a method expecting LONGCHAR
+    var iface = new TypeInfo("rssw.IService", true, false, "Progress.Lang.Object", "");
+    iface.addMethod(new MethodElement("process", false, DataType.VOID,
+        new Parameter(1, "data", 0, ParameterMode.INPUT, DataType.LONGCHAR)));
+    map.put(iface.getTypeName(), iface);
+
+    // Create class implementing the interface (no local methods)
+    var impl = new TypeInfo("rssw.ServiceImpl", false, false, "Progress.Lang.Object", "", "rssw.IService");
+    map.put(impl.getTypeName(), impl);
+
+    // CHARACTER should be compatible with LONGCHAR via interface method
+    var result = impl.getMethod(map::get, "process",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT)});
+    assertNotNull(result);
+    assertEquals(result.getO1().getTypeName(), "rssw.IService");
+  }
+
+  /**
+   * Test that local class method takes precedence over interface method
+   */
+  @Test
+  public void testLocalMethodTakesPrecedenceOverInterface() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+
+    // Create interface with a method
+    var iface = new TypeInfo("rssw.IService", true, false, "Progress.Lang.Object", "");
+    iface.addMethod(new MethodElement("process", false, DataType.CHARACTER,
+        new Parameter(1, "data", 0, ParameterMode.INPUT, DataType.CHARACTER)));
+    map.put(iface.getTypeName(), iface);
+
+    // Create class implementing the interface with its own implementation
+    var impl = new TypeInfo("rssw.ServiceImpl", false, false, "Progress.Lang.Object", "", "rssw.IService");
+    impl.addMethod(new MethodElement("process", false, DataType.INTEGER,
+        new Parameter(1, "data", 0, ParameterMode.INPUT, DataType.CHARACTER)));
+    map.put(impl.getTypeName(), impl);
+
+    // Should find the local method, not the interface one
+    var result = impl.getExactMatchMethod(map::get, "process",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT)});
+    assertNotNull(result);
+    assertEquals(result.getO1().getTypeName(), "rssw.ServiceImpl");
+    assertEquals(result.getO2().getReturnType(), DataType.INTEGER);
+  }
+
+  /**
+   * Test method resolution with multiple interfaces
+   */
+  @Test
+  public void testMultipleInterfacesMethodResolution() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+
+    // Create first interface
+    var iface1 = new TypeInfo("rssw.IServiceA", true, false, "Progress.Lang.Object", "");
+    iface1.addMethod(new MethodElement("processA", false, DataType.VOID,
+        new Parameter(1, "data", 0, ParameterMode.INPUT, DataType.CHARACTER)));
+    map.put(iface1.getTypeName(), iface1);
+
+    // Create second interface
+    var iface2 = new TypeInfo("rssw.IServiceB", true, false, "Progress.Lang.Object", "");
+    iface2.addMethod(new MethodElement("processB", false, DataType.VOID,
+        new Parameter(1, "data", 0, ParameterMode.INPUT, DataType.INTEGER)));
+    map.put(iface2.getTypeName(), iface2);
+
+    // Create class implementing both interfaces
+    var impl = new TypeInfo("rssw.MultiServiceImpl", false, false, "Progress.Lang.Object", "",
+        "rssw.IServiceA", "rssw.IServiceB");
+    map.put(impl.getTypeName(), impl);
+
+    // Should find method from first interface
+    var result1 = impl.getMethod(map::get, "processA",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.CHARACTER, 0, ParameterMode.INPUT)});
+    assertNotNull(result1);
+    assertEquals(result1.getO1().getTypeName(), "rssw.IServiceA");
+
+    // Should find method from second interface
+    var result2 = impl.getMethod(map::get, "processB",
+        new ParameterDescriptor[] {new ParameterDescriptor(DataType.INTEGER, 0, ParameterMode.INPUT)});
+    assertNotNull(result2);
+    assertEquals(result2.getO1().getTypeName(), "rssw.IServiceB");
+  }
+
+  /**
+   * Test method resolution in inherited interface (interface extending another interface)
+   */
+  @Test
+  public void testInheritedInterfaceMethodResolution() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+
+    // Create base interface
+    var baseIface = new TypeInfo("rssw.IBaseService", true, false, "Progress.Lang.Object", "");
+    baseIface.addMethod(new MethodElement("baseMethod", false, DataType.VOID));
+    map.put(baseIface.getTypeName(), baseIface);
+
+    // Create extended interface (inherits from base)
+    var extIface = new TypeInfo("rssw.IExtendedService", true, false, "Progress.Lang.Object", "",
+        "rssw.IBaseService");
+    extIface.addMethod(new MethodElement("extendedMethod", false, DataType.VOID));
+    map.put(extIface.getTypeName(), extIface);
+
+    // Create class implementing extended interface
+    var impl = new TypeInfo("rssw.ServiceImpl", false, false, "Progress.Lang.Object", "",
+        "rssw.IExtendedService");
+    map.put(impl.getTypeName(), impl);
+
+    // Should find method from extended interface
+    var result1 = impl.getMethod(map::get, "extendedMethod", new ParameterDescriptor[] {});
+    assertNotNull(result1);
+    assertEquals(result1.getO1().getTypeName(), "rssw.IExtendedService");
+
+    // Should find method from base interface (via interface inheritance)
+    var result2 = impl.getMethod(map::get, "baseMethod", new ParameterDescriptor[] {});
+    assertNotNull(result2);
+    assertEquals(result2.getO1().getTypeName(), "rssw.IBaseService");
+  }
+
+  /**
+   * Test that parent class is searched after interfaces
+   */
+  @Test
+  public void testParentClassSearchedAfterInterfaces() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+
+    // Create interface with method1
+    var iface = new TypeInfo("rssw.IService", true, false, "Progress.Lang.Object", "");
+    iface.addMethod(new MethodElement("interfaceMethod", false, DataType.VOID));
+    map.put(iface.getTypeName(), iface);
+
+    // Create parent class with method2
+    var parent = new TypeInfo("rssw.BaseClass", false, false, "Progress.Lang.Object", "");
+    parent.addMethod(new MethodElement("parentMethod", false, DataType.VOID));
+    map.put(parent.getTypeName(), parent);
+
+    // Create child class implementing interface and extending parent
+    var child = new TypeInfo("rssw.ChildClass", false, false, "rssw.BaseClass", "", "rssw.IService");
+    map.put(child.getTypeName(), child);
+
+    // Should find interface method
+    var result1 = child.getMethod(map::get, "interfaceMethod", new ParameterDescriptor[] {});
+    assertNotNull(result1);
+    assertEquals(result1.getO1().getTypeName(), "rssw.IService");
+
+    // Should find parent method
+    var result2 = child.getMethod(map::get, "parentMethod", new ParameterDescriptor[] {});
+    assertNotNull(result2);
+    assertEquals(result2.getO1().getTypeName(), "rssw.BaseClass");
+  }
+
+  /**
+   * Test most specific match with class hierarchy.
+   * When multiple methods accept compatible class types, the most specific one should be selected.
+   */
+  @Test
+  public void testMostSpecificClassMatch() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+    for (var version : OpenEdgeVersion.values()) {
+      map.clear();
+      BuiltinClasses.getBuiltinClasses(version).forEach(it -> map.put(it.getTypeName(), it));
+
+      // Create a class hierarchy: GrandChild -> Child -> Parent -> Progress.Lang.Object
+      var parentClass = new TypeInfo("rssw.Parent", false, false, "Progress.Lang.Object", "");
+      var childClass = new TypeInfo("rssw.Child", false, false, "rssw.Parent", "");
+      var grandChildClass = new TypeInfo("rssw.GrandChild", false, false, "rssw.Child", "");
+      map.put(parentClass.getTypeName(), parentClass);
+      map.put(childClass.getTypeName(), childClass);
+      map.put(grandChildClass.getTypeName(), grandChildClass);
+
+      // Create a class with overloaded methods accepting different levels of the hierarchy
+      var typeInfo = new TypeInfo("rssw.TestClass", false, false, "Progress.Lang.Object", "");
+      var methodParent = new MethodElement("process", false, DataType.INTEGER,
+          new Parameter(1, "obj", 0, ParameterMode.INPUT, new DataType("rssw.Parent")));
+      var methodChild = new MethodElement("process", false, DataType.CHARACTER,
+          new Parameter(1, "obj", 0, ParameterMode.INPUT, new DataType("rssw.Child")));
+      var methodGrandChild = new MethodElement("process", false, DataType.LOGICAL,
+          new Parameter(1, "obj", 0, ParameterMode.INPUT, new DataType("rssw.GrandChild")));
+      typeInfo.addMethod(methodParent);
+      typeInfo.addMethod(methodChild);
+      typeInfo.addMethod(methodGrandChild);
+      map.put(typeInfo.getTypeName(), typeInfo);
+
+      // When passing GrandChild, should find GrandChild method (exact match)
+      var result1 = typeInfo.getMethod(map::get, "process",
+          new ParameterDescriptor[] {new ParameterDescriptor(new DataType("rssw.GrandChild"), 0, ParameterMode.INPUT)});
+      assertNotNull(result1);
+      assertEquals(result1.getO2().getReturnType(), DataType.LOGICAL);
+
+      // When passing Child, should find Child method (exact match)
+      var result2 = typeInfo.getMethod(map::get, "process",
+          new ParameterDescriptor[] {new ParameterDescriptor(new DataType("rssw.Child"), 0, ParameterMode.INPUT)});
+      assertNotNull(result2);
+      assertEquals(result2.getO2().getReturnType(), DataType.CHARACTER);
+
+      // When passing Parent, should find Parent method (exact match)
+      var result3 = typeInfo.getMethod(map::get, "process",
+          new ParameterDescriptor[] {new ParameterDescriptor(new DataType("rssw.Parent"), 0, ParameterMode.INPUT)});
+      assertNotNull(result3);
+      assertEquals(result3.getO2().getReturnType(), DataType.INTEGER);
+    }
+  }
+
+  /**
+   * Test that when passing a subclass, the most specific compatible method is selected.
+   */
+  @Test
+  public void testMostSpecificCompatibleClassMatch() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+    for (var version : OpenEdgeVersion.values()) {
+      map.clear();
+      BuiltinClasses.getBuiltinClasses(version).forEach(it -> map.put(it.getTypeName(), it));
+
+      // Create class hierarchy
+      var parentClass = new TypeInfo("rssw.Parent2", false, false, "Progress.Lang.Object", "");
+      var childClass = new TypeInfo("rssw.Child2", false, false, "rssw.Parent2", "");
+      var grandChildClass = new TypeInfo("rssw.GrandChild2", false, false, "rssw.Child2", "");
+      map.put(parentClass.getTypeName(), parentClass);
+      map.put(childClass.getTypeName(), childClass);
+      map.put(grandChildClass.getTypeName(), grandChildClass);
+
+      // Create class with methods for Parent and Child only (not GrandChild)
+      var typeInfo = new TypeInfo("rssw.TestClass2", false, false, "Progress.Lang.Object", "");
+      var methodParent = new MethodElement("process", false, DataType.INTEGER,
+          new Parameter(1, "obj", 0, ParameterMode.INPUT, new DataType("rssw.Parent2")));
+      var methodChild = new MethodElement("process", false, DataType.CHARACTER,
+          new Parameter(1, "obj", 0, ParameterMode.INPUT, new DataType("rssw.Child2")));
+      typeInfo.addMethod(methodParent);
+      typeInfo.addMethod(methodChild);
+      map.put(typeInfo.getTypeName(), typeInfo);
+
+      // When passing GrandChild, should find Child method (most specific compatible)
+      var result = typeInfo.getMethod(map::get, "process",
+          new ParameterDescriptor[] {new ParameterDescriptor(new DataType("rssw.GrandChild2"), 0, ParameterMode.INPUT)});
+      assertNotNull(result);
+      assertEquals(result.getO2().getReturnType(), DataType.CHARACTER);
+    }
+  }
+
+  /**
+   * Test most specific match with Progress.Lang.Object hierarchy.
+   */
+  @Test
+  public void testMostSpecificJsonHierarchy() {
+    for (var version : OpenEdgeVersion.values()) {
+      HashMap<String, ITypeInfo> map = new HashMap<>();
+      BuiltinClasses.getBuiltinClasses(version).forEach(it -> map.put(it.getTypeName(), it));
+
+      // Create class with methods accepting PLO and JsonObject
+      var typeInfo = new TypeInfo("rssw.JsonProcessor", false, false, "Progress.Lang.Object", "");
+      var methodPLO = new MethodElement("handle", false, DataType.INTEGER,
+          new Parameter(1, "obj", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object")));
+      var methodJson = new MethodElement("handle", false, DataType.CHARACTER,
+          new Parameter(1, "obj", 0, ParameterMode.INPUT, new DataType("Progress.Json.ObjectModel.JsonObject")));
+      typeInfo.addMethod(methodPLO);
+      typeInfo.addMethod(methodJson);
+      map.put(typeInfo.getTypeName(), typeInfo);
+
+      // When passing JsonObject, should find JsonObject method (most specific)
+      var result1 = typeInfo.getMethod(map::get, "handle",
+          new ParameterDescriptor[] {new ParameterDescriptor(new DataType("Progress.Json.ObjectModel.JsonObject"), 0, ParameterMode.INPUT)});
+      assertNotNull(result1);
+      assertEquals(result1.getO2().getReturnType(), DataType.CHARACTER);
+
+      // When passing PLO, should find PLO method (exact match)
+      var result2 = typeInfo.getMethod(map::get, "handle",
+          new ParameterDescriptor[] {new ParameterDescriptor(new DataType("Progress.Lang.Object"), 0, ParameterMode.INPUT)});
+      assertNotNull(result2);
+      assertEquals(result2.getO2().getReturnType(), DataType.INTEGER);
+
+      // When passing JsonArray (sibling of JsonObject, both extend JsonConstruct), should find PLO method
+      var result3 = typeInfo.getMethod(map::get, "handle",
+          new ParameterDescriptor[] {new ParameterDescriptor(new DataType("Progress.Json.ObjectModel.JsonArray"), 0, ParameterMode.INPUT)});
+      assertNotNull(result3);
+      assertEquals(result3.getO2().getReturnType(), DataType.INTEGER);
+    }
+  }
+
+  /**
+   * Test most specific match when the parameter type implements an interface: distance to the interface is computed
+   * through the implemented interfaces, and is shorter than distance to Progress.Lang.Object.
+   */
+  @Test
+  public void testMostSpecificInterfaceMatch() {
+    HashMap<String, ITypeInfo> map = new HashMap<>();
+    for (var version : OpenEdgeVersion.values()) {
+      map.clear();
+      BuiltinClasses.getBuiltinClasses(version).forEach(it -> map.put(it.getTypeName(), it));
+
+      // Class hierarchy: Circle -> Shape -> Progress.Lang.Object, and Circle implements IShape
+      var iface = new TypeInfo("rssw.IShape", true, false, "Progress.Lang.Object", "");
+      var shapeClass = new TypeInfo("rssw.Shape", false, false, "Progress.Lang.Object", "");
+      var circleClass = new TypeInfo("rssw.Circle", false, false, "rssw.Shape", "", "rssw.IShape");
+      map.put(iface.getTypeName(), iface);
+      map.put(shapeClass.getTypeName(), shapeClass);
+      map.put(circleClass.getTypeName(), circleClass);
+
+      // Create class with methods accepting PLO and IShape
+      var typeInfo = new TypeInfo("rssw.ShapeProcessor", false, false, "Progress.Lang.Object", "");
+      var methodPLO = new MethodElement("draw", false, DataType.INTEGER,
+          new Parameter(1, "obj", 0, ParameterMode.INPUT, new DataType("Progress.Lang.Object")));
+      var methodIShape = new MethodElement("draw", false, DataType.CHARACTER,
+          new Parameter(1, "obj", 0, ParameterMode.INPUT, new DataType("rssw.IShape")));
+      typeInfo.addMethod(methodPLO);
+      typeInfo.addMethod(methodIShape);
+      map.put(typeInfo.getTypeName(), typeInfo);
+
+      // When passing Circle, IShape is at distance 1 (interface) and PLO at distance 2 (parent of parent)
+      var result = typeInfo.getMethod(map::get, "draw",
+          new ParameterDescriptor[] {new ParameterDescriptor(new DataType("rssw.Circle"), 0, ParameterMode.INPUT)});
+      assertNotNull(result);
+      assertEquals(result.getO2().getReturnType(), DataType.CHARACTER);
+    }
   }
 
 }

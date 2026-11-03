@@ -338,11 +338,9 @@ public class OpenEdgeProparseSensor implements Sensor {
       updateParseTime(System.currentTimeMillis() - startTime);
     } catch (UncheckedIOException caught) {
       numFailures++;
-      if (caught.getCause() instanceof XCodedFileException) {
-        XCodedFileException cause = (XCodedFileException) caught.getCause();
+      if (caught.getCause() instanceof XCodedFileException cause) {
         LOG.error("Unable to parse {} - Can't read xcode'd file {}", file, cause.getFileName());
-      } else if (caught.getCause() instanceof IncludeFileNotFoundException) {
-        IncludeFileNotFoundException cause = (IncludeFileNotFoundException) caught.getCause();
+      } else if (caught.getCause() instanceof IncludeFileNotFoundException cause) {
         LOG.error("Unable to parse {} - Can't find include file '{}' from '{}'", file, cause.getIncludeName(),
             cause.getFileName());
       } else {

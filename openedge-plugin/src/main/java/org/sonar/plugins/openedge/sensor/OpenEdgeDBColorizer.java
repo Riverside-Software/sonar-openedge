@@ -20,6 +20,7 @@
 package org.sonar.plugins.openedge.sensor;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
@@ -62,40 +63,42 @@ public class OpenEdgeDBColorizer implements Sensor {
   }
 
   private void highlightFile(SensorContext context, InputFile file) throws IOException {
-    DumpFileGrammarLexer lexer = new DumpFileGrammarLexer(CharStreams.fromStream(file.inputStream()));
-    NewHighlighting highlighting = context.newHighlighting().onFile(file);
+    try (InputStream inputStream = file.inputStream()) {
+      DumpFileGrammarLexer lexer = new DumpFileGrammarLexer(CharStreams.fromStream(inputStream));
+      NewHighlighting highlighting = context.newHighlighting().onFile(file);
 
-    Token tok = lexer.nextToken();
-    Token nextTok = lexer.nextToken();
+      Token tok = lexer.nextToken();
+      Token nextTok = lexer.nextToken();
 
-    while (tok.getType() != Token.EOF) {
-      if (tok.getChannel() != Token.HIDDEN_CHANNEL) {
-        // No whitespaces or new lines
-        TypeOfText textType = null;
-        if ((tok.getType() == DumpFileGrammarLexer.QUOTED_STRING)
-            || (tok.getType() == DumpFileGrammarLexer.UNQUOTED_STRING)) {
-          textType = TypeOfText.STRING;
-        } else if (tok.getType() == DumpFileGrammarLexer.NUMBER) {
-          textType = TypeOfText.CONSTANT;
-        } else if (tok.getType() == DumpFileGrammarLexer.ANNOTATION_NAME) {
-          textType = TypeOfText.ANNOTATION;
-        } else {
-          textType = TypeOfText.KEYWORD;
+      while (tok.getType() != Token.EOF) {
+        if (tok.getChannel() != Token.HIDDEN_CHANNEL) {
+          // No whitespaces or new lines
+          TypeOfText textType = null;
+          if ((tok.getType() == DumpFileGrammarLexer.QUOTED_STRING)
+              || (tok.getType() == DumpFileGrammarLexer.UNQUOTED_STRING)) {
+            textType = TypeOfText.STRING;
+          } else if (tok.getType() == DumpFileGrammarLexer.NUMBER) {
+            textType = TypeOfText.CONSTANT;
+          } else if (tok.getType() == DumpFileGrammarLexer.ANNOTATION_NAME) {
+            textType = TypeOfText.ANNOTATION;
+          } else {
+            textType = TypeOfText.KEYWORD;
+          }
+
+          TextPointer start = file.newPointer(tok.getLine(), tok.getCharPositionInLine());
+          TextPointer end;
+          // If next token is at beginning of next line, then current token goes until end of line
+          if (nextTok.getCharPositionInLine() == 0) {
+            end = file.selectLine(nextTok.getLine() - 1).end();
+          } else {
+            end = file.newPointer(nextTok.getLine(), nextTok.getCharPositionInLine());
+          }
+          highlighting.highlight(file.newRange(start, end), textType);
         }
-
-        TextPointer start = file.newPointer(tok.getLine(), tok.getCharPositionInLine());
-        TextPointer end;
-        // If next token is at beginning of next line, then current token goes until end of line
-        if (nextTok.getCharPositionInLine() == 0) {
-          end = file.selectLine(nextTok.getLine() - 1).end();
-        } else {
-          end = file.newPointer(nextTok.getLine(), nextTok.getCharPositionInLine());
-        }
-        highlighting.highlight(file.newRange(start, end), textType);
+        tok = nextTok;
+        nextTok = lexer.nextToken();
       }
-      tok = nextTok;
-      nextTok = lexer.nextToken();
+      highlighting.save();
     }
-    highlighting.save();
   }
 }

@@ -14,6 +14,7 @@
  ********************************************************************************/
 package org.prorefactor.proparse;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -39,28 +40,23 @@ import org.slf4j.LoggerFactory;
 public class InputSource {
   private static final Logger LOGGER = LoggerFactory.getLogger(InputSource.class);
 
-  // TODO Almost sure this field is useless
-  private final int sourceNum;
-
   private final String fileContent;
   private final int fileIndex;
   private final boolean macroExpansion;
 
   private int nextCol = 0;
   private int nextLine = 1;
-  private int currPos;
+  private int currPos; 
   private String currAnalyzeSuspend = null;
 
-  public InputSource(int sourceNum, String src, int fileIndex) {
-    this.sourceNum = sourceNum;
+  public InputSource(String src, int fileIndex) {
     this.fileIndex = fileIndex;
     this.macroExpansion = false;
     this.fileContent = src;
   }
 
-  public InputSource(int sourceNum, String str, int fileIndex, int line, int col) {
+  public InputSource(String str, int fileIndex, int line, int col) {
     LOGGER.trace("New InputSource object for macro element '{}'", str);
-    this.sourceNum = sourceNum;
     this.fileContent = str;
     this.fileIndex = fileIndex;
     this.macroExpansion = true;
@@ -68,36 +64,21 @@ public class InputSource {
     this.nextCol = col;
   }
 
-  public InputSource(int sourceNum, File file, Charset charset, int fileIndex, boolean skipXCode) throws IOException {
+  public InputSource(File file, Charset charset, int fileIndex, XCodeWrapper wrapper) throws IOException {
     LOGGER.trace("New InputSource object for file '{}'", file.getName());
-    this.sourceNum = sourceNum;
     this.fileIndex = fileIndex;
     this.macroExpansion = false;
-    try (var input = Files.newInputStream(file.toPath())) {
-      var src = input.readAllBytes();
-      if (isXCoded(src)) {
-        if (skipXCode)
-          this.fileContent = " ";
-        else
-          throw new XCodedFileException(file.getName());
-      } else {
-        this.fileContent = new String(src, charset);
-      }
+    try (var input = wrapper.wrap(Files.newInputStream(file.toPath()), file.getName())) {
+      this.fileContent = new String(input.readAllBytes(), charset);
     }
   }
 
-  public InputSource(int sourceNum, String fileName, byte[] src, Charset charset, int fileIndex, boolean skipXCode) throws IOException {
+  public InputSource(String fileName, byte[] src, Charset charset, int fileIndex, XCodeWrapper wrapper) throws IOException {
     LOGGER.trace("New InputSource object for include stream '{}'", fileName);
-    this.sourceNum = sourceNum;
     this.fileIndex = fileIndex;
     this.macroExpansion = false;
-    if (isXCoded(src)) {
-      if (skipXCode)
-        this.fileContent = " ";
-      else
-        throw new XCodedFileException(fileName);
-    } else {
-      this.fileContent = new String(src, charset);
+    try (var input = wrapper.wrap(new ByteArrayInputStream(src), fileName)) {
+      this.fileContent = new String(input.readAllBytes(), charset);
     }
   }
 
@@ -134,10 +115,6 @@ public class InputSource {
     return macroExpansion;
   }
 
-  public int getSourceNum() {
-    return sourceNum;
-  }
-
   public int getNextCol() {
     return nextCol;
   }
@@ -165,10 +142,6 @@ public class InputSource {
 
   public String getContent() {
     return fileContent;
-  }
-
-  private static boolean isXCoded(byte[] src) {
-    return (src.length > 0) && ((src[0] == 0x11) || (src[0] == 0x13));
   }
 
 }

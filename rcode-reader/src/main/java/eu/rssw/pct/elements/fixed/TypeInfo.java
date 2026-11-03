@@ -25,6 +25,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.gson.annotations.JsonAdapter;
+
 import eu.rssw.pct.elements.IBufferElement;
 import eu.rssw.pct.elements.IDatasetElement;
 import eu.rssw.pct.elements.IEventElement;
@@ -34,8 +36,6 @@ import eu.rssw.pct.elements.ITableElement;
 import eu.rssw.pct.elements.ITypeInfo;
 import eu.rssw.pct.elements.IVariableElement;
 import eu.rssw.pct.elements.TypeInfoAdapter;
-
-import com.google.gson.annotations.JsonAdapter;
 
 @JsonAdapter(TypeInfoAdapter.class)
 public class TypeInfo implements ITypeInfo {
@@ -241,7 +241,7 @@ public class TypeInfo implements ITypeInfo {
 
   @Override
   public List<String> getInterfaces() {
-    return interfaces;
+    return Collections.unmodifiableList(interfaces);
   }
 
   @Override

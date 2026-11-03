@@ -610,6 +610,22 @@ public class PreprocessorDirectiveTest extends AbstractProparseTest {
     assertEquals(inc02.getFileRefName(), "preprocessor/preprocessor26-02.i");
   }
 
+  @Test
+  public void test27() {
+    // Tilde followed by a newline is a line continuation: it has to be discarded from the string's value,
+    // so the &IF condition has to evaluate to true
+    var unit = getParseUnit(new File(SRC_DIR + "/preprocessor27.p"), session);
+    var src = unit.preprocess();
+    var tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPIF);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.PREPROEXPR_TRUE);
+    tok = (ProToken) src.nextToken();
+    assertEquals(tok.getNodeType(), ABLNodeType.AMPTHEN);
+    tok = nextVisibleToken(src);
+    assertEquals(tok.getNodeType(), ABLNodeType.DISPLAY);
+  }
+
   /**
    * Utility method for preprocess(), removes all tokens from hidden channels
    */

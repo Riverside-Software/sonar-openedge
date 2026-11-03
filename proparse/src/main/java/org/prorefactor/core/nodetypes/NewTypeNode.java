@@ -26,13 +26,13 @@ import eu.rssw.pct.elements.ITypeInfo;
 /**
  * Expression node: <code>NEW typeName(parameters)</code>
  */
-public class NewTypeNode extends ExpressionNode {
+public class NewTypeNode extends AbstractMethodCallNode {
   private Pair<ITypeInfo, IMethodElement> method = null;
   private DataType returnDataType = DataType.NOT_COMPUTED;
   private boolean computed = false;
 
-  public NewTypeNode(ProToken t, JPNode parent, int num, boolean hasChildren) {
-    super(t, parent, num, hasChildren);
+  public NewTypeNode(ProToken t, JPNode parent, int num, boolean hasChildren, String methodName) {
+    super(t, parent, num, hasChildren, methodName);
   }
 
   private void compute() {
@@ -56,12 +56,20 @@ public class NewTypeNode extends ExpressionNode {
     return returnDataType;
   }
 
-  public Pair<ITypeInfo, IMethodElement> getMethod() {
+  public synchronized ITypeInfo getTypeInfo() {
     if (!computed) {
       compute();
       computed = true;
     }
-    return method;
+    return method == null ? null : method.getO1();
+  }
+
+  public synchronized IMethodElement getMethodElement() {
+    if (!computed) {
+      compute();
+      computed = true;
+    }
+    return method == null ? null : method.getO2();
   }
 
 }

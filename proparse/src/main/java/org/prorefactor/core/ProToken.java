@@ -46,7 +46,6 @@ public class ProToken implements Token {
   private String fileName;
   private int endLine;
   private int endCharPositionInLine;
-  private int macroSourceNum;
   private int preprocessorLevel = 0;
 
   private String analyzeSuspend = null;
@@ -130,14 +129,6 @@ public class ProToken implements Token {
     return fileIndex;
   }
 
-  /**
-   * TODO Can probably be removed in the future
-   * @return Macro source number
-   */
-  public int getMacroSourceNum() {
-    return macroSourceNum;
-  }
-
   public String getFileName() {
     return fileName;
   }
@@ -213,7 +204,7 @@ public class ProToken implements Token {
 
   @Override
   public String toString() {
-    return "[\"" + text.replace('\r', ' ').replace('\n', ' ') + "\",<" + type + ">,macro=" + macroSourceNum + ",start="
+    return "[\"" + text.replace('\r', ' ').replace('\n', ' ') + "\",<" + type + ">,start="
         + fileIndex + ":" + line + ":" + charPositionInLine + ",end=" + endFileIndex + ":" + endLine + ":"
         + endCharPositionInLine + "]";
   }
@@ -292,8 +283,6 @@ public class ProToken implements Token {
     private int endFileIndex;
     private String fileName;
 
-    private int macroSourceNum;
-
     private String analyzeSuspend = null;
     private ProToken hiddenBefore = null;
     private boolean macroExpansion;
@@ -317,7 +306,6 @@ public class ProToken implements Token {
       this.fileName = token.fileName;
       this.endLine = token.endLine;
       this.endCharPositionInLine = token.endCharPositionInLine;
-      this.macroSourceNum = token.macroSourceNum;
       this.analyzeSuspend = token.analyzeSuspend;
       this.hiddenBefore = token.hiddenBefore;
       this.macroExpansion = token.macroExpansion;
@@ -369,11 +357,6 @@ public class ProToken implements Token {
 
     public Builder setFileName(String fileName) {
       this.fileName = fileName;
-      return this;
-    }
-
-    public Builder setMacroSourceNum(int macroSourceNum) {
-      this.macroSourceNum = macroSourceNum;
       return this;
     }
 
@@ -450,7 +433,6 @@ public class ProToken implements Token {
       tok.fileIndex = fileIndex;
       tok.endFileIndex = endFileIndex;
       tok.fileName = fileName;
-      tok.macroSourceNum = macroSourceNum;
       tok.macroExpansion = macroExpansion;
       tok.analyzeSuspend = analyzeSuspend;
       tok.hiddenBefore = hiddenBefore;

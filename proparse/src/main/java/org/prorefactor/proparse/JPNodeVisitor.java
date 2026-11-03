@@ -38,6 +38,7 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   private boolean isClass;
   private boolean isInterface;
   private boolean isEnum;
+  private boolean isAnnotation;
   private boolean isAbstract;
   private String className;
   private boolean generateErrorNode;
@@ -62,6 +63,10 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
 
   public boolean isEnum() {
     return isEnum;
+  }
+
+  public boolean isAnnotation() {
+    return isAnnotation;
   }
 
   public boolean isAbstractClass() {
@@ -501,6 +506,16 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitParameterArgDatasetHandle(ParameterArgDatasetHandleContext ctx) {
+    return createTree(ctx, ABLNodeType.DATASET_HANDLE_REF).setRuleNode(ctx).setExpression(true);
+  }
+
+  @Override
+  public Builder visitParameterArgTableHandle(ParameterArgTableHandleContext ctx) {
+    return createTree(ctx, ABLNodeType.TABLE_HANDLE_REF).setRuleNode(ctx).setExpression(true);
+  }
+
+  @Override
   public Builder visitFieldFrameOrBrowse(FieldFrameOrBrowseContext ctx) {
     return createTreeFromFirstNode(ctx).setRuleNode(ctx);
   }
@@ -632,6 +647,16 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   }
 
   @Override
+  public Builder visitStronglyTypedAnnotation(StronglyTypedAnnotationContext ctx) {
+    return createTree(ctx, ABLNodeType.STRONGLY_TYPED_ANNOTATION).setStatement().setRuleNode(ctx);
+  }
+
+  @Override
+  public Builder visitAnnotationProperty(AnnotationPropertyContext ctx) {
+    return createTree(ctx, ABLNodeType.ANNOTATION_PROPERTY).setRuleNode(ctx);
+  }
+
+  @Override
   public Builder visitAnnotation(AnnotationContext ctx) {
     Builder node = visitTerminal(ctx.ANNOTATION()).setStatement().setRuleNode(ctx);
 
@@ -686,14 +711,12 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
     // statement can be an assignment or a comparison. And it is faster and easier to transform ASSIGN statement to
     // EXPRESSION statement when the left-part of the assignment is a constant, rather than doing that directly in the
     // grammar
-    if ((ctx.EQUAL() != null) && (ctx.assignEqualLeft().expressionTerm() instanceof ExprTermOtherContext)) {
-      ExprTermOtherContext ctx2 = (ExprTermOtherContext) ctx.assignEqualLeft().expressionTerm();
-      if (ctx2.expressionTerm2() instanceof Exprt2ConstantContext) {
-        node1.getDown().getDown().setRight(node1.getDown().getRight());
-        node1.setDown(node1.getDown().getDown());
-        return new Builder(ABLNodeType.EXPR_STATEMENT).setStatement().setDown(
-            node1.changeType(ABLNodeType.EQ)).setRuleNode(ctx);
-      }
+    if ((ctx.EQUAL() != null) && (ctx.assignEqualLeft().expressionTerm() instanceof ExprTermOtherContext ctx2)
+        && (ctx2.expressionTerm2() instanceof Exprt2ConstantContext)) {
+      node1.getDown().getDown().setRight(node1.getDown().getRight());
+      node1.setDown(node1.getDown().getDown());
+      return new Builder(ABLNodeType.EXPR_STATEMENT).setStatement().setDown(
+          node1.changeType(ABLNodeType.EQ)).setRuleNode(ctx);
     }
 
     Builder holder = new Builder(ABLNodeType.ASSIGN).setStatement().setDown(node1).setRuleNode(ctx);
@@ -891,6 +914,14 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
   @Override
   public Builder visitEnumEnd(EnumEndContext ctx) {
     return createTreeFromFirstNode(ctx);
+  }
+
+  @Override
+  public Builder visitAnnotationStatement(AnnotationStatementContext ctx) {
+    isAnnotation = true;
+    className = ctx.tn.getText();
+    isAbstract = false;
+    return createStatementTreeFromFirstNode(ctx).setBlock(true);
   }
 
   @Override
@@ -1306,6 +1337,11 @@ public class JPNodeVisitor extends ProparseBaseVisitor<Builder> {
       retVal.moveRightToDown();
 
     return retVal;
+  }
+
+  @Override
+  public Builder visitDefineAnnotationPropertyStatement(DefineAnnotationPropertyStatementContext ctx) {
+    return createStatementTreeFromFirstNode(ctx, ABLNodeType.PROPERTY);
   }
 
   @Override

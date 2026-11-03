@@ -146,22 +146,36 @@ interfaceCodeBlock:
     interfaceBlockOrStatement*
   ;
 
+annotationCodeBlock:
+    annotationBlockOrStatement*
+  ;
+
 classBlockOrStatement:
     emptyStatement
   | annotation
+  | stronglyTypedAnnotation
   | inClassStatement
   ;
 
 abstractClassBlockOrStatement:
     emptyStatement
   | annotation
+  | stronglyTypedAnnotation
   | inAbstractClassStatement
   ;
 
 interfaceBlockOrStatement:
     emptyStatement
   | annotation
+  | stronglyTypedAnnotation
   | inInterfaceStatement
+  ;
+
+annotationBlockOrStatement:
+    emptyStatement
+  | annotation
+  | stronglyTypedAnnotation
+  | inAnnotationStatement
   ;
 
 emptyStatement:
@@ -216,6 +230,7 @@ statement:
   |  accumulateStatement
   |  aggregateStatement
   |  analyzeStatement
+  |  annotationStatement
   |  applyStatement
   |  assignStatement
   |  bellStatement
@@ -440,6 +455,10 @@ inInterfaceStatement:
   |  methodDefinitionStatement
   |  externalProcedureStatement // Only external procedures are accepted
   |  externalFunctionStatement  // Only FUNCTION ... IN ... are accepted
+  ;
+
+inAnnotationStatement:
+    defineAnnotationPropertyStatement
   ;
 
 pseudoFunction:
@@ -970,6 +989,39 @@ analyzeStatement:
 
 annotation:
     ANNOTATION notStatementEnd* statementEnd
+  ;
+
+annotationStatement:
+    ANNOTATIONKW tn=typeName2 { support.defineClass($tn.text); }
+    blockColon
+    annotationCodeBlock
+    annotationEnd statementEnd
+  ;
+
+annotationEnd:
+    END (ANNOTATIONKW)?
+  ;
+
+stronglyTypedAnnotation:
+    LEFTBRACE annotationName ( LEFTPAREN ( annotationProperty ( COMMA annotationProperty )* )? RIGHTPAREN )? RIGHTBRACE
+    statementEnd
+  ;
+
+annotationName:
+    typeName
+  ;
+
+annotationProperty:
+    annotationPropName EQUAL annotationPropValue
+  ;
+
+annotationPropName:
+    // Same as newIdentifier
+    .
+  ;
+
+annotationPropValue:
+    TRUE | FALSE | YES | NO | UNKNOWNVALUE | QSTRING | NUMBER
   ;
 
 applyStatement:
@@ -1876,6 +1928,11 @@ defineParamVar2:
 defineParamVar3:
     ( AS datatype | LIKE fieldExpr )?
     ( formatExpression | initialConstant | labelConstant | NOUNDO )*
+  ;
+
+defineAnnotationPropertyStatement:
+    DEFINE PUBLIC? PROPERTY n=newIdentifier AS datatype initialConstant?
+    { support.defVar($n.text); }
   ;
 
 definePropertyStatement:
@@ -4176,6 +4233,7 @@ unreservedkeyword:
 | ALLOWREPLICATION
 | ALTERNATEKEY
 | ANALYZE
+| ANNOTATIONKW
 | ANSIONLY
 | ANYWHERE
 | APPEND

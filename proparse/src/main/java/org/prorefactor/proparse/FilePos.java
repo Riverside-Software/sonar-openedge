@@ -18,32 +18,28 @@ public final class FilePos {
   final int file;
   final int line;
   final int col;
-  final int sourceNum;
 
-  public FilePos(int file, int line, int col, int sourceNum) {
+  public FilePos(int file, int line, int col) {
     this.file = file;
     this.line = line;
     this.col = col;
-    this.sourceNum = sourceNum;
   }
 
   public FilePos(FilePos other) {
     this.file = other.file;
     this.line = other.line;
     this.col = other.col;
-    this.sourceNum = other.sourceNum;
   }
 
   public FilePos(CharPos other) {
     this.file = other.file;
     this.line = other.line;
     this.col = other.col;
-    this.sourceNum = other.sourceNum;
   }
 
   @Override
   public int hashCode() {
-    return (13 * file) + (17 * line) + (31 * col) + (37 * sourceNum);
+    return (13 * file) + (17 * line) + (31 * col);
   }
 
   @Override
@@ -52,7 +48,7 @@ public final class FilePos {
       return false;
     if (this.getClass() == obj.getClass()) {
       FilePos fp = (FilePos) obj;
-      return (fp.file == file) && (fp.line == line) && (fp.col == col) && (fp.sourceNum == sourceNum);
+      return (fp.file == file) && (fp.line == line) && (fp.col == col);
     } else {
       return false;
     }

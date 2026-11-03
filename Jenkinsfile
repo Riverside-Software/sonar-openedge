@@ -38,7 +38,7 @@ pipeline {
             }
           }
         }
-        step([$class: 'Publisher', reportFilenamePattern: '**/target/surefire-reports/testng-results.xml'])
+        junit(testResults: '**/target/surefire-reports/TEST-*.xml', allowEmptyResults: true)
         archiveArtifacts artifacts: '**/openedge-plugin/target/sonar-openedge-plugin-*.jar'
       }
     }
