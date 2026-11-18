@@ -161,7 +161,8 @@ public class TableBuffer extends Symbol {
 
   @Override
   public int hashCode() {
-    return (table.getName().toLowerCase() + "##" + getName().toLowerCase()).hashCode();
+    var str = (table == null ? "<notable>" : table.getName().toLowerCase()) + "##" + getName().toLowerCase();
+    return str.hashCode();
   }
 
   @Override
