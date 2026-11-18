@@ -25,7 +25,7 @@ pipeline {
             if ("main" == env.BRANCH_NAME) {
               withSecrets() {
                 configFileProvider([configFile(fileId: 'MvnSettingsRSSW', variable: 'MAVEN_SETTINGS')]) {
-                  sh 'mvn -s ${MAVEN_SETTINGS} -P release clean deploy -Dgit.commit=\$(git rev-parse --short HEAD)'
+                  sh 'mvn -s ${MAVEN_SETTINGS} -Daether.syncContext.named.factory=rwlock-local -P release clean deploy -Dgit.commit=\$(git rev-parse --short HEAD)'
                 }
               }
               mail body: "https://central.sonatype.com/publishing/deployments", to: "jenkins-reports@riverside-software.fr", subject: "sonar-openedge - Publish artifact on Central"

@@ -5,7 +5,7 @@
 
   <groupId>eu.rssw</groupId>
   <artifactId>sonar-openedge</artifactId>
-  <version>3.11.0</version>
+  <version>3.11.1</version>
   <packaging>pom</packaging>
 
   <name>OpenEdge plugin for SonarQube</name>
@@ -186,10 +186,10 @@
           <plugin>
             <groupId>org.sonatype.central</groupId>
             <artifactId>central-publishing-maven-plugin</artifactId>
-            <version>0.8.0</version>
+            <version>0.12.0</version>
             <extensions>true</extensions>
             <configuration>
-              <publishingServerId>central</publishingServerId>
+              <publishingServerId>sonatype</publishingServerId>
               <deploymentName>sonar-openedge ${project.version}</deploymentName>
             </configuration>
           </plugin>
